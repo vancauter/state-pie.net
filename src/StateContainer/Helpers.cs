@@ -26,7 +26,7 @@ namespace StateContainer
         // CombineReducers
         public static (CombinedState initialState, Reducer rootReducer) CombineReducers(params ISlice[] slices)
         {
-            if (slices == null || slices.Length == 0)
+            if (slices.Length == 0)
                 throw new ArgumentException("Must provide at least one slice to combine.", nameof(slices));
 
             // detect duplicate slice names early for clearer error messages

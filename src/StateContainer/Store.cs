@@ -18,8 +18,6 @@ namespace StateContainer
 
         public void Dispatch(IAction action)
         {
-            ArgumentNullException.ThrowIfNull(action);
-
             var newState = _rootReducer(State, action);
 
             // TODO: Replace Console.WriteLine with proper logging in production
