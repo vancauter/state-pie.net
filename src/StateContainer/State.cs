@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace StateContainer
+namespace SCLibs.StateContainer
 {
     // `IState` is declared in Interfaces.cs; concrete implementations are internal
 
@@ -9,6 +9,12 @@ namespace StateContainer
     public class CombinedState : BaseClass, IState
     {
         public IReadOnlyDictionary<string, IState> States { get; }
+
+        public override string ToString()
+        {
+            var parts = States.Select(kv => $"\"{kv.Key}\": {kv.Value}");
+            return "{" + string.Join(", ", parts) + "}";
+        }
 
         internal CombinedState(IReadOnlyDictionary<string, IState> sliceStates) => States = sliceStates;
 

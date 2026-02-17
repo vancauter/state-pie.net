@@ -1,4 +1,4 @@
-namespace StateContainer
+namespace SCLibs.StateContainer
 {
 
     public class Slice<TState>(string name, TState initialState, Func<TState, IAction, TState> reducerLogic) : ISlice where TState : IState

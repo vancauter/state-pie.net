@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace StateContainer
+namespace SCLibs.StateContainer
 {
     public abstract class BaseClass
     {

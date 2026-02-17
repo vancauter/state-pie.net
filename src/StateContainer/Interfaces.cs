@@ -1,4 +1,4 @@
-namespace StateContainer
+namespace SCLibs.StateContainer
 {
     public interface IAction
     {

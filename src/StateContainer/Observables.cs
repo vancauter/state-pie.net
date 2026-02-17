@@ -1,4 +1,4 @@
-namespace StateContainer
+namespace SCLibs.StateContainer
 {
     // Minimal Subject-like implementation with last-value semantics (Behavior-like)
     internal sealed class SimpleSubject<T>(T initial) : IObservable<T>, IDisposable
