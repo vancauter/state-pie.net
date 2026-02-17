@@ -2,6 +2,7 @@ namespace SCLibs.StateContainer
 {
     public class StateContainer(IState initialState, Reducer rootReducer) : IStateContainer
     {
+        private bool _isDisposed;
         private readonly Reducer _rootReducer = rootReducer;
 
         private readonly SimpleSubject<IState> _stateSubject = new(initialState);
@@ -12,21 +13,21 @@ namespace SCLibs.StateContainer
 
         public void Dispose()
         {
+            if (_isDisposed) return;
+
+            _isDisposed = true;
             _stateSubject.Dispose();
             GC.SuppressFinalize(this);
         }
 
         public void Dispatch(IAction action)
         {
-            var newState = _rootReducer(State, action);
+            ObjectDisposedException.ThrowIf(_isDisposed, nameof(StateContainer));
 
-            // TODO: Replace Console.WriteLine with proper logging in production
-            Console.WriteLine($"[StateContainer] Dispatched action: {action.Type}");
+            var newState = _rootReducer(State, action);
 
             if (!ReferenceEquals(newState, State))
             {
-                Console.WriteLine($"[StateContainer] New state: {newState}");
-
                 State = newState;
                 _stateSubject.OnNext(State);
             }

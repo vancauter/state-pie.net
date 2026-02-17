@@ -1,30 +1,39 @@
-﻿using System;
-using SCLibs.StateContainer;
+﻿using SCLibs.StateContainer;
 
 namespace Dev
 {
     public class Program
     {
+
         private sealed class ConsoleObserver : IObserver<IState>
         {
-            public void OnNext(IState state) => Console.WriteLine($"State changed: {state}");
-            public void OnError(Exception error) { }
-            public void OnCompleted() { }
+            public void OnNext(IState state) => Console.WriteLine($"State changed: {Helpers.SerializeState(state)}");
+            public void OnError(Exception error) => Console.Error.WriteLine($"Error: {error}");
+            public void OnCompleted() => Console.WriteLine($"Completed.");
         }
 
-        public sealed record CounterState(int Count) : IState;
+        public sealed class CounterState(int count) : IState
+        {
+            public int Count { get; } = count;
+        }
+
+        public sealed class ParentState(string name, CounterState child) : IState
+        {
+            public CounterState Child { get; } = child;
+            public string Name { get; } = name;
+        }
 
         public static void Main()
         {
             var counterSlice = Helpers.CreateSlice(
                 name: "counter",
-                initialState: new CounterState(0),
+                initialState: new ParentState("root", new CounterState(0)),
                 reducerFn: (state, action) =>
                 {
                     return action.Type switch
                     {
-                        "increment" => new CounterState(state.Count + 1),
-                        "decrement" => new CounterState(state.Count - 1),
+                        "increment" => new ParentState(state.Name, new CounterState(state.Child.Count + 1)),
+                        "decrement" => new ParentState(state.Name, new CounterState(state.Child.Count - 1)),
                         _ => state
                     };
                 });

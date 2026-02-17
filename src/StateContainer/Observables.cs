@@ -1,6 +1,5 @@
 namespace SCLibs.StateContainer
 {
-    // Minimal Subject-like implementation with last-value semantics (Behavior-like)
     internal sealed class SimpleSubject<T>(T initial) : IObservable<T>, IDisposable
     {
         private readonly List<IObserver<T>> _observers = [];
@@ -19,7 +18,7 @@ namespace SCLibs.StateContainer
                 observer.OnNext(_last);
             }
 
-            return new Unsubscriber(_observers, observer);
+            return new Subscription(_observers, observer);
         }
 
         public void OnNext(T value)
@@ -36,19 +35,18 @@ namespace SCLibs.StateContainer
         public void Dispose()
         {
             if (_isDisposed) return;
+
             _isDisposed = true;
             _observers.Clear();
         }
 
-        private sealed class Unsubscriber(List<IObserver<T>> list, IObserver<T> observer) : IDisposable
+        private sealed class Subscription(List<IObserver<T>> list, IObserver<T> observer) : IDisposable
         {
             private readonly List<IObserver<T>> _list = list;
             private readonly IObserver<T> _observer = observer;
 
-            public void Dispose()
-            {
-                if (_list.Contains(_observer)) _list.Remove(_observer);
-            }
+            // Dispose method to unsubscribe the observer
+            public void Dispose() => _list.RemoveAll(o => o == _observer);
         }
     }
 }

@@ -15,8 +15,8 @@ namespace SCLibs.StateContainer
     public interface ISlice
     {
         string Name { get; }
-        IState InitialState { get; }
-        Reducer ReducerFn { get; }
+        IState State { get; }
+        Reducer Reducer { get; }
     }
 
     public interface IStateContainer : IDisposable

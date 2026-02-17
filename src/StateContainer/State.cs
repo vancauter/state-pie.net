@@ -3,18 +3,14 @@
 namespace SCLibs.StateContainer
 {
     // `IState` is declared in Interfaces.cs; concrete implementations are internal
+    internal sealed class State : IState
+    {
+        // This class intentionally left blank as a marker for valid state types. Concrete state implementations can be defined by users of the library as needed.
+    };
 
-    internal sealed class State : BaseClass, IState;
-
-    public class CombinedState : BaseClass, IState
+    public class CombinedState : IState
     {
         public IReadOnlyDictionary<string, IState> States { get; }
-
-        public override string ToString()
-        {
-            var parts = States.Select(kv => $"\"{kv.Key}\": {kv.Value}");
-            return "{" + string.Join(", ", parts) + "}";
-        }
 
         internal CombinedState(IReadOnlyDictionary<string, IState> sliceStates) => States = sliceStates;
 
