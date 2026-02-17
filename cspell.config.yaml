@@ -1,0 +1,13 @@
+version: "0.2"
+ignorePaths:
+  - "**/bin/**"
+  - "**/obj/**"
+  - .editorconfig
+  - "**/*.csproj"
+  - "**/*.sln"
+dictionaryDefinitions: []
+dictionaries: []
+words:
+  - Finalizers
+ignoreWords: []
+import: []
