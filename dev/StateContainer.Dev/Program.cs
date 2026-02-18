@@ -1,4 +1,4 @@
-﻿using SCLibs.StateContainer;
+using SCLibs.StateContainer;
 
 namespace Dev
 {
@@ -51,6 +51,3 @@ namespace Dev
         }
     }
 }
-
-
-
