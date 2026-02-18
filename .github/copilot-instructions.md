@@ -15,6 +15,8 @@ guidance:
 		- "Be explicit about thread-safety and document synchronization expectations."
 	validation:
 		- "Use clear exception types and messages for invalid arguments."
+		- "Avoid adding redundant null checks for parameters whose types are non-nullable
+		  (prefer compiler nullability annotations when enabled)."
 	tests:
 			- "Follow existing test naming/style; run `dotnet test`."
 			- "When adding or updating tests, include a short header comment above each test
@@ -25,4 +27,5 @@ guidance:
 
 ## Human-readable summary
 
-See the YAML above for structured guidance. In short: keep branches small, run the build/tests locally, follow `.editorconfig`, and add tests for behavior changes.
+See the YAML above for structured guidance. In short: keep branches small, run the build/tests locally, follow
+`.editorconfig`, and add tests for behavior changes.

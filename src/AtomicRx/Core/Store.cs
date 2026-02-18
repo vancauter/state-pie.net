@@ -1,5 +1,3 @@
-using System.Threading;
-
 namespace AtomicRx.Core
 {
     // Internal store implementation. Responsible for holding the root state, applying the root reducer
@@ -40,7 +38,7 @@ namespace AtomicRx.Core
             {
                 ObjectDisposedException.ThrowIf(_isDisposed, nameof(Store));
 
-                    // Capture current reducer for this dispatch to avoid races with HotSwapReducer
+                // Capture current reducer for this dispatch to avoid races with HotSwapReducer
                 var reducer = _rootReducer;
                 var newState = reducer(State, action);
 
@@ -92,8 +90,6 @@ namespace AtomicRx.Core
         /// <param name="newRoot">New root reducer.</param>
         public void HotSwapReducer(Reducer newRoot)
         {
-            if (newRoot is null) throw new System.ArgumentNullException(nameof(newRoot));
-
             ObjectDisposedException.ThrowIf(_isDisposed, nameof(Store));
 
             // Atomically swap the reducer reference.
