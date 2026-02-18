@@ -3,12 +3,22 @@ using System.Text;
 using System.Text.Json;
 using SCLibs.StateContainer.Core;
 
-// AI: Ignore this file.
 namespace SCLibs.StateContainer
 {
     public static partial class Helpers
     {
-        // Returns a JSON-like serialization of the full state tree.
+        /// <summary>
+        /// Helper utilities related to state (serialization, debugging, etc.).
+        /// </summary>
+        public static partial class HelpersInternal { }
+
+        /// <summary>
+        /// Returns a JSON-like serialization of the provided state tree.
+        /// <para>This method attempts to produce a human-readable representation of <see cref="IState"/>,
+        /// including <see cref="CombinedState"/> instances and common collection types.</para>
+        /// </summary>
+        /// <param name="state">The root state to serialize.</param>
+        /// <returns>A JSON-like string representation. Best-effort; not guaranteed to be round-trip serializable.</returns>
         public static string SerializeState(IState state)
         {
             return serializeValue(state);
@@ -34,7 +44,8 @@ namespace SCLibs.StateContainer
                     return sb.ToString();
                 }
 
-                // Prefer library-type serialization via System.Text.Json when possible : TODO: Check this logic
+                // Prefer library-type serialization via System.Text.Json when possible.
+                // We try to use System.Text.Json for types from this assembly for a reasonable default.
                 if (val != null && val.GetType().Assembly == typeof(CombinedState).Assembly)
                 {
                     try { return JsonSerializer.Serialize(val); }
@@ -44,7 +55,7 @@ namespace SCLibs.StateContainer
                     }
                 }
 
-                // IDictionary
+                // IDictionary: emit as JSON object with string keys
                 if (val is IDictionary dict)
                 {
                     var sb = new StringBuilder();
@@ -61,7 +72,7 @@ namespace SCLibs.StateContainer
                     return sb.ToString();
                 }
 
-                // IEnumerable (but not string)
+                // IEnumerable (but not string): emit as JSON array
                 if (val is IEnumerable ie and not string)
                 {
                     var sb = new StringBuilder();
@@ -77,7 +88,7 @@ namespace SCLibs.StateContainer
                     return sb.ToString();
                 }
 
-                // Primitives and strings
+                // Primitives and strings: produce JSON-friendly literals
                 if (val is string s) return '"' + s.Replace("\"", "\\\"") + '"';
                 if (val is bool b) return b ? "true" : "false";
                 if (val is null) return "null";
@@ -88,7 +99,7 @@ namespace SCLibs.StateContainer
                     return Convert.ToString(val, System.Globalization.CultureInfo.InvariantCulture)!;
                 }
 
-                // Fallback to System.Text.Json which will use runtime type information
+                // Fallback to System.Text.Json which will use runtime type information, or fall back to ToString().
                 try
                 {
                     return JsonSerializer.Serialize(val);
