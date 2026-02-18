@@ -1,8 +1,8 @@
 {
     "folders": [
         {
-            "path": "."
-        }
+            "path": ".",
+        },
     ],
     "settings": {
         // "dotnet.defaultSolution": ".sln",
@@ -46,7 +46,7 @@
             "**/dev": false,
             "**/docs": false,
             "**/src": false,
-            "**/tests": false
-        }
-    }
+            "**/tests": false,
+        },
+    },
 }

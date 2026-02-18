@@ -7,10 +7,23 @@
     "endOfLine": "lf",
     "overrides": [
         {
-            "files": ["*.json", "*.jsonc", "*.code-workspace", "*rc"],
+            "files": ["*.json", "*.jsonc"],
             "options": {
                 "singleQuote": false,
+                "parser": "json",
                 "trailingComma": "none"
+            }
+        },
+        {
+            "files": ["*.md"],
+            "options": {
+                "proseWrap": "always"
+            }
+        },
+        {
+            "files": ["*.yml", "*.yaml"],
+            "options": {
+                "singleQuote": false
             }
         }
     ]
