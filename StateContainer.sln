@@ -9,11 +9,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StateContainer", "src\State
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dev", "dev", "{867C5511-C19D-459A-B8B7-6EA4088F510F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StateContainer.Dev", "dev\StateContainer.Dev\StateContainer.Dev.csproj", "{1D27548A-1924-4B1D-9417-78A68F72EC47}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StateContainer.Dev", "dev\StateContainer.Dev.csproj", "{1D27548A-1924-4B1D-9417-78A68F72EC47}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9CF4BFE4-86EF-4CD0-8C6D-04E8E5BC1F17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StateContainer.Tests", "tests\StateContainer.Tests\StateContainer.Tests.csproj", "{337CCF67-B158-4364-A1B1-122F6FE45F9E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StateContainer.Tests", "tests\StateContainer.Tests.csproj", "{337CCF67-B158-4364-A1B1-122F6FE45F9E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

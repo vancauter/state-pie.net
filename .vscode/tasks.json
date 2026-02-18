@@ -12,14 +12,14 @@
         {
             "label": "Run Dev Project",
             "type": "shell",
-            "command": "dotnet run --verbosity q --project dev/*/*.Dev.csproj",
+            "command": "dotnet run --verbosity q --project dev/*.Dev.csproj",
             "group": "none",
             "presentation": { "reveal": "always", "panel": "shared" }
         },
         {
             "label": "Run Dev Project (watch)",
             "type": "shell",
-            "command": "dotnet watch run --verbosity q --project dev/*/*.Dev.csproj",
+            "command": "dotnet watch run --verbosity q --project dev/*.Dev.csproj",
             "isBackground": true,
             "problemMatcher": [],
             "presentation": { "reveal": "always", "panel": "shared" }
@@ -27,7 +27,7 @@
         {
             "label": "Run Tests",
             "type": "shell",
-            "command": "dotnet test tests/*/*.Tests.csproj",
+            "command": "dotnet test tests/*.Tests.csproj",
             "group": "test",
             "problemMatcher": "$msCompile",
             "presentation": { "reveal": "always", "panel": "shared" }
@@ -35,7 +35,7 @@
         {
             "label": "Run Tests (no-build)",
             "type": "shell",
-            "command": "dotnet test tests/*/*.Tests.csproj --no-build",
+            "command": "dotnet test tests/*.Tests.csproj --no-build",
             "group": "test",
             "problemMatcher": "$msCompile",
             "presentation": { "reveal": "always", "panel": "shared" }
