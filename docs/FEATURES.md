@@ -4,17 +4,19 @@ This document lists suggested features to improve ergonomics, extensibility, and
 will update the tracked TODO list as I implement items.
 
 - [ ] Middleware / Enhancers
-  - Add a middleware pipeline to intercept/augment `Dispatch` (e.g., logging, async middleware).
+- [x] Middleware / Enhancers
+  - Add a middleware pipeline to intercept/augment `Dispatch` (e.g., logging, async middleware). Implemented: `Factory.CreateStore` accepts `Middleware[]` and `Store` composes pipeline.
   - [ ] Time-travel middleware (parked)
     - Record dispatched actions and root states to allow stepping back/forward, replay, and time-travel debugging.
     - Parked: will flesh out API shape and storage/replay semantics together with middleware work.
 
 - [ ] Async action helpers (thunks)
-  - Provide a small convention or middleware to handle function- or Task-based actions for async flows.
+- [x] Async action helpers (thunks)
+  - Provide a small convention or middleware to handle function- or Task-based actions for async flows. Implemented: `ThunkMiddleware` supports sync `Action` and async `Func` thunks.
 
 - [ ] Replace reducer / hot-swap
-  - `IStore.ReplaceReducer(Reducer newRoot)` to support HMR and runtime reducer replacement.
-  - Implement on `Store` (thread-safe).
+- [x] Replace reducer / hot-swap
+  - `IStore.HotSwapReducer(Reducer newRoot)` implemented on `Store` (atomic swap + init pass).
 
 - [ ] Init action / reducer initialization semantics
   - Document or provide an init action pattern so reducers can compute derived initial state.
