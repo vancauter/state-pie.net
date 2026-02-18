@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/StateContainer.csproj" />
+    <ProjectReference Include="../src/StateContainer.csproj" />
   </ItemGroup>
 
   <ItemGroup>
