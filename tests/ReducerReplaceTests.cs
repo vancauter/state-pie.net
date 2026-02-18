@@ -2,8 +2,6 @@ using AtomicRx;
 
 namespace StateContainer.Tests
 {
-    public record CounterState(int Count) : IState;
-
     public class ReducerReplaceTests
     {
         [Fact]
