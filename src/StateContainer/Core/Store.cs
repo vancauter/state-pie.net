@@ -1,12 +1,12 @@
 namespace SCLibs.StateContainer
 {
-    public class StateContainer(IState initialState, Reducer rootReducer) : IStateContainer
+    internal class Store(IState initialState, ReducerFn rootReducer) : IStore
     {
         private bool _isDisposed;
-        private readonly Reducer _rootReducer = rootReducer;
-
+        private readonly ReducerFn _rootReducer = rootReducer;
         private readonly SimpleSubject<IState> _stateSubject = new(initialState);
 
+        // Observable stream of state changes.
         public IObservable<IState> StateChanged => _stateSubject;
 
         public IState State { get; private set; } = initialState;
@@ -17,12 +17,11 @@ namespace SCLibs.StateContainer
 
             _isDisposed = true;
             _stateSubject.Dispose();
-            GC.SuppressFinalize(this);
         }
 
         public void Dispatch(IAction action)
         {
-            ObjectDisposedException.ThrowIf(_isDisposed, nameof(StateContainer));
+            ObjectDisposedException.ThrowIf(_isDisposed, nameof(Store));
 
             var newState = _rootReducer(State, action);
 

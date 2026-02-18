@@ -16,15 +16,13 @@ namespace SCLibs.StateContainer
     {
         string Name { get; }
         IState State { get; }
-        Reducer Reducer { get; }
+        ReducerFn Reducer { get; }
     }
 
-    public interface IStateContainer : IDisposable
+    public interface IStore : IDisposable
     {
-        IObservable<IState> StateChanged { get; }
-
         IState State { get; }
-
+        IObservable<IState> StateChanged { get; }
         void Dispatch(IAction action);
     }
 }

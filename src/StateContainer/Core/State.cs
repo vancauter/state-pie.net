@@ -8,7 +8,7 @@ namespace SCLibs.StateContainer
         // This class intentionally left blank as a marker for valid state types. Concrete state implementations can be defined by users of the library as needed.
     };
 
-    public class CombinedState : IState
+    internal class CombinedState : IState
     {
         public IReadOnlyDictionary<string, IState> States { get; }
 
