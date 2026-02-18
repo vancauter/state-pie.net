@@ -30,6 +30,24 @@ namespace AtomicRx.Core
             _stateSubject = new StateSubject(initialState);
             State = initialState;
 
+            // Run an init pass using the root reducer so reducers can compute derived initial state.
+            try
+            {
+                var init = Factory.CreateAction("@@INIT");
+                var reducer = _rootReducer;
+                var newState = reducer(State, init);
+
+                if (!ReferenceEquals(newState, State))
+                {
+                    State = newState;
+                    _stateSubject.OnNext(State);
+                }
+            }
+            catch
+            {
+                // Swallow init errors; reducers should avoid throwing during init.
+            }
+
             // Base dispatch: apply the root reducer and publish the new state if the reference changed.
             // Note: this method intentionally does not catch exceptions from reducers — callers or middleware
             // should handle errors as appropriate. Also, we check disposal at the start to avoid races
@@ -93,12 +111,12 @@ namespace AtomicRx.Core
             ObjectDisposedException.ThrowIf(_isDisposed, nameof(Store));
 
             // Atomically swap the reducer reference.
-            Interlocked.Exchange(ref _rootReducer, newRoot);
+            _ = Interlocked.Exchange(ref _rootReducer, newRoot);
 
             // Run an init pass so the new reducer can compute derived initial state.
             try
             {
-                var init = AtomicRx.Factory.CreateAction("@@INIT");
+                var init = Factory.CreateAction("@@INIT");
                 var reducer = _rootReducer;
                 var newState = reducer(State, init);
 
