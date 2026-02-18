@@ -76,8 +76,8 @@ bld/
 # !.vscode/launch.json
 # !.vscode/extensions.json
 
-*.code-workspace
-.github/instructions/
+# *.code-workspace
+# .github/instructions/
 
 # Local History for Visual Studio Code
 .history/
