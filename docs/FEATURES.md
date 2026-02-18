@@ -4,40 +4,37 @@ This document lists suggested features to improve ergonomics, extensibility, and
 will update the tracked TODO list as I implement items.
 
 - [ ] Middleware / Enhancers
-    - Add a middleware pipeline to intercept/augment `Dispatch` (e.g., logging, async middleware, time-travel).
+  - Add a middleware pipeline to intercept/augment `Dispatch` (e.g., logging, async middleware).
+  - [ ] Time-travel middleware (parked)
+    - Record dispatched actions and root states to allow stepping back/forward, replay, and time-travel debugging.
+    - Parked: will flesh out API shape and storage/replay semantics together with middleware work.
 
 - [ ] Async action helpers (thunks)
-    - Provide a small convention or middleware to handle function- or Task-based actions for async flows.
+  - Provide a small convention or middleware to handle function- or Task-based actions for async flows.
 
 - [ ] Replace reducer / hot-swap
-    - `IStore.ReplaceReducer(Reducer newRoot)` to support HMR and runtime reducer replacement.
-- [ ] Replace reducer / hot-swap
-    - `IStore.ReplaceReducer(Reducer newRoot)` implemented on `Store` (thread-safe).
-
-- [x] Selectors & memoization helpers
-    - Convenience utilities for creating memoized selectors for derived data. Implemented
-      `Selectors.CreateMemoizedSelector`.
+  - `IStore.ReplaceReducer(Reducer newRoot)` to support HMR and runtime reducer replacement.
+  - Implement on `Store` (thread-safe).
 
 - [ ] Init action / reducer initialization semantics
-    - Document or provide an init action pattern so reducers can compute derived initial state.
+  - Document or provide an init action pattern so reducers can compute derived initial state.
 
 - [ ] Observable error/completion semantics
-    - Clarify or extend `StateChanged` observable with documented `OnError`/`OnCompleted` behavior or alternatives.
+  - Clarify or extend `StateChanged` observable with documented `OnError`/`OnCompleted` behavior or alternatives.
 
 - [ ] Typed action creators / ergonomics
-    - Provide helper patterns for typed action creators and constants to reduce boilerplate.
+  - Provide helper patterns for typed action creators and constants to reduce boilerplate.
 
 - [ ] Snapshot / deserialize / migrations
-    - Add helpers to deserialize state, validate versions, and provide migration hooks.
+  - Add helpers to deserialize state, validate versions, and provide migration hooks.
 
 - [ ] Immutability helpers / deep-equality
-    - Small helpers and guidance for preserving reference-equality and performing deep comparisons when needed.
+  - Small helpers and guidance for preserving reference-equality and performing deep comparisons when needed.
 
 - [ ] Testing helpers & examples
-    - Utilities and examples that simplify asserting store transitions, mocking reducers, and integration tests.
+  - Utilities and examples that simplify asserting store transitions, mocking reducers, and integration tests.
 
 Notes
 
 - Priority can be set per-item; I can implement these incrementally and check them off in the TODO list.
-- Want me to start with `Middleware / Enhancers` and scaffold a minimal implementation and tests? O list.
 - Want me to start with `Middleware / Enhancers` and scaffold a minimal implementation and tests?
