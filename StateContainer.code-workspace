@@ -10,7 +10,7 @@
         "explorer.compactFolders": false,
 
         // --- GitHub Copilot Settings ---
-        "github.copilot.chat.codeGeneration.useInstructionFiles": false,
+        "github.copilot.chat.codeGeneration.useInstructionFiles": true,
         "editor.inlineSuggest.syntaxHighlightingEnabled": false,
         // "editor.inlineSuggest.minShowDelay": 1000,
 
