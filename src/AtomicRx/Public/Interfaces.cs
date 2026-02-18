@@ -72,5 +72,13 @@ namespace AtomicRx
         /// </summary>
         /// <param name="action">The action to dispatch.</param>
         void Dispatch(IAction action);
+
+        /// <summary>
+        /// Replace the root reducer used by the store. The replacement is atomic and the
+        /// store will run an internal init pass after swapping so the new reducer can
+        /// compute any derived initial state.
+        /// </summary>
+        /// <param name="newRoot">New root reducer to use for subsequent dispatches.</param>
+        void ReplaceReducer(Reducer newRoot);
     }
 }

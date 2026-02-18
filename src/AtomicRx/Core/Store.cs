@@ -1,3 +1,5 @@
+using System.Threading;
+
 namespace AtomicRx.Core
 {
     // Internal store implementation. Responsible for holding the root state, applying the root reducer
@@ -6,7 +8,7 @@ namespace AtomicRx.Core
     internal sealed class Store : IStore
     {
         private bool _isDisposed;
-        private readonly Reducer _rootReducer;
+        private Reducer _rootReducer;
 
         // Internal subject that manages subscriptions and emits the last seen state immediately
         // to new subscribers. See StateSubject for thread-safety and snapshot semantics.
@@ -38,7 +40,9 @@ namespace AtomicRx.Core
             {
                 ObjectDisposedException.ThrowIf(_isDisposed, nameof(Store));
 
-                var newState = _rootReducer(State, action);
+                // Capture current reducer for this dispatch to avoid races with ReplaceReducer
+                var reducer = _rootReducer;
+                var newState = reducer(State, action);
 
                 if (!ReferenceEquals(newState, State))
                 {
@@ -80,5 +84,38 @@ namespace AtomicRx.Core
         // Dispatch calls the composed middleware pipeline (or the base dispatch when no middleware).
         // Middleware receives the store and a `next` Dispatch delegate to call the next stage in the pipeline.
         public void Dispatch(IAction action) => _dispatch(action);
+
+        /// <summary>
+        /// Atomically replace the root reducer used by the store. After swapping the reducer
+        /// the store runs an internal init pass so the new reducer can compute derived state.
+        /// </summary>
+        /// <param name="newRoot">New root reducer.</param>
+        public void ReplaceReducer(Reducer newRoot)
+        {
+            if (newRoot is null) throw new System.ArgumentNullException(nameof(newRoot));
+
+            ObjectDisposedException.ThrowIf(_isDisposed, nameof(Store));
+
+            // Atomically swap the reducer reference.
+            Interlocked.Exchange(ref _rootReducer, newRoot);
+
+            // Run an init pass so the new reducer can compute derived initial state.
+            try
+            {
+                var init = AtomicRx.Factory.CreateAction("@@INIT");
+                var reducer = _rootReducer;
+                var newState = reducer(State, init);
+
+                if (!ReferenceEquals(newState, State))
+                {
+                    State = newState;
+                    _stateSubject.OnNext(State);
+                }
+            }
+            catch
+            {
+                // Swallow init errors; reducers should avoid throwing during init.
+            }
+        }
     }
 }
