@@ -4,18 +4,18 @@ This document lists suggested features to improve ergonomics, extensibility, and
 will update the tracked TODO list as I implement items.
 
 - [ ] Middleware / Enhancers
-    - Add a middleware pipeline to intercept/augment `Dispatch` (e.g., logging, async middleware, time-travel).
+  - Add a middleware pipeline to intercept/augment `Dispatch` (e.g., logging, async middleware, time-travel).
 
 - [ ] Async action helpers (thunks)
-    - Provide a small convention or middleware to handle function- or Task-based actions for async flows.
+  - Provide a small convention or middleware to handle function- or Task-based actions for async flows.
 
 - [ ] Replace reducer / hot-swap
-    - `IStore.ReplaceReducer(Reducer newRoot)` to support HMR and runtime reducer replacement.
- - [x] Replace reducer / hot-swap
-     - `IStore.ReplaceReducer(Reducer newRoot)` implemented on `Store` (thread-safe).
+  - `IStore.ReplaceReducer(Reducer newRoot)` to support HMR and runtime reducer replacement.
+- [ ] Replace reducer / hot-swap
+    - `IStore.ReplaceReducer(Reducer newRoot)` implemented on `Store` (thread-safe).
 
-- [ ] Selectors & memoization helpers
-    - Convenience utilities for creating memoized selectors for derived data.
+- [x] Selectors & memoization helpers
+    - Convenience utilities for creating memoized selectors for derived data. Implemented `Selectors.CreateMemoizedSelector`.
 
 - [ ] Init action / reducer initialization semantics
     - Document or provide an init action pattern so reducers can compute derived initial state.
@@ -38,6 +38,5 @@ will update the tracked TODO list as I implement items.
 Notes
 
 - Priority can be set per-item; I can implement these incrementally and check them off in the TODO list.
-- Want me to start with `Middleware / Enhancers` and scaffold a minimal implementation and tests?
-O list.
+- Want me to start with `Middleware / Enhancers` and scaffold a minimal implementation and tests? O list.
 - Want me to start with `Middleware / Enhancers` and scaffold a minimal implementation and tests?
