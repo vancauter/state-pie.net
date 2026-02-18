@@ -6,6 +6,11 @@ namespace StateContainer.Tests
 
     public class SelectorTests
     {
+        // Test: MemoizedSelectorCachesLastResultForSameInput
+        // Why: Ensure the memoized selector caches the last computed result when the input
+        //      is the same reference/value so expensive projections are not re-run.
+        // What: Call the selector twice with the same `AppState` instance and assert the
+        //       projection ran only once and produced the expected value.
         [Fact]
         public void MemoizedSelectorCachesLastResultForSameInput()
         {
@@ -23,6 +28,12 @@ namespace StateContainer.Tests
             Assert.Equal(1, callCount);
         }
 
+        // Test: MemoizedSelectorRecomputesWhenComparerDiffers
+        // Why: Verify caching semantics for record types: the default comparer uses structural
+        //      equality, so two different instances with equal values should be treated as equal
+        //      and avoid recomputation.
+        // What: Call the selector with two separate `AppState` instances that are value-equal
+        //       and assert the projection is only executed once due to caching behavior.
         [Fact]
         public void MemoizedSelectorRecomputesWhenComparerDiffers()
         {
