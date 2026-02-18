@@ -4,7 +4,6 @@ namespace Dev
 {
     public class Program
     {
-
         private sealed class ConsoleObserver : IObserver<IState>
         {
             public void OnNext(IState state) => Console.WriteLine($"State changed: {Helpers.SerializeState(state)}");
@@ -25,10 +24,10 @@ namespace Dev
 
         public static void Main()
         {
-            var counterSlice = Helpers.CreateSlice(
+            var counterSlice = Factory.CreateSlice(
                 name: "counter",
                 initialState: new ParentState("root", new CounterState(0)),
-                reducerFn: (state, action) =>
+                reducer: (state, action) =>
                 {
                     return action.Type switch
                     {
@@ -38,15 +37,15 @@ namespace Dev
                     };
                 });
 
-            var (initialRootState, rootReducer) = Helpers.CombineReducers(counterSlice);
+            var (state, reducer) = Factory.CombineReducers(counterSlice);
 
-            using var store = new StateContainer(initialRootState, rootReducer);
+            using var store = Factory.CreateStore(state, reducer);
 
             var subscription = store.StateChanged.Subscribe(new ConsoleObserver());
 
-            store.Dispatch(Helpers.CreateAction("increment"));
-            store.Dispatch(Helpers.CreateAction("increment"));
-            store.Dispatch(Helpers.CreateAction("decrement"));
+            store.Dispatch(Factory.CreateAction("increment"));
+            store.Dispatch(Factory.CreateAction("increment"));
+            store.Dispatch(Factory.CreateAction("decrement"));
 
             subscription.Dispose();
         }
