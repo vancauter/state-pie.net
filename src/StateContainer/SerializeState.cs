@@ -80,6 +80,8 @@ namespace SCLibs.StateContainer
                 // Primitives and strings
                 if (val is string s) return '"' + s.Replace("\"", "\\\"") + '"';
                 if (val is bool b) return b ? "true" : "false";
+                if (val is null) return "null";
+
                 var t = val.GetType();
                 if (t.IsPrimitive || val is decimal)
                 {
