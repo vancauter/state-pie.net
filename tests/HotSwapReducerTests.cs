@@ -1,0 +1,67 @@
+using AtomicRx;
+
+namespace StateContainer.Tests
+{
+    public class ReducerReplaceTests
+    {
+        // Test: HotSwapReducerSwapsLogic
+        // Why: Ensure that swapping reducers at runtime changes the store's behavior
+        //      so subsequent dispatches are interpreted by the new reducer.
+        // What: Start with a no-op reducer, hot-swap to one that handles "INC",
+        //       then dispatch and assert the state reflects the new reducer logic.
+        [Fact]
+        public void HotSwapReducerSwapsLogic()
+        {
+            // old reducer: no-op
+            Reducer oldRoot = (state, action) => state;
+
+            // new reducer: handle "INC" by incrementing CounterState.Count
+            Reducer newRoot = (state, action) =>
+            {
+                var s = (CounterState)state;
+                if (action.Type == "INC") return new CounterState(s.Count + 1);
+                return state;
+            };
+
+            using var store = Factory.CreateStore(new CounterState(0), oldRoot);
+
+            // dispatch before swap should be a no-op
+            store.Dispatch(Factory.CreateAction("INC"));
+            Assert.Equal(0, ((CounterState)store.State).Count);
+
+            // swap reducer
+            store.HotSwapReducer(newRoot);
+
+            // dispatch after swap should use new reducer logic
+            store.Dispatch(Factory.CreateAction("INC"));
+            Assert.Equal(1, ((CounterState)store.State).Count);
+        }
+
+        // Test: HotSwapReducerInitPassPublishesRecomputedState
+        // Why: Verify that the hot-swap performs an init pass allowing the new reducer
+        //      to compute derived initial state immediately after being installed.
+        // What: Hot-swap to a reducer that responds to the "@@INIT" action by
+        //       adjusting state, and assert the store's state is updated.
+        [Fact]
+        public void HotSwapReducerInitPassPublishesRecomputedState()
+        {
+            // old reducer: no-op
+            Reducer oldRoot = (state, action) => state;
+
+            // new reducer: on init action compute derived state (+5)
+            Reducer newRoot = (state, action) =>
+            {
+                var s = (CounterState)state;
+                if (action.Type == "@@INIT") return new CounterState(s.Count + 5);
+                return state;
+            };
+
+            using var store = Factory.CreateStore(new CounterState(0), oldRoot);
+
+            // swap reducer should run init pass and update the state
+            store.HotSwapReducer(newRoot);
+
+            Assert.Equal(5, ((CounterState)store.State).Count);
+        }
+    }
+}

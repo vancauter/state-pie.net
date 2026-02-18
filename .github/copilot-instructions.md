@@ -16,7 +16,9 @@ guidance:
 	validation:
 		- "Use clear exception types and messages for invalid arguments."
 	tests:
-		- "Follow existing test naming/style; run `dotnet test`."
+			- "Follow existing test naming/style; run `dotnet test`."
+			- "When adding or updating tests, include a short header comment above each test
+			  describing why the test exists and what it verifies (1-3 lines)."
 	misc:
 		- "Use clear, maintainable code and document non-obvious decisions."
 ```
