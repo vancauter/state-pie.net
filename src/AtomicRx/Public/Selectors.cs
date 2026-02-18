@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace SCLibs.StateContainer
+namespace AtomicRx
 {
     /// <summary>
     /// Utilities for creating memoized selectors (simple last-input cache).
@@ -19,8 +17,6 @@ namespace SCLibs.StateContainer
         /// <returns>A memoized selector function.</returns>
         public static Func<TState, TResult> CreateMemoizedSelector<TState, TResult>(Func<TState, TResult> selector, IEqualityComparer<TState>? comparer = null)
         {
-            if (selector == null) throw new ArgumentNullException(nameof(selector));
-
             comparer ??= EqualityComparer<TState>.Default;
 
             var hasValue = false;

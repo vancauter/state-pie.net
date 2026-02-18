@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Text;
 using System.Text.Json;
-using SCLibs.StateContainer.Core;
+using AtomicRx.Core;
 
-namespace SCLibs.StateContainer
+namespace AtomicRx
 {
     public static partial class Helpers
     {

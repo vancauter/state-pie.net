@@ -1,4 +1,4 @@
-namespace SCLibs.StateContainer.Core
+namespace AtomicRx.Core
 {
     // Internal implementation of an ISlice.
     // A lightweight container holding the slice name, the current state instance and a reducer delegate.

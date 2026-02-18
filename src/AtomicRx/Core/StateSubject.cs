@@ -1,4 +1,4 @@
-namespace SCLibs.StateContainer.Core
+namespace AtomicRx.Core
 {
     // Lightweight, internal subject optimized for broadcasting IState instances.
     // Behaviors:

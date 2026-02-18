@@ -1,4 +1,4 @@
-namespace SCLibs.StateContainer
+namespace AtomicRx
 {
     public static partial class Factory
     {

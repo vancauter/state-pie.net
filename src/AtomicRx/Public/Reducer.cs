@@ -1,4 +1,4 @@
-namespace SCLibs.StateContainer
+namespace AtomicRx
 {
     /// <summary>
     /// Reducer delegate that accepts the current root <see cref="IState"/> and an <see cref="IAction"/>

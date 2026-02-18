@@ -1,5 +1,4 @@
-using System;
-using SCLibs.StateContainer;
+using AtomicRx;
 
 namespace StateContainer.Tests
 {
@@ -8,12 +7,12 @@ namespace StateContainer.Tests
     public class SelectorTests
     {
         [Fact]
-        public void MemoizedSelector_CachesLastResult_ForSameInput()
+        public void MemoizedSelectorCachesLastResultForSameInput()
         {
             var callCount = 0;
-            Func<AppState, int> projection = s => { callCount++; return s.Value * 2; };
+            int projection(AppState s) { callCount++; return s.Value * 2; }
 
-            var selector = Selectors.CreateMemoizedSelector(projection);
+            var selector = Selectors.CreateMemoizedSelector((Func<AppState, int>)projection);
 
             var s = new AppState(10);
             var a = selector(s);
@@ -25,12 +24,12 @@ namespace StateContainer.Tests
         }
 
         [Fact]
-        public void MemoizedSelector_Recomputes_WhenComparerDiffers()
+        public void MemoizedSelectorRecomputesWhenComparerDiffers()
         {
             var callCount = 0;
-            Func<AppState, int> projection = s => { callCount++; return s.Value * 3; };
+            int projection(AppState s) { callCount++; return s.Value * 3; }
 
-            var selector = Selectors.CreateMemoizedSelector(projection);
+            var selector = Selectors.CreateMemoizedSelector((Func<AppState, int>)projection);
 
             var s1 = new AppState(2);
             var s2 = new AppState(2); // equal by value but different reference; default comparer will treat equal

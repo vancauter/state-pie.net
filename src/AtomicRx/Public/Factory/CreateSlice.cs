@@ -1,6 +1,6 @@
-using SCLibs.StateContainer.Core;
+using AtomicRx.Core;
 
-namespace SCLibs.StateContainer
+namespace AtomicRx
 {
     public static partial class Factory
     {

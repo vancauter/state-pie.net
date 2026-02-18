@@ -1,4 +1,4 @@
-namespace SCLibs.StateContainer.Core
+namespace AtomicRx.Core
 {
     internal sealed class State : IState
     {

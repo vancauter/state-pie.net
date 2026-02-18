@@ -1,4 +1,4 @@
-namespace SCLibs.StateContainer
+namespace AtomicRx
 {
     /// <summary>
     /// Delegate used to dispatch an <see cref="IAction"/> to the store.
