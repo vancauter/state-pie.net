@@ -1,10 +1,11 @@
 namespace SCLibs.StateContainer.Core
 {
-    internal sealed class Store(IState initialState, ReducerFn rootReducer) : IStore
+    internal sealed partial class Store(IState initialState, ReducerFn rootReducer) : IStore
     {
         private bool _isDisposed;
         private readonly ReducerFn _rootReducer = rootReducer;
-        private readonly SimpleSubject<IState> _stateSubject = new(initialState);
+        // Use an internal subject implementation specialized for `IState`.
+        private readonly StateSubject _stateSubject = new(initialState);
 
         // Observable stream of state changes.
         public IObservable<IState> StateChanged => _stateSubject;

@@ -1,40 +1,39 @@
 namespace SCLibs.StateContainer.Core
 {
-    internal sealed class SimpleSubject<T>(T initial) : IObservable<T>, IDisposable
+    internal sealed class StateSubject(IState initialState) : IObservable<IState>, IDisposable
     {
-        private readonly List<IObserver<T>> _observers = [];
+        private readonly List<IObserver<IState>> _observers = [];
         private readonly object _lock = new();
         private bool _isDisposed;
-        private T? _last = initial;
+        private IState? _lastState = initialState;
 
-        public IDisposable Subscribe(IObserver<T> observer)
+        public IDisposable Subscribe(IObserver<IState> observer)
         {
-            ObjectDisposedException.ThrowIf(_isDisposed, nameof(SimpleSubject<T>));
+            ObjectDisposedException.ThrowIf(_isDisposed, nameof(StateSubject));
 
-            T? last;
+            IState? initialStateToEmit;
             lock (_lock)
             {
-                _observers.Add(observer);
-                last = _last;
+                if (!_observers.Contains(observer))
+                    _observers.Add(observer);
+
+                initialStateToEmit = _lastState;
             }
 
-            // Replay last value outside lock to avoid re-entrance issues.
-            if (last is not null)
-            {
-                try { observer.OnNext(last); } catch { }
-            }
+            if (initialStateToEmit is not null)
+                try { observer.OnNext(initialStateToEmit); } catch { }
 
-            return new Subscription(() => { lock (_lock) { _ = _observers.RemoveAll(o => o == observer); } });
+            return new Subscription(() => { lock (_lock) { _ = _observers.Remove(observer); } });
         }
 
-        public void OnNext(T value)
+        public void OnNext(IState value)
         {
             if (_isDisposed) return;
 
-            IObserver<T>[] snapshot;
+            IObserver<IState>[] snapshot;
             lock (_lock)
             {
-                _last = value;
+                _lastState = value;
                 snapshot = [.. _observers];
             }
 
@@ -47,7 +46,6 @@ namespace SCLibs.StateContainer.Core
         public void Dispose()
         {
             if (_isDisposed) return;
-
             _isDisposed = true;
             lock (_lock) { _observers.Clear(); }
         }
