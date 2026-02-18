@@ -1,3 +1,5 @@
+using SCLibs.StateContainer.Core;
+
 namespace SCLibs.StateContainer
 {
     public static partial class Factory

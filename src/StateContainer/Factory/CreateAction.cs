@@ -7,7 +7,7 @@ namespace SCLibs.StateContainer
             if (string.IsNullOrWhiteSpace(type))
                 throw new ArgumentException("Action type must be a non-empty string.", nameof(type));
 
-            return new Action(type);
+            return new Core.Action(type);
         }
 
         public static IAction CreateAction<TPayload>(string type, TPayload payload)
@@ -15,7 +15,7 @@ namespace SCLibs.StateContainer
             if (string.IsNullOrWhiteSpace(type))
                 throw new ArgumentException("Action type must be a non-empty string.", nameof(type));
 
-            return new Action<TPayload>(type, payload);
+            return new Core.Action<TPayload>(type, payload);
         }
     }
 }

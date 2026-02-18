@@ -1,6 +1,6 @@
-namespace SCLibs.StateContainer
+namespace SCLibs.StateContainer.Core
 {
-    internal class Store(IState initialState, ReducerFn rootReducer) : IStore
+    internal sealed class Store(IState initialState, ReducerFn rootReducer) : IStore
     {
         private bool _isDisposed;
         private readonly ReducerFn _rootReducer = rootReducer;

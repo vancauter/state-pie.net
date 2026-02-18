@@ -1,6 +1,6 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 
-namespace SCLibs.StateContainer
+namespace SCLibs.StateContainer.Core
 {
     // `IState` is declared in Interfaces.cs; concrete implementations are internal
     internal sealed class State : IState
@@ -8,7 +8,7 @@ namespace SCLibs.StateContainer
         // This class intentionally left blank as a marker for valid state types. Concrete state implementations can be defined by users of the library as needed.
     };
 
-    internal class CombinedState : IState
+    internal sealed class CombinedState : IState
     {
         public IReadOnlyDictionary<string, IState> States { get; }
 

@@ -1,4 +1,4 @@
-namespace SCLibs.StateContainer
+namespace SCLibs.StateContainer.Core
 {
     internal sealed class SimpleSubject<T>(T initial) : IObservable<T>, IDisposable
     {
