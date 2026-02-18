@@ -1,10 +1,21 @@
 using SCLibs.StateContainer.Core;
+using System.Collections.ObjectModel;
 
 namespace SCLibs.StateContainer
 {
     public static partial class Factory
     {
-        public static (IState state, ReducerFn reducer) CombineReducers(params ISlice[] slices)
+        /// <summary>
+        /// Combine multiple <see cref="ISlice"/> instances into a single root <see cref="IState"/>
+        /// and a <see cref="Reducer"/> that delegates to each slice reducer.
+        /// </summary>
+        /// <param name="slices">An array of slices to combine. Each slice must have a unique name.</param>
+        /// <returns>
+        /// A tuple containing the initial combined root state and a root reducer function that
+        /// forwards actions to each slice reducer and returns an updated combined state when any slice changes.
+        /// </returns>
+        /// <exception cref="ArgumentException">Thrown when no slices are provided or duplicate slice names are detected.</exception>
+        public static (IState state, Reducer reducer) CombineReducers(params ISlice[] slices)
         {
             if (slices.Length == 0)
                 throw new ArgumentException("Must provide at least one slice to combine.", nameof(slices));
@@ -15,7 +26,9 @@ namespace SCLibs.StateContainer
                 throw new ArgumentException($"Duplicate slice name detected: {duplicateGroup.Key}", nameof(slices));
 
             var reducerDictionary = slices.ToDictionary(slice => slice.Name, slice => slice.Reducer);
-            var initialSliceStates = slices.ToDictionary(slice => slice.Name, slice => slice.State);
+            // Build a mutable dictionary first, then wrap in ReadOnlyDictionary to avoid copying inside Create.
+            var mutableSliceStates = slices.ToDictionary(slice => slice.Name, slice => slice.State);
+            var initialSliceStates = new ReadOnlyDictionary<string, IState>(mutableSliceStates);
             var initialRootState = CombinedState.Create(initialSliceStates);
 
             IState rootReducerDelegate(IState state, IAction action)

@@ -1,28 +1,76 @@
 namespace SCLibs.StateContainer
 {
+    /// <summary>
+    /// Represents a non-generic action dispatched to a store.
+    /// <para>Actions are simple, serializable messages identified by a <see cref="Type"/> string.</para>
+    /// </summary>
     public interface IAction
     {
+        /// <summary>
+        /// A string identifier for the action type. Consumers should use meaningful, unique strings.
+        /// </summary>
         string Type { get; }
     }
 
+    /// <summary>
+    /// Represents an action carrying a strongly-typed payload.
+    /// </summary>
+    /// <typeparam name="TPayload">The payload type for the action.</typeparam>
     public interface IAction<TPayload> : IAction
     {
+        /// <summary>
+        /// The payload carried by the action.
+        /// </summary>
         TPayload Payload { get; }
     }
 
+    /// <summary>
+    /// Marker interface for types that may be used as application state.
+    /// Implementations should be immutable or treated as immutable by reducers.
+    /// </summary>
     public interface IState { }
 
+    /// <summary>
+    /// Represents a named slice of the overall application state.
+    /// <para>A slice provides its current <see cref="State"/> and a <see cref="Reducer"/> to handle actions for that slice.</para>
+    /// </summary>
     public interface ISlice
     {
+        /// <summary>
+        /// The unique name of this slice within a combined root state.
+        /// </summary>
         string Name { get; }
+
+        /// <summary>
+        /// The current state object for this slice.
+        /// </summary>
         IState State { get; }
-        ReducerFn Reducer { get; }
+
+        /// <summary>
+        /// The reducer function that accepts the slice state and an action and returns the next slice state.
+        /// </summary>
+        Reducer Reducer { get; }
     }
 
+    /// <summary>
+    /// Represents the root store which holds the application state and handles dispatching actions.
+    /// </summary>
     public interface IStore : IDisposable
     {
+        /// <summary>
+        /// The current root state of the application.
+        /// </summary>
         IState State { get; }
+
+        /// <summary>
+        /// An observable stream that emits the root state each time it changes.
+        /// </summary>
         IObservable<IState> StateChanged { get; }
+
+        /// <summary>
+        /// Dispatches an action to the store, causing reducers to compute the next state.
+        /// </summary>
+        /// <param name="action">The action to dispatch.</param>
         void Dispatch(IAction action);
     }
 }
