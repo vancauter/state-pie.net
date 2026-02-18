@@ -79,6 +79,6 @@ namespace AtomicRx
         /// compute any derived initial state.
         /// </summary>
         /// <param name="newRoot">New root reducer to use for subsequent dispatches.</param>
-        void ReplaceReducer(Reducer newRoot);
+        void HotSwapReducer(Reducer newRoot);
     }
 }

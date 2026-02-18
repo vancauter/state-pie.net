@@ -40,7 +40,7 @@ namespace AtomicRx.Core
             {
                 ObjectDisposedException.ThrowIf(_isDisposed, nameof(Store));
 
-                // Capture current reducer for this dispatch to avoid races with ReplaceReducer
+                    // Capture current reducer for this dispatch to avoid races with HotSwapReducer
                 var reducer = _rootReducer;
                 var newState = reducer(State, action);
 
@@ -90,7 +90,7 @@ namespace AtomicRx.Core
         /// the store runs an internal init pass so the new reducer can compute derived state.
         /// </summary>
         /// <param name="newRoot">New root reducer.</param>
-        public void ReplaceReducer(Reducer newRoot)
+        public void HotSwapReducer(Reducer newRoot)
         {
             if (newRoot is null) throw new System.ArgumentNullException(nameof(newRoot));
 
