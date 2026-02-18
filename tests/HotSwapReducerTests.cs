@@ -13,15 +13,15 @@ namespace StateContainer.Tests
         public void HotSwapReducerSwapsLogic()
         {
             // old reducer: no-op
-            Reducer oldRoot = (state, action) => state;
+            static IState oldRoot(IState state, IAction action) => state;
 
             // new reducer: handle "INC" by incrementing CounterState.Count
-            Reducer newRoot = (state, action) =>
+            static IState newRoot(IState state, IAction action)
             {
                 var s = (CounterState)state;
                 if (action.Type == "INC") return new CounterState(s.Count + 1);
                 return state;
-            };
+            }
 
             using var store = Factory.CreateStore(new CounterState(0), oldRoot);
 
@@ -46,15 +46,15 @@ namespace StateContainer.Tests
         public void HotSwapReducerInitPassPublishesRecomputedState()
         {
             // old reducer: no-op
-            Reducer oldRoot = (state, action) => state;
+            static IState oldRoot(IState state, IAction action) => state;
 
             // new reducer: on init action compute derived state (+5)
-            Reducer newRoot = (state, action) =>
+            static IState newRoot(IState state, IAction action)
             {
                 var s = (CounterState)state;
                 if (action.Type == "@@INIT") return new CounterState(s.Count + 5);
                 return state;
-            };
+            }
 
             using var store = Factory.CreateStore(new CounterState(0), oldRoot);
 

@@ -10,7 +10,6 @@ guidance:
 		- "Verify public API signatures remain compatible; update tests/docs when changing them."
 	formatting:
 		- "Follow `.editorconfig` for code style; use consistent naming and formatting."
-		- "Prefer small, focused PRs with tests."
 	threading:
 		- "Be explicit about thread-safety and document synchronization expectations."
 	validation:
