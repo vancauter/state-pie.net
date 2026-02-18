@@ -9,7 +9,7 @@ guidance:
 	apiContracts:
 		- "Verify public API signatures remain compatible; update tests/docs when changing them."
 	formatting:
-		- "Follow `.editorconfig` and run `dotnet format`."
+		- "Follow `.editorconfig` for code style; use consistent naming and formatting."
 		- "Prefer small, focused PRs with tests."
 	threading:
 		- "Be explicit about thread-safety and document synchronization expectations."
@@ -17,8 +17,6 @@ guidance:
 		- "Use clear exception types and messages for invalid arguments."
 	tests:
 		- "Follow existing test naming/style; run `dotnet test`."
-	ci:
-		- "CI should run `dotnet build` and `dotnet test`. Document any preview SDK requirements in CI config and README."
 	misc:
 		- "Use clear, maintainable code and document non-obvious decisions."
 ```
