@@ -10,9 +10,9 @@ allowed-tools: [bash]
 metadata:
     conventional_commits: true
     interactive: false
-    intelligent_staging: false
+    intelligent_staging: true
     auto_commit: true
-    always_stage_all: true
+    always_stage_all: false
     autonomous: true
 guidance:
     format: |
@@ -26,21 +26,28 @@ guidance:
               Prefer staged diff (`git diff --staged`) when available; otherwise use
               the working-tree diff (`git diff`). Also check `git status --porcelain`.
         - stageFiles: |
-              Always stage all changed files (except files that appear to contain
-              secrets such as private keys, environment files, or credentials).
-              Do not ask the user to pick groups. Stage everything in the working
-              tree with `git add --all` or the equivalent, and proceed to commit.
+              Analyze the working-tree diff and group changed files into logical
+              cohorts (eg. `docs`, `api`, `feature:<scope>`, `tests`, `ci`). For
+              each logical group, create a separate staging set; avoid staging
+              files that appear to contain secrets (private keys, env files,
+              credentials). Do not implicitly stage unrelated groups together.
+              The assistant should autonomously decide groups and prepare per-
+              group commits.
         - generateMessage: |
               Derive `type` (feat, fix, chore, docs, refactor, test, ci), `scope` from
               touched paths, and a short imperative description (<72 chars). Offer an
               optional body and footers (e.g., `Closes #NNN`).
-                  When multiple groups are selected, generate a separate conventional
-                  commit message for each group. Do NOT automatically combine unrelated
-                  groups into a single commit.
-          - executeCommit: |
-              Stage all changed files and create a single conventional commit covering
-              all staged changes. Prefer multi-line commits when a body or footers are
-              included. Do not require user confirmation before running `git commit`.
+              When multiple groups are selected, generate a separate conventional
+              commit message for each group. Do NOT automatically combine unrelated
+              groups into a single commit.
+        - executeCommit: |
+              For each autonomous logical group produced by `stageFiles`, stage
+              only that group's files and create a separate conventional commit
+              with an appropriate type/scope and message. Prefer multi-line
+              commits when a body or footers are included. Do not require user
+              confirmation before running `git commit`. Preserve safety rules
+              (do not modify git config, do not run destructive commands, do
+              not skip hooks without explicit user request).
     bestPractices:
         - "One logical change per commit"
         - "Use imperative present-tense and keep description under 72 chars"
