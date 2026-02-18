@@ -43,7 +43,7 @@
         {
             "label": "Proper Clean",
             "type": "shell",
-            "command": "../proper_clean.sh",
+            "command": "../../Scripts/proper_clean.sh",
             "group": "none",
             "problemMatcher": [],
             "presentation": { "reveal": "always", "panel": "shared" }

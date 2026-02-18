@@ -12,7 +12,6 @@
         // --- GitHub Copilot Settings ---
         "github.copilot.chat.codeGeneration.useInstructionFiles": true,
         "editor.inlineSuggest.syntaxHighlightingEnabled": false,
-        // "editor.inlineSuggest.minShowDelay": 1000,
 
         // --- File Exclusions ---
         "files.exclude": {
