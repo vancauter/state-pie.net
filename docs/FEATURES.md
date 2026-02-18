@@ -11,6 +11,8 @@ will update the tracked TODO list as I implement items.
 
 - [ ] Replace reducer / hot-swap
     - `IStore.ReplaceReducer(Reducer newRoot)` to support HMR and runtime reducer replacement.
+ - [x] Replace reducer / hot-swap
+     - `IStore.ReplaceReducer(Reducer newRoot)` implemented on `Store` (thread-safe).
 
 - [ ] Selectors & memoization helpers
     - Convenience utilities for creating memoized selectors for derived data.

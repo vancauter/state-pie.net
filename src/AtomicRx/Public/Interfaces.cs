@@ -72,5 +72,12 @@ namespace SCLibs.StateContainer
         /// </summary>
         /// <param name="action">The action to dispatch.</param>
         void Dispatch(IAction action);
+
+        /// <summary>
+        /// Replace the current root reducer with a new one at runtime.
+        /// <para>This is useful for hot-reload or dynamic reducer composition scenarios.</para>
+        /// </summary>
+        /// <param name="newReducer">The new root reducer to use for subsequent dispatches.</param>
+        void ReplaceReducer(Reducer newReducer);
     }
 }

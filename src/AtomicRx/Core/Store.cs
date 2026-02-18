@@ -6,7 +6,8 @@ namespace SCLibs.StateContainer.Core
     internal sealed class Store : IStore
     {
         private bool _isDisposed;
-        private readonly Reducer _rootReducer;
+        private Reducer _rootReducer;
+        private readonly object _reducerLock = new();
 
         // Internal subject that manages subscriptions and emits the last seen state immediately
         // to new subscribers. See StateSubject for thread-safety and snapshot semantics.
@@ -38,7 +39,10 @@ namespace SCLibs.StateContainer.Core
             {
                 ObjectDisposedException.ThrowIf(_isDisposed, nameof(Store));
 
-                var newState = _rootReducer(State, action);
+                Reducer reducer;
+                lock (_reducerLock) { reducer = _rootReducer; }
+
+                var newState = reducer(State, action);
 
                 if (!ReferenceEquals(newState, State))
                 {
@@ -65,6 +69,21 @@ namespace SCLibs.StateContainer.Core
             else
             {
                 _dispatch = baseDispatch;
+            }
+        }
+
+        /// <summary>
+        /// Replace the current root reducer used by the store. Thread-safe.
+        /// </summary>
+        /// <param name="newReducer">New reducer to use for subsequent dispatches.</param>
+        public void ReplaceReducer(Reducer newReducer)
+        {
+            if (newReducer == null) throw new ArgumentNullException(nameof(newReducer));
+            ObjectDisposedException.ThrowIf(_isDisposed, nameof(Store));
+
+            lock (_reducerLock)
+            {
+                _rootReducer = newReducer;
             }
         }
 
