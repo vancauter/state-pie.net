@@ -1,6 +1,6 @@
 namespace AtomicRx.Core
 {
-    // Lightweight, internal subject optimized for broadcasting IState instances.
+    // Internal subject implementation that holds the current state and manages observer subscriptions.
     // Behaviors:
     // - Thread-safe: subscription list guarded by a private lock.
     // - Immediately emits the last known state to newly subscribed observers.
