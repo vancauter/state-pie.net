@@ -19,6 +19,7 @@ namespace AtomicRx
         /// <param name="rootReducer">Root reducer.</param>
         /// <param name="middleware">Optional middleware pipeline applied in order.</param>
         /// <returns>An <see cref="IStore"/> instance with middleware applied.</returns>
-        public static IStore CreateStore(IState initialState, Reducer rootReducer, params Middleware[] middleware) => new Store(initialState, rootReducer, middleware);
+        public static IStore CreateStore(IState initialState, Reducer rootReducer, params Middleware[] middleware)
+            => new Store(initialState, rootReducer, middleware);
     }
 }
