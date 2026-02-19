@@ -78,7 +78,8 @@ namespace AtomicRx.Core
             if (_isDisposed) return;
 
             _isDisposed = true;
-            // Dispose internal subject which clears observers; further Dispatch calls will throw.
+            // Complete the subject so subscribers receive OnCompleted, then dispose.
+            _stateSubject.OnCompleted();
             _stateSubject.Dispose();
         }
 

@@ -2,7 +2,7 @@ namespace AtomicRx
 {
     /// <summary>
     /// Represents a non-generic action dispatched to a store.
-    /// <para>Actions are simple, serializable messages identified by a <see cref="Type"/> string.</para>
+    /// Actions are simple, serializable messages identified by a <see cref="Type"/> string.
     /// </summary>
     public interface IAction
     {
@@ -32,7 +32,7 @@ namespace AtomicRx
 
     /// <summary>
     /// Represents a named slice of the overall application state.
-    /// <para>A slice provides its current <see cref="State"/> and a <see cref="Reducer"/> to handle actions for that slice.</para>
+    /// A slice provides its current <see cref="State"/> and a <see cref="Reducer"/> to handle actions for that slice.
     /// </summary>
     public interface ISlice
     {
@@ -64,6 +64,13 @@ namespace AtomicRx
 
         /// <summary>
         /// An observable stream that emits the root state each time it changes.
+        ///
+        /// Semantics:
+        /// - The observable immediately emits the current state to new subscribers.
+        /// - The observable will call <c>OnCompleted</c> when the store is disposed.
+        /// - The observable does not emit errors for reducer exceptions; reducer exceptions
+        ///   are expected to be handled by callers or middleware. Observer callback
+        ///   exceptions are swallowed to avoid disrupting other subscribers.
         /// </summary>
         IObservable<IState> StateChanged { get; }
 
