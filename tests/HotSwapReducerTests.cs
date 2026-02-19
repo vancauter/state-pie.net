@@ -1,6 +1,4 @@
-using AtomicRx;
-
-namespace StateContainer.Tests
+namespace AtomicRx.Tests
 {
     public class ReducerReplaceTests
     {
