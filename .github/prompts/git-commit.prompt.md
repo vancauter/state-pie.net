@@ -1,11 +1,9 @@
 ```yaml
 name: git-commit
 description: >-
-    Generate and run git commits using the Conventional Commits format. The
-    assistant should use this prompt when the user asks to create a commit,
-    mentions `/commit`, or requests an intelligent commit message based on the
-    repo diff. Supports auto-detection of type/scope, interactive overrides,
-    and sensible staging guidance.
+    Generate and run git commits using the Conventional Commits format. The assistant should use this prompt when the
+    user asks to create a commit, mentions `/git-commit`, or requests an intelligent commit message based on the repo
+    diff. Supports auto-detection of type/scope, interactive overrides, and sensible staging guidance.
 allowed-tools: [bash]
 metadata:
     conventional_commits: true
