@@ -32,25 +32,7 @@ namespace AtomicRx
             return new Core.Action<TPayload>(type, payload);
         }
 
-        /// <summary>
-        /// Create a typed action creator function that produces an <see cref="IAction{TPayload}"/> for the given <paramref name="type"/>.
-        /// </summary>
-        /// <typeparam name="TPayload">Payload type produced by the action creator.</typeparam>
-        /// <param name="type">The action type string.</param>
-        /// <returns>A function that accepts a payload and returns an <see cref="IAction{TPayload}"/>.</returns>
-        /// <exception cref="ArgumentException">Thrown when <paramref name="type"/> is null or whitespace.</exception>
-        /// <example>
-        /// <code>
-        /// var addTodo = Factory.CreateActionCreator<string>("ADD_TODO");
-        /// var action = addTodo("Buy milk"); // Creates an IAction<string> with Type = "ADD_TODO" and Payload = "Buy milk"
-        /// </code>
-        /// </example>
-        public static Func<TPayload, IAction<TPayload>> CreateActionCreator<TPayload>(string type)
-        {
-            if (string.IsNullOrWhiteSpace(type))
-                throw new ArgumentException("Action type must be a non-empty string.", nameof(type));
-
-            return payload => new Core.Action<TPayload>(type, payload);
-        }
+        // Action creator helpers have moved to the `ActionCreator` / `ActionCreator<TPayload>` records.
+        // Use `new ActionCreator<TPayload>(type)` to obtain a typed creator function.
     }
 }
