@@ -72,27 +72,49 @@ namespace AtomicRx.Tests
         {
             var slice = Slices.CreateCounterSlice();
 
-            var logs = new List<string>();
-            var logging = LoggingMiddleware.Create(logs);
-
             var (rootState, rootReducer) = Factory.CombineReducers(slice);
 
-            using var store = Factory.CreateStore(rootState, rootReducer, logging, ThunkMiddleware.Create());
-
-            var thunk = new Func<IStore, Task>(async s =>
+            // Capture console output emitted by the logger. The logger writes to
+            // the console by default; tests can inspect the output to verify
+            // logged action types without relying on an in-memory sink.
+            var sw = new StringWriter();
+            var originalOut = Console.Out;
+            try
             {
-                s.Dispatch(Factory.CreateAction(Slices.Increment));
-                await Task.Delay(5);
-                s.Dispatch(Factory.CreateAction(Slices.Increment));
-            });
+                Console.SetOut(sw);
 
-            store.Dispatch(Factory.CreateAction("THUNK", thunk));
-            await Task.Delay(50);
+                var logging = LoggingMiddleware.Create();
+                using var store = Factory.CreateStore(rootState, rootReducer, logging, ThunkMiddleware.Create());
 
-            // Expect log sequence: THUNK (original action), then two increment actions dispatched by the thunk
-            var normalized = logs.Select(l => l == "INC" ? Slices.Increment : l).ToArray();
-            var expected = new[] { "THUNK", Slices.Increment, Slices.Increment };
-            Assert.Equal(expected, normalized);
+                var thunk = new Func<IStore, Task>(async s =>
+                {
+                    s.Dispatch(Factory.CreateAction(Slices.Increment));
+                    await Task.Delay(5);
+                    s.Dispatch(Factory.CreateAction(Slices.Increment));
+                });
+
+                store.Dispatch(Factory.CreateAction("THUNK", thunk));
+                await Task.Delay(50);
+
+                // Restore console and analyze captured output below.
+                Console.SetOut(originalOut);
+                var output = sw.ToString();
+
+                // Expect: THUNK then two increments; ensure ordering by index checks.
+                var idxThunk = output.IndexOf("THUNK");
+                var idxInc1 = output.IndexOf(Slices.Increment);
+                var idxInc2 = output.IndexOf(Slices.Increment, idxInc1 + 1);
+
+                Assert.True(idxThunk >= 0, "Expected THUNK to be logged");
+                Assert.True(idxInc1 > idxThunk, "Expected first INC after THUNK");
+                Assert.True(idxInc2 > idxInc1, "Expected second INC after first INC");
+                return;
+            }
+            finally
+            {
+                Console.SetOut(originalOut);
+            }
+            
         }
     }
 }

@@ -9,23 +9,6 @@ namespace AtomicRx
     public static class LoggingMiddleware
     {
         /// <summary>
-        /// Compatibility overload: create a logging middleware that also appends
-        /// action types to the provided in-memory sink (used by tests).
-        /// This still forwards every action type to <see cref="Log.Info(object)"/>.
-        /// </summary>
-        public static Middleware Create(List<string> sink) => (store, next) => action =>
-        {
-            try
-            {
-                try { sink?.Add(action.Type); } catch { }
-                try { Log.Info(action.Type); } catch { }
-            }
-            catch { }
-
-            next(action);
-        };
-
-        /// <summary>
         /// Create a logging middleware that sends action types to <see cref="Log.Info(object)"/>.
         /// </summary>
         public static Middleware Create() => (store, next) => action =>
