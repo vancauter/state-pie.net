@@ -7,6 +7,3 @@
 
 - [ ] Snapshot / deserialize / migrations (parked)
   - Add helpers to deserialize state, validate versions, and provide migration hooks.
-
-- [ ] Testing helpers & examples
-  - Utilities and examples that simplify asserting store transitions, mocking reducers, and integration tests.
