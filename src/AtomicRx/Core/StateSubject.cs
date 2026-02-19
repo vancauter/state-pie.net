@@ -63,10 +63,7 @@ namespace AtomicRx.Core
                 snapshot = [.. _observers];
             }
 
-            foreach (var o in snapshot)
-            {
-                try { o.OnNext(value); } catch { }
-            }
+            foreach (var o in snapshot) { try { o.OnNext(value); } catch { } }
         }
 
         // Signal an error to all observers and mark the subject as completed with error.
@@ -82,10 +79,7 @@ namespace AtomicRx.Core
                 snapshot = [.. _observers];
             }
 
-            foreach (var o in snapshot)
-            {
-                try { o.OnError(ex); } catch { }
-            }
+            foreach (var o in snapshot) { try { o.OnError(ex); } catch { } }
         }
 
         // Signal completion to all observers. After completion no further OnNext calls will be delivered.
@@ -100,10 +94,7 @@ namespace AtomicRx.Core
                 snapshot = [.. _observers];
             }
 
-            foreach (var o in snapshot)
-            {
-                try { o.OnCompleted(); } catch { }
-            }
+            foreach (var o in snapshot) { try { o.OnCompleted(); } catch { } }
         }
 
         public void Dispose()
