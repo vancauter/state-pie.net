@@ -4,7 +4,7 @@ namespace AtomicRx.Tests
 
     public class SelectorTests
     {
-        // Test: MemoizedSelectorCachesLastResultForSameInput
+        // Test Memoized Selector Caches Last Result For Same Input
         // Why: Ensure the memoized selector caches the last computed result when the input
         //      is the same reference/value so expensive projections are not re-run.
         // What: Call the selector twice with the same `AppState` instance and assert the
@@ -26,7 +26,7 @@ namespace AtomicRx.Tests
             Assert.Equal(1, callCount);
         }
 
-        // Test: MemoizedSelectorRecomputesWhenComparerDiffers
+        // Test Memoized Selector Recomputes When Comparer Differs
         // Why: Verify caching semantics for record types: the default comparer uses structural
         //      equality, so two different instances with equal values should be treated as equal
         //      and avoid recomputation.

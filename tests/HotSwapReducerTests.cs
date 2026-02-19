@@ -1,8 +1,10 @@
+using AtomicRx.Tests.TestStore;
+
 namespace AtomicRx.Tests
 {
     public class ReducerReplaceTests
     {
-        // Test: HotSwapReducerSwapsLogic
+        // Test HotSwapReducer Logic
         // Why: Ensure that swapping reducers at runtime changes the store's behavior
         //      so subsequent dispatches are interpreted by the new reducer.
         // What: Start with a no-op reducer, hot-swap to one that handles "INC",
@@ -13,29 +15,30 @@ namespace AtomicRx.Tests
             // old reducer: no-op
             static IState oldRoot(IState state, IAction action) => state;
 
-            // new reducer: handle "INC" by incrementing CounterState.Count
+            // new reducer: handle increment by incrementing CounterState.Count
             static IState newRoot(IState state, IAction action)
             {
                 var s = (CounterState)state;
-                if (action.Type == "INC") return new CounterState(s.Count + 1);
+                if (action.Type == Slices.Increment) return new CounterState(s.Count + 1);
                 return state;
             }
+            var slice = Slices.CreateCounterSlice();
 
-            using var store = Factory.CreateStore(new CounterState(0), oldRoot);
+            using var store = Factory.CreateStore(slice.State, oldRoot);
 
             // dispatch before swap should be a no-op
-            store.Dispatch(Factory.CreateAction("INC"));
+            store.Dispatch(Factory.CreateAction(Slices.Increment));
             Assert.Equal(0, ((CounterState)store.State).Count);
 
             // swap reducer
             store.HotSwapReducer(newRoot);
 
             // dispatch after swap should use new reducer logic
-            store.Dispatch(Factory.CreateAction("INC"));
+            store.Dispatch(Factory.CreateAction(Slices.Increment));
             Assert.Equal(1, ((CounterState)store.State).Count);
         }
 
-        // Test: HotSwapReducerInitPassPublishesRecomputedState
+        // Test HotSwapReducer Recomputed State
         // Why: Verify that the hot-swap performs an init pass allowing the new reducer
         //      to compute derived initial state immediately after being installed.
         // What: Hot-swap to a reducer that responds to the "@@INIT" action by
@@ -53,8 +56,9 @@ namespace AtomicRx.Tests
                 if (action.Type == "@@INIT") return new CounterState(s.Count + 5);
                 return state;
             }
+            var slice = Slices.CreateCounterSlice();
 
-            using var store = Factory.CreateStore(new CounterState(0), oldRoot);
+            using var store = Factory.CreateStore(slice.State, oldRoot);
 
             // swap reducer should run init pass and update the state
             store.HotSwapReducer(newRoot);
