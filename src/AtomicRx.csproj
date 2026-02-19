@@ -5,4 +5,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>AtomicRx</AssemblyName>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Logger/src/Logger/Logger.csproj" />
+  </ItemGroup>
 </Project>
