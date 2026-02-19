@@ -1,8 +1,5 @@
 namespace AtomicRx
 {
-    /// <summary>
-    /// Utilities for creating memoized selectors (simple last-input cache).
-    /// </summary>
     public static class Selectors
     {
         /// <summary>
