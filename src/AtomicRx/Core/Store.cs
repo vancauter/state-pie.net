@@ -91,6 +91,16 @@ namespace AtomicRx.Core
         /// the store runs an internal init pass so the new reducer can compute derived state.
         /// </summary>
         /// <param name="newRoot">New root reducer.</param>
+        /// <remarks>
+        /// The reducer swap is atomic and thread-safe. Dispatches that occur during the swap will
+        /// either see the old or new reducer, but will not observe a partially swapped state.
+        /// The init pass is also run after the swap to allow the new reducer to compute any derived
+        /// initial state immediately. This is important for scenarios like hot-reloading where the new reducer
+        /// may need to adjust the state shape or compute derived values based on the existing state.
+        /// Callers should be aware that the init pass dispatches a special "@@INIT" action,
+        /// and reducers should handle this action appropriately
+        /// (e.g., by returning the current state or computing derived state without side effects).
+        /// </remarks>
         public void HotSwapReducer(Reducer newRoot)
         {
             ObjectDisposedException.ThrowIf(_isDisposed, nameof(Store));
@@ -103,6 +113,8 @@ namespace AtomicRx.Core
 
         }
 
+        // Internal method to run the init pass by dispatching a special "@@INIT" action. This allows reducers
+        // to compute derived initial state immediately after being installed or hot-swapped.
         private void RunInitPass()
         {
             try
