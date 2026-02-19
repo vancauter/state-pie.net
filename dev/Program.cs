@@ -6,7 +6,14 @@ namespace Dev
     {
         public static void Main()
         {
-            using var store = ExampleStore.Store.Create();
+            // Create a simple sink to capture dispatched action types.
+            var logSink = new List<string>();
+
+            // Build logging middleware that appends action types to `logSink`.
+            var loggingMiddleware = LoggingMiddleware.Create(logSink);
+
+            // Create the example store with logging middleware applied.
+            using var store = ExampleStore.Store.Create(loggingMiddleware);
 
             IDisposable? subscription = null;
             var observer = new ConsoleObserver(() => subscription?.Dispose());
@@ -23,6 +30,13 @@ namespace Dev
             // in turn invokes the observer's OnCompleted. The observer's completion
             // handler runs the provided callback, disposing the subscription.
             store.Dispose();
+
+            // Print the logged action types collected by the logging middleware.
+            Console.WriteLine("Logged actions:");
+            foreach (var a in logSink)
+            {
+                Console.WriteLine($" - {a}");
+            }
         }
 
         // Simple console observer that prints state changes and errors.
