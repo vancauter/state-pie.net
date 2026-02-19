@@ -30,9 +30,6 @@ namespace AtomicRx.Core
             _stateSubject = new StateSubject(initialState);
             State = initialState;
 
-            // Run init pass so reducers can compute derived initial state.
-            RunInitPass();
-
             // Base dispatch: apply the root reducer and publish the new state if the reference changed.
             // Note: this method intentionally does not catch exceptions from reducers — callers or middleware
             // should handle errors as appropriate. Also, we check disposal at the start to avoid races
@@ -71,6 +68,11 @@ namespace AtomicRx.Core
             {
                 _dispatch = baseDispatch;
             }
+
+            // Run init pass so reducers (and middleware) can compute derived initial state.
+            // We run the init through the composed dispatch pipeline so middleware (e.g., logging)
+            // observes the special "@@INIT" action.
+            RunInitPass();
         }
 
         public void Dispose()
@@ -120,15 +122,11 @@ namespace AtomicRx.Core
         {
             try
             {
+                // Dispatch the special init action through the composed pipeline so
+                // middleware can observe it. The base dispatch will update state and
+                // publish via _stateSubject when appropriate.
                 var init = Factory.CreateAction("@@INIT");
-                var reducer = _rootReducer;
-                var newState = reducer(State, init);
-
-                if (!ReferenceEquals(newState, State))
-                {
-                    State = newState;
-                    _stateSubject.OnNext(State);
-                }
+                _dispatch(init);
             }
             catch
             {
