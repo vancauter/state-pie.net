@@ -11,17 +11,23 @@ namespace Dev
         // NOTE: the completion callback is invoked from the observer's OnCompleted
         // handler so the subscription itself can be disposed in response to the
         // store completing (see subscription creation below).
-        private sealed class ConsoleObserver(Action? onCompleted = null) : IObserver<IState>
+        private sealed class ConsoleObserver(Action? unsubscribe = null) : IObserver<IState>
         {
-            private readonly Action? _onCompleted = onCompleted;
+            private readonly Action? _unsubscribe = unsubscribe;
 
             public void OnNext(IState state) => Console.WriteLine($"State changed: {Helpers.SerializeState(state)}");
-            public void OnError(Exception error) => Console.Error.WriteLine($"Error: {error}");
+
+            public void OnError(Exception error)
+            {
+                _unsubscribe?.Invoke();
+                Console.Error.WriteLine($"Error: {error}");
+            }
+
             public void OnCompleted()
             {
                 // Dispose callback invoked here to unsubscribe the observer when the
                 // subject/store completes. This avoids holding references after completion.
-                _onCompleted?.Invoke();
+                _unsubscribe?.Invoke();
                 Console.WriteLine("Completed.");
             }
         }
