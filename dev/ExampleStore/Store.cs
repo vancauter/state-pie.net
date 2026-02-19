@@ -8,9 +8,8 @@ namespace Dev.ExampleStore
         {
             var counterSlice = Slices.CreateCounterSlice();
             var personSlice = Slices.CreatePersonSlice();
-            var nestedSlice = Slices.CreateNestedSlice();
 
-            var (state, reducer) = Factory.CombineReducers(counterSlice, personSlice, nestedSlice);
+            var (state, reducer) = Factory.CombineReducers(counterSlice, personSlice);
 
             return Factory.CreateStore(state, reducer);
         }
