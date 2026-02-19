@@ -1,29 +1,12 @@
 # AtomicRx — Suggested Feature Roadmap
 
-This document lists suggested features to improve ergonomics, extensibility, and testability. Use this as a checklist; I
-will update the tracked TODO list as I implement items.
-
 - [ ] Middleware / Enhancers
-    - [ ] Time-travel middleware (parked)
-        - Record dispatched actions and root states to allow stepping back/forward, replay, and time-travel debugging.
-    - Parked: will flesh out API shape and storage/replay semantics together with middleware work.
+  - [ ] Time-travel middleware (parked)
+    - Record dispatched actions and root states to allow stepping back/forward, replay, and time-travel debugging.
+  - Parked: will flesh out API shape and storage/replay semantics together with middleware work.
 
-- [ ] Observable error/completion semantics
-    - Clarify or extend `StateChanged` observable with documented `OnError`/`OnCompleted` behavior or alternatives.
-
-- [ ] Typed action creators / ergonomics
-    - Provide helper patterns for typed action creators and constants to reduce boilerplate.
-
-- [ ] Snapshot / deserialize / migrations
-    - Add helpers to deserialize state, validate versions, and provide migration hooks.
-
-- [ ] Immutability helpers / deep-equality
-    - Small helpers and guidance for preserving reference-equality and performing deep comparisons when needed.
+- [ ] Snapshot / deserialize / migrations (parked)
+  - Add helpers to deserialize state, validate versions, and provide migration hooks.
 
 - [ ] Testing helpers & examples
-    - Utilities and examples that simplify asserting store transitions, mocking reducers, and integration tests.
-
-Notes
-
-- Priority can be set per-item; I can implement these incrementally and check them off in the TODO list.
-- Want me to start with `Middleware / Enhancers` and scaffold a minimal implementation and tests?
+  - Utilities and examples that simplify asserting store transitions, mocking reducers, and integration tests.
