@@ -28,6 +28,38 @@ namespace Dev.ExampleStore
 
         #endregion
 
+        #region Nested (inner) slices
+
+        // Inner counter slice used as part of a nested CombinedState
+        internal static ISlice CreateInnerCounterSlice() => Factory.CreateSlice(
+            name: "innerCounter",
+            initialState: new CounterState(5),
+            reducer: (state, action) => state);
+
+        // Inner person slice used as part of a nested CombinedState
+        internal static ISlice CreateInnerPersonSlice() => Factory.CreateSlice(
+            name: "innerPerson",
+            initialState: new PersonState("Inner", 10),
+            reducer: (state, action) => state);
+
+        // Create a slice whose state is itself a CombinedState (nested combined state).
+        // This lets us exercise serialization and nested reducer behavior.
+        internal static ISlice CreateNestedSlice()
+        {
+            var (innerState, innerReducer) = Factory.CombineReducers(CreateInnerCounterSlice(), CreateInnerPersonSlice());
+
+            // Adapter to match the generic Reducer<TState> expected by CreateSlice<TState>
+            IState adapter(IState s, IAction a) => innerReducer(s, a);
+
+            return Factory.CreateSlice(
+                name: "nested",
+                initialState: innerState,
+                reducer: adapter
+            );
+        }
+
+        #endregion
+
         #region Person slice
 
         public const string PersonAddAge = "person.add_age";

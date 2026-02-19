@@ -8,15 +8,12 @@ namespace Dev
         {
             using var store = ExampleStore.Store.Create();
 
-
             IDisposable? subscription = null;
             var observer = new ConsoleObserver(() => subscription?.Dispose());
             subscription = store.StateChanged.Subscribe(observer);
 
-
             // Counter slice
             store.Dispatch(Factory.CreateAction(ExampleStore.Slices.Increment));
-            store.Dispatch(Factory.CreateAction(ExampleStore.Slices.Decrement));
 
             // Person slice
             store.Dispatch(Factory.CreateAction(ExampleStore.Slices.PersonAddAge));
