@@ -3,7 +3,7 @@ using AtomicRx.Core;
 
 namespace AtomicRx
 {
-    public static partial class Helpers
+    public static class Helpers
     {
         /// <summary>
         /// This method produces a human-readable representation of <see cref="IState"/>,
