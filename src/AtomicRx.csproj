@@ -6,6 +6,6 @@
     <AssemblyName>AtomicRx</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../../Logger/src/Logger/Logger.csproj" />
+    <ProjectReference Include="../../Logger/src/Logger.csproj" />
   </ItemGroup>
 </Project>
