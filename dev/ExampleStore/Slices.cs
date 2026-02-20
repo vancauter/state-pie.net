@@ -10,8 +10,8 @@ namespace Dev.ExampleStore
 
         #region Counter slice
 
-        public const string Increment = "counter.increment";
-        public const string Decrement = "counter.decrement";
+        public const string Increment = "@COUNTER/INCREMENT";
+        public const string Decrement = "@COUNTER/DECREMENT";
 
         internal static ISlice CreateCounterSlice() => Factory.CreateSlice(
             name: "counter",
@@ -30,8 +30,8 @@ namespace Dev.ExampleStore
 
         #region Person slice
 
-        public const string PersonAddAge = "person.add_age";
-        public const string PersonSetName = "person.set_name";
+        public const string PersonAddAge = "@PERSON/ADD_AGE";
+        public const string PersonSetName = "@PERSON/SET_NAME";
 
         public static ISlice CreatePersonSlice() => Factory.CreateSlice(
             name: "person",

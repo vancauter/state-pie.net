@@ -1,4 +1,5 @@
 using AtomicRx;
+using SCLibs.Logger;
 
 namespace Dev
 {
@@ -24,8 +25,6 @@ namespace Dev
             // in turn invokes the observer's OnCompleted. The observer's completion
             // handler runs the provided callback, disposing the subscription.
             store.Dispose();
-
-            // (Logs are emitted via SCLibs.Logger during dispatch.)
         }
 
         // Simple console observer that prints state changes and errors.
@@ -33,9 +32,9 @@ namespace Dev
         {
             private readonly Action? _unsubscribe = unsubscribe;
 
-            public void OnNext(IState state) => Console.WriteLine($"State changed: {Helpers.SerializeState(state)}");
-            public void OnError(Exception error) { _unsubscribe?.Invoke(); Console.Error.WriteLine($"Error: {error}"); }
-            public void OnCompleted() { _unsubscribe?.Invoke(); Console.WriteLine("Completed."); }
+            public void OnNext(IState state) => Log.Debug($"State changed: {Helpers.SerializeState(state)}");
+            public void OnError(Exception error) { _unsubscribe?.Invoke(); Log.Error($"Error: {error}"); }
+            public void OnCompleted() { _unsubscribe?.Invoke(); Log.Info("Unsubscribed and completed."); }
         }
     }
 }
