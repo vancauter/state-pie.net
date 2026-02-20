@@ -12,6 +12,10 @@
         // --- GitHub Copilot Settings ---
         "github.copilot.chat.codeGeneration.useInstructionFiles": true,
         "editor.inlineSuggest.syntaxHighlightingEnabled": false,
+        "chat.tools.terminal.outputLocation": "terminal",
+
+        "chat.instructionsFilesLocations": { "../.github/instructions": true },
+        "chat.promptFilesLocations": { "../.github/prompts": true },
 
         // --- File Exclusions ---
         "files.exclude": {
