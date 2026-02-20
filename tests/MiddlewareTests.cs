@@ -114,7 +114,7 @@ namespace AtomicRx.Tests
             {
                 Console.SetOut(originalOut);
             }
-            
+
         }
     }
 }
