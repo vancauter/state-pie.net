@@ -3,11 +3,20 @@ using SCLibs.Logger;
 namespace AtomicRx
 {
     /// <summary>
-    /// Simple logging middleware example that forwards each dispatched action
-    /// type immediately to the shared `SCLibs.Logger` facade.
+    /// Simple logging middleware
     /// </summary>
     public static class LoggingMiddleware
     {
+        // Static constructor to configure the logger when the middleware is first used.
+        static LoggingMiddleware() =>
+            // Configure the shared logger to write to console with a simple format.
+            Log.SetOptions(new LogOptions
+            {
+                IncludeAppName = false,
+                IncludeSeverity = false,
+                IncludeTimestamp = true,
+            });
+
         /// <summary>
         /// Create a logging middleware that sends action types to <see cref="Log.Info(object)"/>.
         /// </summary>
@@ -15,9 +24,7 @@ namespace AtomicRx
         {
             try
             {
-                // Immediately hand off to the shared logger. Keep this call
-                // defensive so logging cannot break dispatch.
-                try { Log.Info(action.Type); } catch { }
+                Log.Info($"Dispatched action: {action.Type}");
             }
             catch
             {
