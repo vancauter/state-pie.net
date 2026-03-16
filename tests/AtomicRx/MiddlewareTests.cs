@@ -23,8 +23,8 @@ namespace AtomicRx.Tests
 
             await Task.Delay(50);
 
-            var serialized = StateJson.Serialize(store.State);
-            Assert.Contains("2", serialized);
+            var counterState = StoreStateAssertions.GetSliceState<CounterState>(store.State, "counter");
+            Assert.Equal(2, counterState.Count);
         }
 
         [Fact]
@@ -43,8 +43,8 @@ namespace AtomicRx.Tests
 
             store.Dispatch(Factory.CreateAction("THUNK", thunk));
 
-            var serialized = StateJson.Serialize(store.State);
-            Assert.Contains("2", serialized);
+            var counterState = StoreStateAssertions.GetSliceState<CounterState>(store.State, "counter");
+            Assert.Equal(2, counterState.Count);
         }
 
         [Fact]

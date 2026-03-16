@@ -1,3 +1,5 @@
+using AtomicRx.Tests.TestSupport;
+
 namespace AtomicRx.Tests
 {
     public record Counter(int Value) : IState;
@@ -57,9 +59,11 @@ namespace AtomicRx.Tests
 
             Assert.True(observed.Count >= 3);
 
-            var serialized = StateJson.Serialize(store.State);
-            Assert.Contains("\"a\":", serialized);
-            Assert.Contains("\"b\":", serialized);
+            var firstState = StoreStateAssertions.GetSliceState<Counter>(store.State, "a");
+            var secondState = StoreStateAssertions.GetSliceState<Counter>(store.State, "b");
+
+            Assert.Equal(1, firstState.Value);
+            Assert.Equal(12, secondState.Value);
         }
 
         private sealed class TestObserver(List<IState> destination) : IObserver<IState>

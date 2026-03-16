@@ -1,3 +1,4 @@
+using System.Text.Json;
 using AtomicRx;
 using SC.SimpleLog;
 
@@ -34,7 +35,7 @@ namespace Dev
         {
             private readonly Action? _unsubscribe = unsubscribe;
 
-            public void OnNext(IState state) => s_log.Debug($"State changed: {StateJson.Serialize(state)}");
+            public void OnNext(IState state) => s_log.Debug($"State changed: {JsonSerializer.Serialize(state)}");
             public void OnError(Exception error) { _unsubscribe?.Invoke(); s_log.Error($"Error: {error}"); }
             public void OnCompleted() { _unsubscribe?.Invoke(); s_log.Info("Unsubscribed and completed."); }
         }

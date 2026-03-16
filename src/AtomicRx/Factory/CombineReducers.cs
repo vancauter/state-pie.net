@@ -40,7 +40,7 @@ namespace AtomicRx
             var reducerDictionary = slices.ToDictionary(slice => slice.Name, slice => slice.Reducer, StringComparer.Ordinal);
             var mutableSliceStates = slices.ToDictionary(slice => slice.Name, slice => slice.State, StringComparer.Ordinal);
             var initialSliceStates = new ReadOnlyDictionary<string, IState>(mutableSliceStates);
-            var initialRootState = CombinedState.Create(initialSliceStates);
+            var initialRootState = new CombinedState(initialSliceStates);
 
             IState rootReducer(IState state, IAction action)
             {
@@ -69,7 +69,7 @@ namespace AtomicRx
                     }
                 }
 
-                return changed ? CombinedState.Create(nextSliceStates) : currentRootState;
+                return changed ? new CombinedState(nextSliceStates) : currentRootState;
             }
 
             return (initialRootState, rootReducer);

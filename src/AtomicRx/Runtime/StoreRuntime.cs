@@ -6,6 +6,11 @@ namespace AtomicRx.Runtime
     internal sealed class StoreRuntime : IStore
     {
         /// <summary>
+        /// Reuses the internal initialization action.
+        /// </summary>
+        private static readonly IAction s_initAction = Factory.CreateAction("@@INIT");
+
+        /// <summary>
         /// Serializes reducer execution and disposal transitions.
         /// </summary>
         private readonly Lock _dispatchLock = new();
@@ -39,31 +44,9 @@ namespace AtomicRx.Runtime
             _stateStream = new ReplayStateStream(initialState);
             State = initialState;
 
-            void baseDispatch(IAction action)
-            {
-                IState? stateToPublish = null;
-
-                lock (_dispatchLock)
-                {
-                    ObjectDisposedException.ThrowIf(_isDisposed, nameof(StoreRuntime));
-
-                    var nextState = _rootReducer(State, action);
-                    if (!ReferenceEquals(nextState, State))
-                    {
-                        State = nextState;
-                        stateToPublish = nextState;
-                    }
-                }
-
-                if (stateToPublish is not null)
-                {
-                    _stateStream.OnNext(stateToPublish);
-                }
-            }
-
             if (middleware.Length > 0)
             {
-                var current = (Dispatch)baseDispatch;
+                var current = (Dispatch)DispatchCore;
                 for (var index = middleware.Length - 1; index >= 0; index--)
                 {
                     current = middleware[index](this, current);
@@ -73,7 +56,7 @@ namespace AtomicRx.Runtime
             }
             else
             {
-                _dispatch = baseDispatch;
+                _dispatch = DispatchCore;
             }
 
             RunInitPass();
@@ -127,13 +110,38 @@ namespace AtomicRx.Runtime
         }
 
         /// <summary>
+        /// Runs the active root reducer and publishes changed state.
+        /// </summary>
+        private void DispatchCore(IAction action)
+        {
+            IState? stateToPublish = null;
+
+            lock (_dispatchLock)
+            {
+                ObjectDisposedException.ThrowIf(_isDisposed, nameof(StoreRuntime));
+
+                var nextState = _rootReducer(State, action);
+                if (!ReferenceEquals(nextState, State))
+                {
+                    State = nextState;
+                    stateToPublish = nextState;
+                }
+            }
+
+            if (stateToPublish is not null)
+            {
+                _stateStream.OnNext(stateToPublish);
+            }
+        }
+
+        /// <summary>
         /// Dispatches the internal initialization action.
         /// </summary>
         private void RunInitPass()
         {
             try
             {
-                _dispatch(Factory.CreateAction("@@INIT"));
+                _dispatch(s_initAction);
             }
             catch
             {
