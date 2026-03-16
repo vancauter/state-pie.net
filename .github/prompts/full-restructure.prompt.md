@@ -70,6 +70,7 @@ Output requirements:
 3. After implementation, summarize the structural changes, naming changes, and any intentional API or behavior changes.
 4. Report build and test results.
 5. List any remaining tradeoffs or follow-up work.
+6. Cleanup empty directories and remove any temporary files or notes created during the process.
 
 Repository guidance to consult during the task:
 
