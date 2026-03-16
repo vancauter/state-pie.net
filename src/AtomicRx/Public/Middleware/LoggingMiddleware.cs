@@ -1,4 +1,4 @@
-using SCLibs.Logger;
+using SC.SimpleLog;
 
 namespace AtomicRx
 {
@@ -7,24 +7,13 @@ namespace AtomicRx
     /// </summary>
     public static class LoggingMiddleware
     {
-        // Static constructor to configure the logger when the middleware is first used.
-        static LoggingMiddleware() =>
-            // Configure the shared logger to write to console with a simple format.
-            Log.SetOptions(new LogOptions
-            {
-                IncludeAppName = false,
-                IncludeSeverity = false,
-                IncludeTimestamp = true,
-            });
+        private static readonly SimpleLogger s_log = new();
 
-        /// <summary>
-        /// Create a logging middleware that sends action types to <see cref="Log.Info(object)"/>.
-        /// </summary>
         public static Middleware Create() => (store, next) => action =>
         {
             try
             {
-                Log.Info($"Dispatched action: {action.Type}");
+                s_log.Info($"Dispatched action: {action.Type}");
             }
             catch
             {
