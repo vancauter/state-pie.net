@@ -1,20 +1,10 @@
-# ==============================================================================
-# C# & .NET Coding Style Configuration
-#
-# Author:      Steven van Cauter
-# Version:     1.0.0
-# Updated:     2026-01-30
-# Description: Centralized formatting and Roslyn analyzer settings for
-#              consistent C# and .NET industry conventions.
-# ==============================================================================
-
 root = true
 
 [*]
 charset = utf-8
 end_of_line = lf  # Unix
 indent_style = space
-insert_final_newline = true
+insert_final_newline = false
 trim_trailing_whitespace = true
 
 # JSON and JSONC
@@ -23,10 +13,6 @@ indent_size = 2
 
 # YAML
 [*.{yaml,yml}]
-indent_size = 2
-
-# MD
-[*.{md,markdown}]
 indent_size = 2
 
 [*.cs]
@@ -52,6 +38,7 @@ dotnet_analyzer_diagnostic.category-Style.severity = warning  # style rules
 dotnet_diagnostic.IDE0005.severity = warning  # diagnostic (unused using).
 dotnet_diagnostic.IDE0060.severity = warning  # diagnostic (unused parameter)
 dotnet_diagnostic.IDE0051.severity = warning  # diagnostic (unused private member)
+dotnet_diagnostic.CA1716.severity = none  # diagnostic (identifiers should not match keywords)
 
 # Organize usings
 
@@ -240,11 +227,6 @@ dotnet_naming_rule.locals_and_parameters_should_be_camel_case.severity = warning
 dotnet_naming_rule.locals_and_parameters_should_be_camel_case.symbols = local_and_parameter_symbols  # symbol group for locals and parameters
 dotnet_naming_rule.locals_and_parameters_should_be_camel_case.style = camel_case_style  # naming style: camelCase
 
-# Constants: prefer PascalCase (applies to const fields)
-dotnet_naming_rule.constants_should_be_pascal_case.severity = warning
-dotnet_naming_rule.constants_should_be_pascal_case.symbols = const_symbols
-dotnet_naming_rule.constants_should_be_pascal_case.style = pascal_style
-
 # Symbols Specifications
 
 dotnet_naming_symbols.members_pascal_symbols.applicable_kinds = class, struct, enum, method, property, event, namespace  # applicable kinds for member PascalCase
@@ -285,11 +267,3 @@ dotnet_naming_style.underscore_camel_case_style.required_prefix = _  # required 
 dotnet_naming_style.s_prefix_style.capitalization = camel_case  # naming style: 's_' prefix + camelCase
 dotnet_naming_style.s_prefix_style.required_prefix = s_  # required prefix: s_
 dotnet_naming_style.camel_case_style.capitalization = camel_case  # naming style: camelCase
-
-# Use standard .NET naming conventions for constants: PascalCase
-dotnet_naming_rule.constants_should_be_pascal_case.severity = warning
-dotnet_naming_rule.constants_should_be_pascal_case.symbols = const_symbols
-dotnet_naming_rule.constants_should_be_pascal_case.style = pascal_style
-dotnet_naming_symbols.const_symbols.applicable_kinds = field
-dotnet_naming_symbols.const_symbols.required_modifiers = const
-dotnet_naming_style.pascal_style.capitalization = pascal_case
