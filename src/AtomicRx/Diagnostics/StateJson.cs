@@ -18,14 +18,14 @@ namespace AtomicRx
         /// </remarks>
         public static string Serialize(IState state)
         {
-            static object? Convert(IState currentState)
+            static object? convert(IState currentState)
             {
                 if (currentState is CombinedState combinedState)
                 {
                     var dictionary = new Dictionary<string, object?>(StringComparer.Ordinal);
                     foreach (var slice in combinedState.States)
                     {
-                        dictionary[slice.Key] = Convert(slice.Value);
+                        dictionary[slice.Key] = convert(slice.Value);
                     }
 
                     return dictionary;
@@ -34,7 +34,7 @@ namespace AtomicRx
                 return currentState;
             }
 
-            return JsonSerializer.Serialize(Convert(state));
+            return JsonSerializer.Serialize(convert(state));
         }
     }
 }
