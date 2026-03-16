@@ -12,10 +12,10 @@
         // --- GitHub Copilot Settings ---
         "github.copilot.chat.codeGeneration.useInstructionFiles": true,
         "editor.inlineSuggest.syntaxHighlightingEnabled": false,
-        "chat.tools.terminal.outputLocation": "terminal",
 
-        "chat.instructionsFilesLocations": { "../.github/instructions": true },
-        "chat.promptFilesLocations": { "../.github/prompts": true },
+        "github.copilot.chat.switchAgent.enabled": true,
+        "github.copilot.chat.copilotMemory.enabled": true,
+        "chat.tools.terminal.outputLocation": "chat",
 
         // --- File Exclusions ---
         "files.exclude": {
@@ -38,8 +38,7 @@
 
             // Documentation files
             "**/LICENSE*": true,
-            "**/README*": true,
-            "**/cspell.config.yaml": true,
+            "**/README*": false,
 
             // Project files
             "**/*.code-workspace": false,
