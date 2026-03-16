@@ -7,7 +7,8 @@ agent: "agent"
 
 # Documentation Pass
 
-Perform a comprehensive documentation and comment-refinement pass on all source code under `./src`.
+Perform a comprehensive documentation and comment-refinement pass on all source code under `./src`. Comments explain the
+**why**, over what the code does. Documentation should be clear, concise, and follow C# conventions.
 
 ## Public API Documentation
 

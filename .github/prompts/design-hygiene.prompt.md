@@ -9,10 +9,9 @@ agent: "C# Expert"
 
 # Design Hygiene Pass
 
-Perform a focused design-quality pass over the current C# codebase.
-
-Consult [DDD and .NET architecture guidelines](../instructions/dotnet-architecture.instructions.md) when the reviewed
-files fall under that instruction scope.
+Perform a focused design-quality pass over the current C# codebase. The goal is to identify and fix issues related to
+design hygiene, including excessive exposure, suboptimal type shapes, and missed opportunities for purity, while
+preserving the public API and minimizing churn.
 
 ## Mission
 
