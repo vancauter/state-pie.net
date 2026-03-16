@@ -1,17 +1,23 @@
 namespace AtomicRx.Core
 {
-    // Internal implementation of an ISlice.
-    // A lightweight container holding the slice name, the current state instance and a reducer delegate.
+    /// <summary>
+    /// Represents the internal <see cref="ISlice"/> implementation.
+    /// </summary>
     internal sealed class Slice<TState>(string name, TState initialState, Reducer<TState> reducer) : ISlice where TState : IState
     {
-        // The unique name identifying this slice in a combined root state.
+        /// <summary>
+        /// Gets the slice name.
+        /// </summary>
         public string Name { get; } = name;
 
-        // The slice's current state instance. Note: reducers are expected to treat states as immutable.
+        /// <summary>
+        /// Gets the current slice state.
+        /// </summary>
         public IState State { get; } = initialState;
 
-        // Adapter that exposes the generic reducer as the non-generic Reducer required by ISlice.
-        // It casts the incoming IState back to TState before invoking the typed reducer.
+        /// <summary>
+        /// Gets the reducer adapter exposed through <see cref="ISlice"/>.
+        /// </summary>
         public Reducer Reducer { get; } = (state, action) => reducer((TState)state, action);
     }
 }

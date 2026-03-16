@@ -1,59 +1,63 @@
 namespace AtomicRx.Core
 {
-    // Internal store implementation. Responsible for holding the root state, applying the root reducer
-    // and notifying subscribers when the state reference changes. Supports optional middleware that
-    // can intercept or augment dispatched actions.
+    /// <summary>
+    /// Implements the internal store runtime.
+    /// </summary>
     internal sealed class Store : IStore
     {
+        /// <summary>
+        /// Indicates whether the store has been disposed.
+        /// </summary>
         private bool _isDisposed;
+
+        /// <summary>
+        /// Stores the active root reducer.
+        /// </summary>
         private Reducer _rootReducer;
 
-        // Internal subject that manages subscriptions and emits the last seen state immediately
-        // to new subscribers. See StateSubject for thread-safety and snapshot semantics.
+        /// <summary>
+        /// Publishes state changes to subscribers.
+        /// </summary>
         private readonly StateSubject _stateSubject;
 
-        // Observable stream of state changes. Exposes the internal subject but only as IObservable.
+        /// <summary>
+        /// Gets the observable stream of state changes.
+        /// </summary>
         public IObservable<IState> StateChanged => _stateSubject;
 
-        // Current root state instance.
-        // Reducers must return the same instance when no change occurs; the store uses reference-equality
-        // to detect changes and avoid unnecessary notifications.
+        /// <summary>
+        /// Gets the current root state.
+        /// </summary>
         public IState State { get; private set; }
 
-        // The composed dispatch pipeline built from middleware; defaults to the base reducer-applier.
-        // Middleware functions are invoked in the order they are provided to CreateStore.
+        /// <summary>
+        /// Stores the composed dispatch pipeline.
+        /// </summary>
         private readonly Dispatch _dispatch;
 
+        /// <summary>
+        /// Initializes a new store instance.
+        /// </summary>
         internal Store(IState initialState, Reducer rootReducer, params Middleware[] middleware)
         {
             _rootReducer = rootReducer;
             _stateSubject = new StateSubject(initialState);
             State = initialState;
 
-            // Base dispatch: apply the root reducer and publish the new state if the reference changed.
-            // Note: this method intentionally does not catch exceptions from reducers — callers or middleware
-            // should handle errors as appropriate. Also, we check disposal at the start to avoid races
-            // where a dispatch occurs while the store is being disposed.
             void baseDispatch(IAction action)
             {
                 ObjectDisposedException.ThrowIf(_isDisposed, nameof(Store));
 
-                // Capture current reducer for this dispatch to avoid races with HotSwapReducer
                 var reducer = _rootReducer;
                 var newState = reducer(State, action);
 
                 if (!ReferenceEquals(newState, State))
                 {
                     State = newState;
-                    // Publish the updated state to observers.
                     _stateSubject.OnNext(State);
                 }
             }
 
-            // If middleware is provided, build the pipeline by composing them around baseDispatch.
-            // Composition order: middleware provided in array order will be invoked in that same order
-            // when dispatching (first -> second -> ... -> base). We build the pipeline by folding
-            // the middleware from last to first so that the first middleware wraps the second, etc.
             if (middleware != null && middleware.Length > 0)
             {
                 var current = (Dispatch)baseDispatch;
@@ -69,68 +73,52 @@ namespace AtomicRx.Core
                 _dispatch = baseDispatch;
             }
 
-            // Run init pass so reducers (and middleware) can compute derived initial state.
-            // We run the init through the composed dispatch pipeline so middleware (e.g., logging)
-            // observes the special "@@INIT" action.
             RunInitPass();
         }
 
+        /// <summary>
+        /// Disposes the store and completes the observable state stream.
+        /// </summary>
         public void Dispose()
         {
             if (_isDisposed) return;
 
             _isDisposed = true;
-            // Complete the subject so subscribers receive OnCompleted, then dispose.
             _stateSubject.OnCompleted();
             _stateSubject.Dispose();
         }
 
-        // Dispatch calls the composed middleware pipeline (or the base dispatch when no middleware).
-        // Middleware receives the store and a `next` Dispatch delegate to call the next stage in the pipeline.
+        /// <summary>
+        /// Dispatches an action through the middleware pipeline.
+        /// </summary>
         public void Dispatch(IAction action) => _dispatch(action);
 
         /// <summary>
-        /// Atomically replace the root reducer used by the store. After swapping the reducer
-        /// the store runs an internal init pass so the new reducer can compute derived state.
+        /// Replaces the current root reducer and reruns the initialization pass.
         /// </summary>
         /// <param name="newRoot">New root reducer.</param>
-        /// <remarks>
-        /// The reducer swap is atomic and thread-safe. Dispatches that occur during the swap will
-        /// either see the old or new reducer, but will not observe a partially swapped state.
-        /// The init pass is also run after the swap to allow the new reducer to compute any derived
-        /// initial state immediately. This is important for scenarios like hot-reloading where the new reducer
-        /// may need to adjust the state shape or compute derived values based on the existing state.
-        /// Callers should be aware that the init pass dispatches a special "@@INIT" action,
-        /// and reducers should handle this action appropriately
-        /// (e.g., by returning the current state or computing derived state without side effects).
-        /// </remarks>
         public void HotSwapReducer(Reducer newRoot)
         {
             ObjectDisposedException.ThrowIf(_isDisposed, nameof(Store));
 
-            // Atomically swap the reducer reference.
             _ = Interlocked.Exchange(ref _rootReducer, newRoot);
 
-            // Run init pass so the new reducer can compute derived initial state.
             RunInitPass();
-
         }
 
-        // Internal method to run the init pass by dispatching a special "@@INIT" action. This allows reducers
-        // to compute derived initial state immediately after being installed or hot-swapped.
+        /// <summary>
+        /// Dispatches the internal initialization action.
+        /// </summary>
         private void RunInitPass()
         {
             try
             {
-                // Dispatch the special init action through the composed pipeline so
-                // middleware can observe it. The base dispatch will update state and
-                // publish via _stateSubject when appropriate.
                 var init = Factory.CreateAction("@@INIT");
                 _dispatch(init);
             }
             catch
             {
-                // Swallow init errors; reducers should avoid throwing during init.
+                // Initialization is best-effort so startup does not fail on reducer bootstrap logic.
             }
         }
     }

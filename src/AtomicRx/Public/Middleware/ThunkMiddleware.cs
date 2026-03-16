@@ -1,22 +1,20 @@
 namespace AtomicRx
 {
     /// <summary>
-    /// Thunk middleware: when an action carries a payload that is a function (thunk),
-    /// invoke the payload instead of forwarding the action to reducers. This keeps the
-    /// core Dispatch signature unchanged while enabling async/thunk flows via action payloads.
-    ///
-    /// Supported thunk shapes as action payloads:
-    /// - <see cref="Func{IStore, Task}"/>, <see cref="Action{IStore}"/>: receives the store and can perform work.
-    /// - <see cref="Func{Dispatch, IStore, Task}"/>, <see cref="Action{Dispatch, IStore}"/>: receives the next dispatch function and the store.
-    ///
-    /// Note: The middleware invokes thunks and will not await async thunks on the dispatching thread.
-    /// Callers should ensure exceptions are handled inside the thunk if they don't want them swallowed.
+    /// Provides middleware that executes thunk payloads instead of forwarding them to reducers.
     /// </summary>
+    /// <remarks>
+    /// Supported thunk payload shapes are <see cref="Action{IStore}"/>, <see cref="Action{Dispatch, IStore}"/>, <see cref="Func{IStore, Task}"/>, and <see cref="Func{Dispatch, IStore, Task}"/>.
+    /// Async thunks are started without awaiting them on the dispatching thread, and synchronous invocation failures are suppressed to keep dispatch moving.
+    /// </remarks>
     public static class ThunkMiddleware
     {
+        /// <summary>
+        /// Creates thunk middleware.
+        /// </summary>
+        /// <returns>A middleware delegate that intercepts supported thunk payloads.</returns>
         public static Middleware Create() => (store, next) => action =>
         {
-            // Handle IAction<Action<IStore>>
             if (action is IAction<Action<IStore>> syncThunkAction)
             {
                 try
@@ -30,7 +28,6 @@ namespace AtomicRx
                 return;
             }
 
-            // Handle IAction<Action<Dispatch, IStore>>
             if (action is IAction<Action<Dispatch, IStore>> syncThunkWithNext)
             {
                 try
@@ -43,7 +40,6 @@ namespace AtomicRx
                 return;
             }
 
-            // Handle IAction<Func<IStore, Task>>
             if (action is IAction<Func<IStore, Task>> thunkAction)
             {
                 try
@@ -56,7 +52,6 @@ namespace AtomicRx
                 return;
             }
 
-            // Handle IAction<Func<Dispatch, IStore, Task>>
             if (action is IAction<Func<Dispatch, IStore, Task>> thunkActionWithNext)
             {
                 try
@@ -69,7 +64,6 @@ namespace AtomicRx
                 return;
             }
 
-            // Default: forward to next middleware/reducer
             next(action);
         };
     }

@@ -5,7 +5,7 @@ namespace AtomicRx
     public static partial class Factory
     {
         /// <summary>
-        /// Create a typed <see cref="ISlice"/> with the provided name, initial state, and reducer.
+        /// Creates a typed <see cref="ISlice"/> with the provided name, initial state, and reducer.
         /// </summary>
         /// <typeparam name="TState">The concrete state type for the slice.</typeparam>
         /// <param name="name">The unique slice name.</param>

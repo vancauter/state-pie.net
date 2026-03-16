@@ -2,12 +2,12 @@ namespace AtomicRx
 {
     /// <summary>
     /// Represents a non-generic action dispatched to a store.
-    /// Actions are simple, serializable messages identified by a <see cref="Type"/> string.
+    /// Actions are simple messages identified by a <see cref="Type"/> string.
     /// </summary>
     public interface IAction
     {
         /// <summary>
-        /// A string identifier for the action type. Consumers should use meaningful, unique strings.
+        /// Gets the string identifier for the action.
         /// </summary>
         string Type { get; }
     }
@@ -19,7 +19,7 @@ namespace AtomicRx
     public interface IAction<TPayload> : IAction
     {
         /// <summary>
-        /// The payload carried by the action.
+        /// Gets the payload carried by the action.
         /// </summary>
         TPayload Payload { get; }
     }
@@ -37,17 +37,17 @@ namespace AtomicRx
     public interface ISlice
     {
         /// <summary>
-        /// The unique name of this slice within a combined root state.
+        /// Gets the unique name of this slice within a combined root state.
         /// </summary>
         string Name { get; }
 
         /// <summary>
-        /// The current state object for this slice.
+        /// Gets the current state object for this slice.
         /// </summary>
         IState State { get; }
 
         /// <summary>
-        /// The reducer function that accepts the slice state and an action and returns the next slice state.
+        /// Gets the reducer that accepts the slice state and an action and returns the next slice state.
         /// </summary>
         Reducer Reducer { get; }
     }
@@ -58,34 +58,34 @@ namespace AtomicRx
     public interface IStore : IDisposable
     {
         /// <summary>
-        /// The current root state of the application.
+        /// Gets the current root state of the application.
         /// </summary>
         IState State { get; }
 
         /// <summary>
-        /// An observable stream that emits the root state each time it changes.
-        ///
-        /// Semantics:
-        /// - The observable immediately emits the current state to new subscribers.
-        /// - The observable will call <c>OnCompleted</c> when the store is disposed.
-        /// - The observable does not emit errors for reducer exceptions; reducer exceptions
-        ///   are expected to be handled by callers or middleware. Observer callback
-        ///   exceptions are swallowed to avoid disrupting other subscribers.
+        /// Gets an observable stream that emits the root state each time it changes.
         /// </summary>
+        /// <remarks>
+        /// New subscribers immediately receive the current state. The observable completes when the store is disposed.
+        /// Observer callback exceptions are suppressed so one subscriber cannot disrupt the rest of the notification pipeline.
+        /// </remarks>
         IObservable<IState> StateChanged { get; }
 
         /// <summary>
         /// Dispatches an action to the store, causing reducers to compute the next state.
         /// </summary>
         /// <param name="action">The action to dispatch.</param>
+        /// <exception cref="ObjectDisposedException">Thrown when the store has already been disposed.</exception>
         void Dispatch(IAction action);
 
         /// <summary>
-        /// Replace the root reducer used by the store. The replacement is atomic and the
-        /// store will run an internal init pass after swapping so the new reducer can
-        /// compute any derived initial state.
+        /// Replaces the root reducer used by the store.
         /// </summary>
         /// <param name="newRoot">New root reducer to use for subsequent dispatches.</param>
+        /// <exception cref="ObjectDisposedException">Thrown when the store has already been disposed.</exception>
+        /// <remarks>
+        /// The swap is atomic. After replacing the reducer, the store dispatches an internal initialization action so the new reducer can recompute any derived state.
+        /// </remarks>
         void HotSwapReducer(Reducer newRoot);
     }
 }

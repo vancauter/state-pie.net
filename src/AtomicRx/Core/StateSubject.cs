@@ -1,21 +1,43 @@
 namespace AtomicRx.Core
 {
-    // Internal subject implementation that holds the current state and manages observer subscriptions.
-    // Behaviors:
-    // - Thread-safe: subscription list guarded by a private lock.
-    // - Immediately emits the last known state to newly subscribed observers.
-    // - Emits OnCompleted when the subject is completed/disposed.
-    // - Swallows exceptions from observer callbacks to keep dispatching to other observers.
+    /// <summary>
+    /// Implements a stateful observable used by the store.
+    /// </summary>
     internal sealed class StateSubject(IState initialState) : IObservable<IState>, IDisposable
     {
+        /// <summary>
+        /// Stores the active observers.
+        /// </summary>
         private readonly List<IObserver<IState>> _observers = [];
+
+        /// <summary>
+        /// Guards observer and terminal-state mutations.
+        /// </summary>
         private readonly object _lock = new();
+
+        /// <summary>
+        /// Indicates whether the subject has been disposed.
+        /// </summary>
         private bool _isDisposed;
+
+        /// <summary>
+        /// Indicates whether the subject has completed.
+        /// </summary>
         private bool _isCompleted;
+
+        /// <summary>
+        /// Stores the terminal error, when one has been signaled.
+        /// </summary>
         private Exception? _error;
+
+        /// <summary>
+        /// Stores the most recently observed state.
+        /// </summary>
         private IState? _lastState = initialState;
 
-        // Subscribe registers the observer and immediately emits the last state (if present).
+        /// <summary>
+        /// Subscribes an observer and replays the latest state when available.
+        /// </summary>
         public IDisposable Subscribe(IObserver<IState> observer)
         {
             ObjectDisposedException.ThrowIf(_isDisposed, nameof(StateSubject));
@@ -39,19 +61,18 @@ namespace AtomicRx.Core
 
             if (completedOrErrored)
             {
-                // If the subject has already completed or errored, immediately notify the new subscriber.
                 if (err is not null)
                     try { observer.OnError(err); } catch { }
                 else
                     try { observer.OnCompleted(); } catch { }
             }
 
-            // Return an IDisposable that removes the observer when disposed.
             return new Subscription(() => { lock (_lock) { _ = _observers.Remove(observer); } });
         }
 
-        // OnNext publishes a new state to all observers. It updates the last state and sends a snapshot
-        // of observers to avoid holding the lock while calling external code.
+        /// <summary>
+        /// Publishes a new state to all observers.
+        /// </summary>
         public void OnNext(IState value)
         {
             if (_isDisposed) return;
@@ -66,7 +87,9 @@ namespace AtomicRx.Core
             foreach (var o in snapshot) { try { o.OnNext(value); } catch { } }
         }
 
-        // Signal an error to all observers and mark the subject as completed with error.
+        /// <summary>
+        /// Signals an error to all observers.
+        /// </summary>
         public void OnError(Exception ex)
         {
             if (_isDisposed) return;
@@ -82,7 +105,9 @@ namespace AtomicRx.Core
             foreach (var o in snapshot) { try { o.OnError(ex); } catch { } }
         }
 
-        // Signal completion to all observers. After completion no further OnNext calls will be delivered.
+        /// <summary>
+        /// Signals completion to all observers.
+        /// </summary>
         public void OnCompleted()
         {
             if (_isDisposed) return;
@@ -97,21 +122,30 @@ namespace AtomicRx.Core
             foreach (var o in snapshot) { try { o.OnCompleted(); } catch { } }
         }
 
+        /// <summary>
+        /// Releases the subject and clears its observer list.
+        /// </summary>
         public void Dispose()
         {
             if (_isDisposed) return;
             _isDisposed = true;
-            // Ensure observers are notified of completion before clearing.
             OnCompleted();
             lock (_lock) { _observers.Clear(); }
         }
 
-        // Internal class for managing observer subscriptions.
-        // It captures a dispose action that removes the observer from the subject.
+        /// <summary>
+        /// Represents a disposable observer subscription.
+        /// </summary>
         private sealed class Subscription(System.Action disposeAction) : IDisposable
         {
+            /// <summary>
+            /// Stores the unsubscription callback.
+            /// </summary>
             private readonly System.Action _disposeAction = disposeAction;
 
+            /// <summary>
+            /// Removes the associated observer.
+            /// </summary>
             public void Dispose() => _disposeAction();
         }
     }

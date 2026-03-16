@@ -1,23 +1,30 @@
 namespace AtomicRx.Core
 {
+    /// <summary>
+    /// Represents a minimal marker state implementation.
+    /// </summary>
     internal sealed class State : IState
     {
-        // Marker type for simple/placeholder states. Left blank intentionally.
     };
 
-    // Internal implementation of a combined state that holds the current state of each slice in a dictionary.
-    // This type is used as the root state when combining multiple slices. Reducers that combine slices are expected
-    // to return an instance of this type containing the updated slice states.
+    /// <summary>
+    /// Represents a root state composed from named slice states.
+    /// </summary>
     internal sealed class CombinedState : IState
     {
+        /// <summary>
+        /// Gets the slice states stored in the combined root state.
+        /// </summary>
         internal IReadOnlyDictionary<string, IState> States { get; }
 
+        /// <summary>
+        /// Initializes a new combined state instance.
+        /// </summary>
         internal CombinedState(IReadOnlyDictionary<string, IState> sliceStates) => States = sliceStates;
 
-        // Accept an IReadOnlyDictionary to allow callers to provide an already-readonly wrapper
-        // and avoid copying the underlying entries. This method is internal and currently only
-        // used by Factory.CombineReducers which wraps the mutable dictionary in a ReadOnlyDictionary
-        // before calling Create.
+        /// <summary>
+        /// Creates a combined state from an existing read-only slice map.
+        /// </summary>
         internal static CombinedState Create(IReadOnlyDictionary<string, IState> sliceStates) => new(sliceStates);
     }
 }

@@ -1,9 +1,12 @@
 namespace AtomicRx
 {
+    /// <summary>
+    /// Provides factory helpers for constructing actions, slices, reducers, and stores.
+    /// </summary>
     public static partial class Factory
     {
         /// <summary>
-        /// Create a simple <see cref="IAction"/> with the specified <paramref name="type"/>.
+        /// Creates an <see cref="IAction"/> with the specified <paramref name="type"/>.
         /// </summary>
         /// <param name="type">Non-empty action type string.</param>
         /// <returns>An <see cref="IAction"/> instance.</returns>
@@ -17,7 +20,7 @@ namespace AtomicRx
         }
 
         /// <summary>
-        /// Create an <see cref="IAction{TPayload}"/> carrying a strongly-typed payload.
+        /// Creates an <see cref="IAction{TPayload}"/> carrying a strongly typed payload.
         /// </summary>
         /// <typeparam name="TPayload">Payload type.</typeparam>
         /// <param name="type">Non-empty action type string.</param>
@@ -32,7 +35,6 @@ namespace AtomicRx
             return new Core.Action<TPayload>(type, payload);
         }
 
-        // Action creator helpers have moved to the `ActionCreator` / `ActionCreator<TPayload>` records.
-        // Use `new ActionCreator<TPayload>(type)` to obtain a typed creator function.
+        // Action-creator helpers live in separate record types so the core factory remains focused on value construction.
     }
 }
