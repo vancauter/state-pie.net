@@ -1,10 +1,12 @@
 using AtomicRx;
-using SCLibs.Logger;
+using SC.SimpleLog;
 
 namespace Dev
 {
     public class Program
     {
+        private static readonly SimpleLogger s_log = new();
+
         public static void Main()
         {
             // Create the example store with logging middleware applied.
@@ -32,9 +34,9 @@ namespace Dev
         {
             private readonly Action? _unsubscribe = unsubscribe;
 
-            public void OnNext(IState state) => Log.Debug($"State changed: {Helpers.SerializeState(state)}");
-            public void OnError(Exception error) { _unsubscribe?.Invoke(); Log.Error($"Error: {error}"); }
-            public void OnCompleted() { _unsubscribe?.Invoke(); Log.Info("Unsubscribed and completed."); }
+            public void OnNext(IState state) => s_log.Debug($"State changed: {Helpers.SerializeState(state)}");
+            public void OnError(Exception error) { _unsubscribe?.Invoke(); s_log.Error($"Error: {error}"); }
+            public void OnCompleted() { _unsubscribe?.Invoke(); s_log.Info("Unsubscribed and completed."); }
         }
     }
 }
