@@ -1,3 +1,5 @@
+using AtomicRx.Runtime;
+
 namespace AtomicRx
 {
     /// <summary>
@@ -10,13 +12,15 @@ namespace AtomicRx
         /// </summary>
         /// <param name="type">Non-empty action type string.</param>
         /// <returns>An <see cref="IAction"/> instance.</returns>
-        /// <exception cref="ArgumentException">Thrown when <paramref name="type"/> is null or whitespace.</exception>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="type"/> is <see langword="null"/>, empty, or whitespace.</exception>
         public static IAction CreateAction(string type)
         {
             if (string.IsNullOrWhiteSpace(type))
+            {
                 throw new ArgumentException("Action type must be a non-empty string.", nameof(type));
+            }
 
-            return new Core.Action(type);
+            return new StoreAction(type);
         }
 
         /// <summary>
@@ -26,15 +30,18 @@ namespace AtomicRx
         /// <param name="type">Non-empty action type string.</param>
         /// <param name="payload">Payload instance to attach to the action.</param>
         /// <returns>An <see cref="IAction{TPayload}"/> instance.</returns>
-        /// <exception cref="ArgumentException">Thrown when <paramref name="type"/> is null or whitespace.</exception>
-        public static IAction CreateAction<TPayload>(string type, TPayload payload)
+        /// <exception cref="ArgumentException">Thrown when <paramref name="type"/> is <see langword="null"/>, empty, or whitespace.</exception>
+        /// <remarks>
+        /// The payload is stored as supplied and is not copied or transformed.
+        /// </remarks>
+        public static IAction<TPayload> CreateAction<TPayload>(string type, TPayload payload)
         {
             if (string.IsNullOrWhiteSpace(type))
+            {
                 throw new ArgumentException("Action type must be a non-empty string.", nameof(type));
+            }
 
-            return new Core.Action<TPayload>(type, payload);
+            return new StoreAction<TPayload>(type, payload);
         }
-
-        // Action-creator helpers live in separate record types so the core factory remains focused on value construction.
     }
 }

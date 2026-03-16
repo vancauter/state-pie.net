@@ -1,9 +1,9 @@
-namespace AtomicRx.Core
+namespace AtomicRx.Runtime
 {
     /// <summary>
     /// Represents the internal <see cref="ISlice"/> implementation.
     /// </summary>
-    internal sealed class Slice<TState>(string name, TState initialState, Reducer<TState> reducer) : ISlice where TState : IState
+    internal sealed class StateSlice<TState>(string name, TState initialState, Reducer<TState> reducer) : ISlice where TState : IState
     {
         /// <summary>
         /// Gets the slice name.
@@ -11,7 +11,7 @@ namespace AtomicRx.Core
         public string Name { get; } = name;
 
         /// <summary>
-        /// Gets the current slice state.
+        /// Gets the initial slice state.
         /// </summary>
         public IState State { get; } = initialState;
 

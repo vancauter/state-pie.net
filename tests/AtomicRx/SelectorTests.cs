@@ -4,51 +4,47 @@ namespace AtomicRx.Tests
 
     public class SelectorTests
     {
-        // Test Memoized Selector Caches Last Result For Same Input
-        // Why: Ensure the memoized selector caches the last computed result when the input
-        //      is the same reference/value so expensive projections are not re-run.
-        // What: Call the selector twice with the same `AppState` instance and assert the
-        //       projection ran only once and produced the expected value.
         [Fact]
-        public void MemoizedSelectorCachesLastResultForSameInput()
+        public void MemoizedSelector_WhenInputMatchesCache_ReusesPreviousResult()
         {
             var callCount = 0;
-            int projection(AppState s) { callCount++; return s.Value * 2; }
+            int projection(AppState state)
+            {
+                callCount++;
+                return state.Value * 2;
+            }
 
             var selector = Selectors.CreateMemoizedSelector((Func<AppState, int>)projection);
 
-            var s = new AppState(10);
-            var a = selector(s);
-            var b = selector(s); // same reference
+            var state = new AppState(10);
+            var first = selector(state);
+            var second = selector(state);
 
-            Assert.Equal(20, a);
-            Assert.Equal(20, b);
+            Assert.Equal(20, first);
+            Assert.Equal(20, second);
             Assert.Equal(1, callCount);
         }
 
-        // Test Memoized Selector Recomputes When Comparer Differs
-        // Why: Verify caching semantics for record types: the default comparer uses structural
-        //      equality, so two different instances with equal values should be treated as equal
-        //      and avoid recomputation.
-        // What: Call the selector with two separate `AppState` instances that are value-equal
-        //       and assert the projection is only executed once due to caching behavior.
         [Fact]
-        public void MemoizedSelectorRecomputesWhenComparerDiffers()
+        public void MemoizedSelector_WhenComparerTreatsValuesEqual_ReusesPreviousResult()
         {
             var callCount = 0;
-            int projection(AppState s) { callCount++; return s.Value * 3; }
+            int projection(AppState state)
+            {
+                callCount++;
+                return state.Value * 3;
+            }
 
             var selector = Selectors.CreateMemoizedSelector((Func<AppState, int>)projection);
 
-            var s1 = new AppState(2);
-            var s2 = new AppState(2); // equal by value but different reference; default comparer will treat equal
+            var firstState = new AppState(2);
+            var secondState = new AppState(2);
 
-            var a = selector(s1);
-            var b = selector(s2);
+            var first = selector(firstState);
+            var second = selector(secondState);
 
-            Assert.Equal(6, a);
-            Assert.Equal(6, b);
-            // Default comparer for record types uses structural equality so second call should be cached
+            Assert.Equal(6, first);
+            Assert.Equal(6, second);
             Assert.Equal(1, callCount);
         }
     }

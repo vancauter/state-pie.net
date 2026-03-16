@@ -4,38 +4,29 @@ namespace AtomicRx.Tests
 
     public class FactoryTests
     {
-        // Test Create Action No Payload
-        // Why: Ensure simple actions are created with the correct type and implement IAction.
-        // What: Call Factory.CreateAction and verify the returned action's Type and interface.
         [Fact]
-        public void CreateActionNoPayloadReturnsActionWithType()
+        public void CreateAction_WithoutPayload_ReturnsTypedAction()
         {
-            var a = Factory.CreateAction("TEST_ACTION");
-            Assert.Equal("TEST_ACTION", a.Type);
-            _ = Assert.IsAssignableFrom<IAction>(a);
+            var action = Factory.CreateAction("TEST_ACTION");
+            Assert.Equal("TEST_ACTION", action.Type);
+            _ = Assert.IsAssignableFrom<IAction>(action);
         }
 
-        // Test Create Action With Payload
-        // Why: Verify payload-carrying actions expose the payload and correct type.
-        // What: Create an action with a payload and assert Type and Payload values.
         [Fact]
-        public void CreateActionWithPayloadReturnsTypedAction()
+        public void CreateAction_WithPayload_ReturnsTypedAction()
         {
-            var a = Factory.CreateAction("INC", 5);
-            Assert.Equal("INC", a.Type);
-            var ta = Assert.IsAssignableFrom<IAction<int>>(a);
-            Assert.Equal(5, ta.Payload);
+            var action = Factory.CreateAction("INC", 5);
+            Assert.Equal("INC", action.Type);
+            var typedAction = Assert.IsAssignableFrom<IAction<int>>(action);
+            Assert.Equal(5, typedAction.Payload);
         }
 
-        // Test Create Slice Basics
-        // Why: Ensure slices expose name, initial state and a reducer that computes next state.
-        // What: Create a slice and verify Name, State and reducer behavior for an action.
         [Fact]
-        public void CreateSliceExposesNameStateAndReducer()
+        public void CreateSlice_WhenCreated_ExposesNameStateAndReducer()
         {
-            var slice = Factory.CreateSlice("counter", new Counter(0), (s, a) =>
+            var slice = Factory.CreateSlice("counter", new Counter(0), (state, action) =>
             {
-                return a.Type == "inc" ? new Counter(s.Value + 1) : s;
+                return action.Type == "inc" ? new Counter(state.Value + 1) : state;
             });
 
             Assert.Equal("counter", slice.Name);
@@ -45,45 +36,45 @@ namespace AtomicRx.Tests
             Assert.NotSame(slice.State, next);
         }
 
-        // Test Combine Reducers Integration
-        // Why: Validate that combined reducers and the root store integrate and notify observers.
-        // What: Combine two slices, create a store, subscribe, dispatch actions and assert observed updates.
         [Fact]
-        public void CombineReducersAndCreateStoreIntegrateCorrectly()
+        public void CombineReducers_WhenStoreDispatches_EmitsUpdatedRootState()
         {
-            var s1 = Factory.CreateSlice("a", new Counter(0), (s, a) => a.Type == "inc_a" ? new Counter(s.Value + 1) : s);
-            var s2 = Factory.CreateSlice("b", new Counter(10), (s, a) => a.Type == "inc_b" ? new Counter(s.Value + 2) : s);
+            var firstSlice = Factory.CreateSlice("a", new Counter(0), (state, action) => action.Type == "inc_a" ? new Counter(state.Value + 1) : state);
+            var secondSlice = Factory.CreateSlice("b", new Counter(10), (state, action) => action.Type == "inc_b" ? new Counter(state.Value + 2) : state);
 
-            var (rootState, rootReducer) = Factory.CombineReducers(s1, s2);
+            var (rootState, rootReducer) = Factory.CombineReducers(firstSlice, secondSlice);
 
             using var store = Factory.CreateStore(rootState, rootReducer);
 
             var observed = new List<IState>();
             var collector = new TestObserver(observed);
-            using var sub = store.StateChanged.Subscribe(collector);
+            using var subscription = store.StateChanged.Subscribe(collector);
 
-            // initial state emitted immediately
             Assert.NotEmpty(observed);
 
             store.Dispatch(Factory.CreateAction("inc_a"));
             store.Dispatch(Factory.CreateAction("inc_b"));
 
-            // After two updates we should have at least three observed states (initial + 2 updates)
             Assert.True(observed.Count >= 3);
 
-            // Basic sanity: serialized state contains both slice names
-            var ser = Helpers.SerializeState(store.State);
-            Assert.Contains("\"a\":", ser);
-            Assert.Contains("\"b\":", ser);
+            var serialized = StateJson.Serialize(store.State);
+            Assert.Contains("\"a\":", serialized);
+            Assert.Contains("\"b\":", serialized);
         }
 
-        private sealed class TestObserver(List<IState> dest) : IObserver<IState>
+        private sealed class TestObserver(List<IState> destination) : IObserver<IState>
         {
-            private readonly List<IState> _dest = dest;
+            private readonly List<IState> _destination = destination;
 
-            public void OnCompleted() { }
-            public void OnError(Exception error) { }
-            public void OnNext(IState value) => _dest.Add(value);
+            public void OnCompleted()
+            {
+            }
+
+            public void OnError(Exception error)
+            {
+            }
+
+            public void OnNext(IState value) => _destination.Add(value);
         }
     }
 }

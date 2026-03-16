@@ -1,11 +1,11 @@
 namespace AtomicRx
 {
     /// <summary>
-    /// Provides middleware that executes thunk payloads instead of forwarding them to reducers.
+    /// Provides middleware that executes supported thunk payloads instead of forwarding them to reducers.
     /// </summary>
     /// <remarks>
-    /// Supported thunk payload shapes are <see cref="Action{IStore}"/>, <see cref="Action{Dispatch, IStore}"/>, <see cref="Func{IStore, Task}"/>, and <see cref="Func{Dispatch, IStore, Task}"/>.
-    /// Async thunks are started without awaiting them on the dispatching thread, and synchronous invocation failures are suppressed to keep dispatch moving.
+    /// Supported payload shapes are <see cref="Action{T}"/> with <see cref="IStore"/>, <see cref="Action{T1, T2}"/> with <see cref="Dispatch"/> and <see cref="IStore"/>, and their <see cref="Task"/>-returning counterparts.
+    /// Thunk invocation failures are suppressed so middleware does not terminate the dispatch pipeline.
     /// </remarks>
     public static class ThunkMiddleware
     {
@@ -13,6 +13,9 @@ namespace AtomicRx
         /// Creates thunk middleware.
         /// </summary>
         /// <returns>A middleware delegate that intercepts supported thunk payloads.</returns>
+        /// <remarks>
+        /// Async thunks are started without awaiting them on the caller thread.
+        /// </remarks>
         public static Middleware Create() => (store, next) => action =>
         {
             if (action is IAction<Action<IStore>> syncThunkAction)
@@ -23,8 +26,8 @@ namespace AtomicRx
                 }
                 catch
                 {
-                    // Swallow to avoid breaking the dispatch chain; thunks should handle their own errors.
                 }
+
                 return;
             }
 
@@ -37,6 +40,7 @@ namespace AtomicRx
                 catch
                 {
                 }
+
                 return;
             }
 
@@ -49,6 +53,7 @@ namespace AtomicRx
                 catch
                 {
                 }
+
                 return;
             }
 
@@ -61,6 +66,7 @@ namespace AtomicRx
                 catch
                 {
                 }
+
                 return;
             }
 

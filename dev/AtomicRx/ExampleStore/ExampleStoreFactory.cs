@@ -2,13 +2,12 @@ using AtomicRx;
 
 namespace Dev.ExampleStore
 {
-    public static class Store
+    public static class ExampleStoreFactory
     {
-        // Allow callers to supply optional middleware when creating the example store.
         public static IStore Create(params Middleware[] middleware)
         {
-            var counterSlice = Slices.CreateCounterSlice();
-            var personSlice = Slices.CreatePersonSlice();
+            var counterSlice = ExampleSlices.CreateCounterSlice();
+            var personSlice = ExampleSlices.CreatePersonSlice();
 
             var (state, reducer) = Factory.CombineReducers(counterSlice, personSlice);
 

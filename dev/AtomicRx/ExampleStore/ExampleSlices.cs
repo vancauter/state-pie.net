@@ -5,13 +5,12 @@ namespace Dev.ExampleStore
     public sealed record CounterState(int Count) : IState;
     public sealed record PersonState(string Name, int Age) : IState;
 
-    public static class Slices
+    public static class ExampleSlices
     {
-
-        #region Counter slice
-
         public const string Increment = "@COUNTER/INCREMENT";
         public const string Decrement = "@COUNTER/DECREMENT";
+        public const string PersonAddAge = "@PERSON/ADD_AGE";
+        public const string PersonSetName = "@PERSON/SET_NAME";
 
         internal static ISlice CreateCounterSlice() => Factory.CreateSlice(
             name: "counter",
@@ -26,13 +25,6 @@ namespace Dev.ExampleStore
                 };
             });
 
-        #endregion
-
-        #region Person slice
-
-        public const string PersonAddAge = "@PERSON/ADD_AGE";
-        public const string PersonSetName = "@PERSON/SET_NAME";
-
         public static ISlice CreatePersonSlice() => Factory.CreateSlice(
             name: "person",
             initialState: new PersonState("Guest", 30),
@@ -41,11 +33,9 @@ namespace Dev.ExampleStore
                 return action.Type switch
                 {
                     PersonAddAge => new PersonState(state.Name, state.Age + 1),
-                    PersonSetName when action is IAction<string> a => new PersonState(a.Payload, state.Age),
+                    PersonSetName when action is IAction<string> payloadAction => new PersonState(payloadAction.Payload, state.Age),
                     _ => state
                 };
             });
-
-        #endregion
     }
 }

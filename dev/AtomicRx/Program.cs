@@ -10,18 +10,18 @@ namespace Dev
         public static void Main()
         {
             // Create the example store with logging middleware applied.
-            using var store = ExampleStore.Store.Create(LoggingMiddleware.Create());
+            using var store = ExampleStore.ExampleStoreFactory.Create(LoggingMiddleware.Create());
 
             IDisposable? subscription = null;
             var observer = new ConsoleObserver(() => subscription?.Dispose());
             subscription = store.StateChanged.Subscribe(observer);
 
             // Counter slice
-            store.Dispatch(Factory.CreateAction(ExampleStore.Slices.Increment));
+            store.Dispatch(Factory.CreateAction(ExampleStore.ExampleSlices.Increment));
 
             // Person slice
-            store.Dispatch(Factory.CreateAction(ExampleStore.Slices.PersonAddAge));
-            store.Dispatch(Factory.CreateAction(ExampleStore.Slices.PersonSetName, "Lee-Lee"));
+            store.Dispatch(Factory.CreateAction(ExampleStore.ExampleSlices.PersonAddAge));
+            store.Dispatch(Factory.CreateAction(ExampleStore.ExampleSlices.PersonSetName, "Lee-Lee"));
 
             // Disposing the store will call OnCompleted on the internal subject which
             // in turn invokes the observer's OnCompleted. The observer's completion
@@ -34,7 +34,7 @@ namespace Dev
         {
             private readonly Action? _unsubscribe = unsubscribe;
 
-            public void OnNext(IState state) => s_log.Debug($"State changed: {Helpers.SerializeState(state)}");
+            public void OnNext(IState state) => s_log.Debug($"State changed: {StateJson.Serialize(state)}");
             public void OnError(Exception error) { _unsubscribe?.Invoke(); s_log.Error($"Error: {error}"); }
             public void OnCompleted() { _unsubscribe?.Invoke(); s_log.Info("Unsubscribed and completed."); }
         }

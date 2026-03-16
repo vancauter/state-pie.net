@@ -14,21 +14,21 @@ namespace AtomicRx
         /// <param name="comparer">Optional equality comparer for the state. When <see langword="null"/>, <see cref="EqualityComparer{T}.Default"/> is used.</param>
         /// <returns>A thread-safe memoized selector function.</returns>
         /// <remarks>
-        /// This method uses single-slot memoization. If the input oscillates between distinct values, the selector recomputes each time the cached slot no longer matches.
+        /// This method performs single-entry memoization. If successive inputs compare equal, the cached result is reused.
         /// </remarks>
         public static Func<TState, TResult> CreateMemoizedSelector<TState, TResult>(
             Func<TState, TResult> selector,
             IEqualityComparer<TState>? comparer = null)
         {
             comparer ??= EqualityComparer<TState>.Default;
-            var syncLock = new object();
+            var syncLock = new Lock();
             var hasValue = false;
             TState? lastState = default;
             TResult? lastResult = default;
 
             return state =>
             {
-                if (hasValue && comparer.Equals(lastState!, state))
+                if (Volatile.Read(ref hasValue) && comparer.Equals(lastState!, state))
                 {
                     return lastResult!;
                 }

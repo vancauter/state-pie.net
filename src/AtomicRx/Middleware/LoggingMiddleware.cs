@@ -17,7 +17,7 @@ namespace AtomicRx
         /// </summary>
         /// <returns>A middleware delegate that logs each dispatched action before forwarding it.</returns>
         /// <remarks>
-        /// Logging failures are suppressed so diagnostics cannot interfere with dispatch.
+        /// Logging failures are suppressed so diagnostics do not interrupt dispatch execution.
         /// </remarks>
         public static Middleware Create() => (store, next) => action =>
         {
@@ -27,7 +27,6 @@ namespace AtomicRx
             }
             catch
             {
-                // Logging is best-effort and must not affect dispatch behavior.
             }
 
             next(action);
