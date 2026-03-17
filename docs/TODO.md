@@ -1,8 +1,8 @@
-# AtomicRx Action Document
+# AtomicState Action Document
 
 ## Objective
 
-Bring the shipped library, test coverage, and public documentation into alignment for AtomicRx's current scope as a
+Bring the shipped library, test coverage, and public documentation into alignment for AtomicState's current scope as a
 minimal reactive state container.
 
 ## Priority Actions

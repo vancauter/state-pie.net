@@ -1,8 +1,8 @@
-# AtomicRx Thread-Safety Action Plan
+# AtomicState Thread-Safety Action Plan
 
 ## Objective
 
-Close the known concurrency gaps in AtomicRx in a safe implementation order, starting with correctness bugs in the
+Close the known concurrency gaps in AtomicState in a safe implementation order, starting with correctness bugs in the
 observable pipeline and then tightening publication semantics, middleware ordering guarantees, tests, and documentation.
 
 ## Resolved Contract Decisions

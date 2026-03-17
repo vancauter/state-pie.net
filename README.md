@@ -1,6 +1,6 @@
-# AtomicRx
+# AtomicState
 
-AtomicRx is a reactive state container for .NET.
+AtomicState is a reactive state container for .NET.
 
 It is built around actions, reducers, stores, slices, and middleware. The library provides serialized dispatch, state
 observation through `IObservable<IState>`, and reference-based change detection for immutable-by-convention state
@@ -25,7 +25,7 @@ snapshots.
 
 ## Features
 
-AtomicRx provides:
+AtomicState provides:
 
 - Plain actions with optional strongly typed payloads.
 - Reducers for single-root or slice-composed state.
@@ -43,7 +43,7 @@ NuGet packaging is planned, but the package details are not finalized yet.
 Placeholder:
 
 ```bash
-dotnet add package AtomicRx
+dotnet add package AtomicState
 ```
 
 ## Core Concepts
@@ -68,7 +68,7 @@ That second rule is what prevents unnecessary state publications.
 For simple scenarios, define a single root state and reducer directly.
 
 ```csharp
-using AtomicRx;
+using AtomicState;
 
 public sealed record CounterState(int Count) : IState;
 
@@ -101,7 +101,7 @@ Console.WriteLine(current.Count);
 Actions can also carry strongly typed payloads.
 
 ```csharp
-using AtomicRx;
+using AtomicState;
 
 public sealed record PersonState(string Name) : IState;
 
@@ -125,7 +125,7 @@ var action = Factory.CreateAction("@PERSON/SET_NAME", "Lee-Lee");
 For multi-part state, define named slices and combine them into a single root reducer.
 
 ```csharp
-using AtomicRx;
+using AtomicState;
 using System.Text.Json;
 
 public sealed record CounterState(int Count) : IState;
@@ -172,7 +172,7 @@ Each store exposes a replaying observable through `IStore.StateChanged`.
 New subscribers immediately receive the latest state snapshot. The sequence completes when the store is disposed.
 
 ```csharp
-using AtomicRx;
+using AtomicState;
 
 public sealed record CounterState(int Count) : IState;
 
@@ -203,7 +203,7 @@ sealed class Observer : IObserver<IState>
 
 ## Middleware
 
-AtomicRx composes middleware around the dispatch pipeline in registration order.
+AtomicState composes middleware around the dispatch pipeline in registration order.
 
 The only built-in middleware today is logging.
 
@@ -221,7 +221,7 @@ Custom middleware can intercept, short-circuit, or forward actions through the `
 
 ## Thread-Safety Status
 
-AtomicRx is being aligned with an explicit concurrency contract documented in
+AtomicState is being aligned with an explicit concurrency contract documented in
 [docs/Threadsafe-Actions.md](docs/Threadsafe-Actions.md).
 
 The current target contract is:
@@ -253,8 +253,8 @@ dotnet run --project dev/*/*.Dev.csproj
 
 The repository also includes:
 
-- A sample app under `dev/AtomicRx`
-- Automated tests under `tests/AtomicRx`
+- A sample app under `dev/AtomicState`
+- Automated tests under `tests/AtomicState`
 - Ongoing design notes under `docs/`
 
 ## Contributing
