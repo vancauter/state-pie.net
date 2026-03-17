@@ -177,8 +177,8 @@ replay, live updates, completion, and disposal are observed in one linearized or
 per store stream, run on the calling thread, and have no built-in thread affinity or scheduler. The sequence completes
 when the store is disposed.
 
-The intended `IStore.State` contract is that unsynchronized cross-thread readers observe the latest committed root
-state.
+The intended `IStore.State` contract is that cross-thread readers that are not synchronized observe the latest committed
+root state.
 
 ```csharp
 using SC.AtomicState;
