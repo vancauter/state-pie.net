@@ -1,42 +1,44 @@
-# AtomicState Action Document
+# AtomicState Current Action Plan
 
 ## Objective
 
-Bring the shipped library, test coverage, and public documentation into alignment for AtomicState's current scope as a
-minimal reactive state container.
+Keep AtomicState aligned with its documented scope as a lightweight reactive state container, while removing actions
+that are already covered by the current implementation and test suite.
 
 ## Priority Actions
 
-### P1: Stop hiding initialization failures
+### P1: Make initialization failure behavior explicit
 
-- [ ] Replace the blanket `catch` in store initialization with an explicit strategy.
-- [ ] Decide whether initialization should fail fast, surface diagnostics, or expose an opt-in error hook.
-- [ ] Add tests for reducer or middleware failures during the internal `@@INIT` dispatch.
+- [ ] Replace the blanket exception suppression in the store `@@INIT` path with an intentional contract.
+- [ ] Decide whether initialization failures should fail store creation, be surfaced through diagnostics, or use an
+      explicit opt-in error callback.
+- [ ] Update tests to verify the chosen initialization failure contract for reducer and middleware exceptions.
 
-Why this matters: initialization problems are currently suppressed, which can leave the store in an unexpected state
-without any signal to the caller.
+Why this matters: `Store.RunInitPass()` currently swallows every exception, which can leave callers with a usable store
+object but no signal that initialization logic failed.
 
-### P2: Back the thread-safety claim with tests
+### P2: Add a supported combined-slice access API
 
-- [ ] Add concurrency-focused tests for simultaneous dispatch from multiple tasks.
-- [ ] Verify ordered publication and final state correctness under contention.
-- [ ] Document any guarantees that are intentionally out of scope, such as observer timing or middleware reentrancy.
+- [ ] Add a public API for retrieving combined slice state by slice name and expected type.
+- [ ] Update docs and examples to use that API instead of recommending serialization or test-only reflection helpers.
+- [ ] Remove reflection-based access patterns from tests where a public accessor can validate the intended contract.
 
-Why this matters: the README promises serialized, thread-safe dispatch, but the current suite only exercises
-single-threaded and delayed async scenarios.
+Why this matters: combined state remains an internal runtime shape today, and even the test suite relies on reflection
+to read slices. That is a strong signal that the public API is still missing an ergonomic read path.
 
-### P3: Future enhancement
+### P3: Align installation docs with shipping reality
 
-- [ ] Add and maintain a dedicated `PerformanceTests` test class for perf-only scenarios.
-- [ ] Add a public helper for strongly typed access into the internal combined slice state shape.
-- [ ] Evaluate whether time-travel middleware belongs in the near-term roadmap after the stability and documentation
-      gaps above are closed.
+- [ ] Remove or replace the placeholder `dotnet add package AtomicState` guidance until package metadata and delivery
+      are actually defined.
+- [ ] Add the real distribution path for consumers, whether that is NuGet packaging metadata or source/project reference
+      guidance.
+- [ ] Review README wording so release-readiness claims do not overstate what is currently available.
 
-Why this matters: time-travel debugging is useful, but it should not outrank correctness, diagnostics, and test coverage
-work.
+Why this matters: the README still presents package installation as planned placeholder text, while the project file has
+no packaging metadata. That creates avoidable confusion for first-time consumers.
 
 ## Exit Criteria
 
-- Store initialization failures have an intentional and tested contract.
-- Concurrency guarantees are validated by automated tests.
-- Performance Test
+- Initialization failures have a documented and tested contract.
+- Consumers can read combined slice state through a supported public API.
+- Installation guidance matches the way AtomicState is actually shipped.
