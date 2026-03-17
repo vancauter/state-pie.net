@@ -165,6 +165,9 @@ Console.WriteLine(JsonSerializer.Serialize(store.State));
 `Factory.CombineReducers` enforces unique slice names and preserves the existing root state reference when no slice
 returns a new instance.
 
+Store creation performs an internal `@@INIT` dispatch before returning. If reducer or middleware logic throws during
+that initialization pass, `Factory.CreateStore(...)` throws and no partially initialized store instance is returned.
+
 ## Observing State
 
 Each store exposes a replaying observable through `IStore.StateChanged`.

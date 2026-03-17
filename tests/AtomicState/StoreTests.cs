@@ -23,7 +23,7 @@ namespace SC.AtomicState.Tests
         }
 
         [Fact]
-        public void CreateStore_WhenInitReducerThrows_CreatesUsableStore()
+        public void CreateStore_WhenInitReducerThrows_ThrowsInvalidOperationException()
         {
             static IState rootReducer(IState state, IAction action)
             {
@@ -32,21 +32,34 @@ namespace SC.AtomicState.Tests
                     throw new InvalidOperationException("init failure");
                 }
 
-                var currentState = (CounterState)state;
-                return action.Type == TestSlices.Increment
-                    ? new CounterState(currentState.Count + 1)
-                    : state;
+                return state;
             }
 
             var slice = TestSlices.CreateCounterSlice();
 
-            using var store = Factory.CreateStore(slice.State, rootReducer);
+            var exception = Assert.Throws<InvalidOperationException>(() => Factory.CreateStore(slice.State, rootReducer));
 
-            Assert.Equal(0, ((CounterState)store.State).Count);
+            Assert.Equal("init failure", exception.Message);
+        }
 
-            store.Dispatch(Factory.CreateAction(TestSlices.Increment));
+        [Fact]
+        public void CreateStore_WhenInitMiddlewareThrows_ThrowsInvalidOperationException()
+        {
+            static IState rootReducer(IState state, IAction action) => state;
 
-            Assert.Equal(1, ((CounterState)store.State).Count);
+            static Dispatch ThrowOnInit(IStore store, Dispatch next) => action =>
+            {
+                if (action.Type == "@@INIT")
+                {
+                    throw new InvalidOperationException("middleware init failure");
+                }
+
+                next(action);
+            };
+
+            var exception = Assert.Throws<InvalidOperationException>(() => Factory.CreateStore(new CounterState(0), rootReducer, ThrowOnInit));
+
+            Assert.Equal("middleware init failure", exception.Message);
         }
 
         [Fact]

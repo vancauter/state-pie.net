@@ -154,16 +154,10 @@ namespace SC.AtomicState.Runtime
         /// <summary>
         /// Dispatches the internal initialization action.
         /// </summary>
-        private void RunInitPass()
-        {
-            try
-            {
-                _dispatch(s_initAction);
-            }
-            catch
-            {
-                // Initialization is best-effort so middleware or reducers cannot prevent store creation.
-            }
-        }
+        /// <remarks>
+        /// Initialization is part of successful store creation, so reducer or middleware failures are propagated to
+        /// the caller instead of leaving a partially initialized store instance in circulation.
+        /// </remarks>
+        private void RunInitPass() => _dispatch(s_initAction);
     }
 }

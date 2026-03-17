@@ -14,7 +14,9 @@ namespace SC.AtomicState
         /// <param name="rootReducer">A reducer that computes the next root state for each dispatched action.</param>
         /// <returns>An <see cref="IStore"/> instance.</returns>
         /// <remarks>
-        /// The created store performs an internal initialization dispatch so reducers can materialize derived initial state before external subscribers observe the store.
+        /// The created store performs an internal initialization dispatch so reducers can materialize derived initial
+        /// state before external subscribers observe the store. Initialization is part of store creation, so failures
+        /// during that dispatch prevent the store from being created and are propagated unchanged to the caller.
         /// </remarks>
         public static IStore CreateStore(IState initialState, Reducer rootReducer) => new Store(initialState, rootReducer);
 
@@ -30,7 +32,9 @@ namespace SC.AtomicState
         /// each action first. Middleware may call <see cref="IStore.Dispatch(IAction)"/> again while a dispatch is
         /// already in progress, and that nested dispatch is serialized with other dispatch execution. Background work
         /// scheduled by middleware is outside the originating dispatch transaction, although any later dispatch from
-        /// that work is still serialized by the store.
+        /// that work is still serialized by the store. Initialization is part of store creation, so failures during
+        /// the internal initialization dispatch prevent the store from being created and are propagated unchanged to
+        /// the caller.
         /// </remarks>
         public static IStore CreateStore(IState initialState, Reducer rootReducer, params AtomicMiddleware[] middleware) => new Store(initialState, rootReducer, middleware);
     }
