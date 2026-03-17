@@ -22,5 +22,5 @@ namespace SC.AtomicState
     /// any later dispatch from that scheduled work is still serialized by the store, but it is outside the original
     /// dispatch transaction.
     /// </remarks>
-    public delegate Dispatch AtomicMiddleware(IStore store, Dispatch next);
+    public delegate Dispatch Middleware(IStore store, Dispatch next);
 }

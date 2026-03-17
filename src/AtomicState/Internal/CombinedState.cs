@@ -1,4 +1,4 @@
-namespace SC.AtomicState.Runtime
+namespace SC.AtomicState.Internal
 {
     /// <summary>
     /// Represents a root state composed from named slice states.

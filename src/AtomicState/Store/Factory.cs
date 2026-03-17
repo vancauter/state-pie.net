@@ -1,0 +1,177 @@
+using System.Collections.ObjectModel;
+using SC.AtomicState.Internal;
+
+namespace SC.AtomicState
+{
+    /// <summary>
+    /// Provides factory helpers for constructing actions, slices, reducers, and stores.
+    /// </summary>
+    public static class Factory
+    {
+        /// <summary>
+        /// Creates an <see cref="IAction"/> with the specified <paramref name="type"/>.
+        /// </summary>
+        /// <param name="type">Non-empty action type string.</param>
+        /// <returns>An <see cref="IAction"/> instance.</returns>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="type"/> is <see langword="null"/>, empty, or whitespace.</exception>
+        /// <remarks>
+        /// Use stable action type strings so reducers and middleware can rely on predictable message names.
+        /// </remarks>
+        public static IAction CreateAction(string type)
+        {
+            if (string.IsNullOrWhiteSpace(type))
+            {
+                throw new ArgumentException("Action type must be a non-empty string.", nameof(type));
+            }
+
+            return new StoreAction(type);
+        }
+
+        /// <summary>
+        /// Creates an <see cref="IAction{TPayload}"/> carrying a strongly typed payload.
+        /// </summary>
+        /// <typeparam name="TPayload">Payload type.</typeparam>
+        /// <param name="type">Non-empty action type string.</param>
+        /// <param name="payload">Payload instance to attach to the action.</param>
+        /// <returns>An <see cref="IAction{TPayload}"/> instance.</returns>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="type"/> is <see langword="null"/>, empty, or whitespace.</exception>
+        /// <remarks>
+        /// The payload is stored as supplied and is not copied or transformed.
+        /// </remarks>
+        public static IAction<TPayload> CreateAction<TPayload>(string type, TPayload payload)
+        {
+            if (string.IsNullOrWhiteSpace(type))
+            {
+                throw new ArgumentException("Action type must be a non-empty string.", nameof(type));
+            }
+
+            return new StoreAction<TPayload>(type, payload);
+        }
+
+        /// <summary>
+        /// Creates a typed <see cref="ISlice"/> with the provided name, initial state, and reducer.
+        /// </summary>
+        /// <typeparam name="TState">The concrete state type for the slice.</typeparam>
+        /// <param name="name">The unique slice name.</param>
+        /// <param name="initialState">Initial state instance for the slice.</param>
+        /// <param name="reducer">Reducer function that computes next state for the slice.</param>
+        /// <returns>An <see cref="ISlice"/> instance.</returns>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is <see langword="null"/>, empty, or whitespace.</exception>
+        /// <remarks>
+        /// The returned slice adapts the strongly typed reducer to the untyped <see cref="ISlice"/> contract used by <see cref="CombineReducers(ISlice[])"/>.
+        /// </remarks>
+        public static ISlice CreateSlice<TState>(string name, TState initialState, Reducer<TState> reducer) where TState : IState
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Slice name must be a non-empty string.", nameof(name));
+            }
+
+            return new StateSlice<TState>(name, initialState, reducer);
+        }
+
+        /// <summary>
+        /// Creates a root <see cref="IStore"/> with the provided initial state and root reducer.
+        /// </summary>
+        /// <param name="initialState">Initial root state.</param>
+        /// <param name="rootReducer">A reducer that computes the next root state for each dispatched action.</param>
+        /// <returns>An <see cref="IStore"/> instance.</returns>
+        /// <remarks>
+        /// The created store performs an internal initialization dispatch so reducers can materialize derived initial
+        /// state before external subscribers observe the store. Initialization is part of store creation, so failures
+        /// during that dispatch prevent the store from being created and are propagated unchanged to the caller.
+        /// </remarks>
+        public static IStore CreateStore(IState initialState, Reducer rootReducer) => new Store(initialState, rootReducer);
+
+        /// <summary>
+        /// Creates a root <see cref="IStore"/> with optional middleware that wraps dispatch.
+        /// </summary>
+        /// <param name="initialState">Initial root state.</param>
+        /// <param name="rootReducer">Root reducer.</param>
+        /// <param name="middleware">Optional middleware pipeline applied in order.</param>
+        /// <returns>An <see cref="IStore"/> instance with middleware applied.</returns>
+        /// <remarks>
+        /// Middleware wraps the store's base dispatch pipeline in the order provided, so the first middleware receives
+        /// each action first. Middleware may call <see cref="IStore.Dispatch(IAction)"/> again while a dispatch is
+        /// already in progress, and that nested dispatch is serialized with other dispatch execution. Background work
+        /// scheduled by middleware is outside the originating dispatch transaction, although any later dispatch from
+        /// that work is still serialized by the store. Initialization is part of store creation, so failures during
+        /// the internal initialization dispatch prevent the store from being created and are propagated unchanged to
+        /// the caller.
+        /// </remarks>
+        public static IStore CreateStore(IState initialState, Reducer rootReducer, params Middleware[] middleware) => new Store(initialState, rootReducer, middleware);
+
+        /// <summary>
+        /// Combines multiple <see cref="ISlice"/> instances into a single root state and reducer.
+        /// </summary>
+        /// <param name="slices">An array of slices to combine. Each slice must have a unique name.</param>
+        /// <returns>A tuple containing the initial combined root state and a reducer that delegates to each slice reducer.</returns>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="slices"/> is empty, contains a null entry, or contains duplicate slice names.</exception>
+        /// <remarks>
+        /// The returned reducer expects to receive the root state shape created by this method. It preserves the
+        /// existing root state reference when no slice produces a new state instance. That identity-preserving path is
+        /// intentional because it prevents unnecessary state publication and avoids allocating a replacement slice map
+        /// for actions that leave every slice unchanged.
+        /// </remarks>
+        public static (IState state, Reducer reducer) CombineReducers(params ISlice[] slices)
+        {
+            if (slices.Length == 0)
+            {
+                throw new ArgumentException("Must provide at least one slice to combine.", nameof(slices));
+            }
+
+            if (slices.Any(static slice => slice is null))
+            {
+                throw new ArgumentException("Slices cannot contain null entries.", nameof(slices));
+            }
+
+            var duplicateGroup = slices.GroupBy(slice => slice.Name, StringComparer.Ordinal)
+                .FirstOrDefault(group => group.Count() > 1);
+
+            if (duplicateGroup is not null)
+            {
+                throw new ArgumentException($"Duplicate slice name detected: {duplicateGroup.Key}", nameof(slices));
+            }
+
+            var reducerDictionary = slices.ToDictionary(slice => slice.Name, slice => slice.Reducer, StringComparer.Ordinal);
+            var mutableSliceStates = slices.ToDictionary(slice => slice.Name, slice => slice.State, StringComparer.Ordinal);
+            var initialSliceStates = new ReadOnlyDictionary<string, IState>(mutableSliceStates);
+            var initialRootState = new CombinedState(initialSliceStates);
+
+            IState rootReducer(IState state, IAction action)
+            {
+                if (state is not CombinedState currentRootState)
+                {
+                    throw new InvalidOperationException(
+                        $"[CombineReducers] Unexpected state type: {state?.GetType().Name}. Expected {nameof(CombinedState)}.");
+                }
+
+                Dictionary<string, IState>? nextSliceStates = null;
+
+                foreach (var sliceEntry in reducerDictionary)
+                {
+                    if (!currentRootState.States.TryGetValue(sliceEntry.Key, out var currentSliceState))
+                    {
+                        throw new InvalidOperationException(
+                            $"[CombineReducers] Missing slice state for key: {sliceEntry.Key} in current root state.");
+                    }
+
+                    var nextSliceState = sliceEntry.Value(currentSliceState, action);
+                    if (!ReferenceEquals(nextSliceState, currentSliceState))
+                    {
+                        // Delay cloning until the first actual slice change so no-op actions can return the current
+                        // root snapshot without paying for a transient dictionary allocation.
+                        nextSliceStates ??= new Dictionary<string, IState>(currentRootState.States, StringComparer.Ordinal);
+                        nextSliceStates[sliceEntry.Key] = nextSliceState;
+                    }
+                }
+
+                // Reusing the current root instance keeps reference-based change detection aligned with reducer output
+                // and avoids publishing a synthetic root object for a logical no-op action.
+                return nextSliceStates is null ? currentRootState : new CombinedState(nextSliceStates);
+            }
+
+            return (initialRootState, rootReducer);
+        }
+    }
+}

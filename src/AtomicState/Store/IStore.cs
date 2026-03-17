@@ -14,8 +14,8 @@ namespace SC.AtomicState
         /// Gets the current root state snapshot.
         /// </summary>
         /// <remarks>
-        /// The intended concurrency contract is that unsynchronized cross-thread readers observe the latest committed
-        /// root state.
+        /// The intended concurrency contract is that cross-thread readers that are not synchronized observe the latest
+        /// committed root state.
         /// </remarks>
         IState State { get; }
 

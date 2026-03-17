@@ -1,4 +1,4 @@
-namespace SC.AtomicState.Runtime
+namespace SC.AtomicState.Internal
 {
     /// <summary>
     /// Represents the internal action implementation without a payload.

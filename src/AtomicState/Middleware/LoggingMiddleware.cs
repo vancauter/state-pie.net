@@ -23,7 +23,7 @@ namespace SC.AtomicState
         /// <remarks>
         /// Logging failures are suppressed so diagnostics do not interrupt dispatch execution.
         /// </remarks>
-        public static AtomicMiddleware Create() => (store, next) => action =>
+        public static Middleware Create() => (store, next) => action =>
         {
             try
             {

@@ -1,16 +1,26 @@
-namespace SC.AtomicState.Dev.ExampleStore
+namespace SC.AtomicState.Dev
 {
     public sealed record CounterState(int Count) : IState;
     public sealed record PersonState(string Name, int Age) : IState;
 
-    public static class ExampleSlices
+    public static class ExampleStore
     {
         public const string Increment = "@COUNTER/INCREMENT";
         public const string Decrement = "@COUNTER/DECREMENT";
         public const string PersonAddAge = "@PERSON/ADD_AGE";
         public const string PersonSetName = "@PERSON/SET_NAME";
 
-        internal static ISlice CreateCounterSlice() => Factory.CreateSlice(
+        public static IStore Create(params Middleware[] middleware)
+        {
+            var counterSlice = CreateCounterSlice();
+            var personSlice = CreatePersonSlice();
+
+            var (state, reducer) = Factory.CombineReducers(counterSlice, personSlice);
+
+            return Factory.CreateStore(state, reducer, middleware);
+        }
+
+        private static ISlice CreateCounterSlice() => Factory.CreateSlice(
             name: "counter",
             initialState: new CounterState(0),
             reducer: (state, action) =>
@@ -23,7 +33,7 @@ namespace SC.AtomicState.Dev.ExampleStore
                 };
             });
 
-        public static ISlice CreatePersonSlice() => Factory.CreateSlice(
+        private static ISlice CreatePersonSlice() => Factory.CreateSlice(
             name: "person",
             initialState: new PersonState("Guest", 30),
             reducer: (state, action) =>

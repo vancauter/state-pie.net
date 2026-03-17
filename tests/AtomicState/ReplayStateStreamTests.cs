@@ -1,4 +1,4 @@
-using SC.AtomicState.Runtime;
+using SC.AtomicState.Internal;
 using SC.AtomicState.Tests.Shared;
 
 namespace SC.AtomicState.Tests

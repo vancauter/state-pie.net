@@ -10,18 +10,18 @@ namespace SC.AtomicState.Dev
         public static void Main()
         {
             // Create the example store with logging middleware applied.
-            using var store = ExampleStore.ExampleStoreFactory.Create(LoggingMiddleware.Create());
+            using var store = ExampleStore.Create(LoggingMiddleware.Create());
 
             IDisposable? subscription = null;
             var observer = new ConsoleObserver(() => subscription?.Dispose());
             subscription = store.StateChanged.Subscribe(observer);
 
             // Counter slice
-            store.Dispatch(Factory.CreateAction(ExampleStore.ExampleSlices.Increment));
+            store.Dispatch(Factory.CreateAction(ExampleStore.Increment));
 
             // Person slice
-            store.Dispatch(Factory.CreateAction(ExampleStore.ExampleSlices.PersonAddAge));
-            store.Dispatch(Factory.CreateAction(ExampleStore.ExampleSlices.PersonSetName, "Lee-Lee"));
+            store.Dispatch(Factory.CreateAction(ExampleStore.PersonAddAge));
+            store.Dispatch(Factory.CreateAction(ExampleStore.PersonSetName, "Lee-Lee"));
 
             // Disposing the store will call OnCompleted on the internal subject which
             // in turn invokes the observer's OnCompleted. The observer's completion

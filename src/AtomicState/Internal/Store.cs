@@ -1,4 +1,4 @@
-namespace SC.AtomicState.Runtime
+namespace SC.AtomicState.Internal
 {
     /// <summary>
     /// Implements the store that owns serialized dispatch, state publication, and observable notifications.
@@ -46,7 +46,7 @@ namespace SC.AtomicState.Runtime
         /// <param name="initialState">The initial root state to expose before the initialization pass runs.</param>
         /// <param name="rootReducer">The root reducer that computes committed state transitions.</param>
         /// <param name="middleware">Optional middleware applied around the serialized dispatch core.</param>
-        internal Store(IState initialState, Reducer rootReducer, params AtomicMiddleware[] middleware)
+        internal Store(IState initialState, Reducer rootReducer, params Middleware[] middleware)
         {
             _rootReducer = rootReducer;
             _stateStream = new StateStream(initialState);
@@ -83,8 +83,8 @@ namespace SC.AtomicState.Runtime
         /// Gets the current root state.
         /// </summary>
         /// <remarks>
-        /// Uses an acquire read so un-synchronized readers can observe the latest committed state published by
-        /// <see cref="Dispatch(IAction)"/>.
+        /// Uses an acquire read so readers that are not synchronized can observe the latest committed state published
+        /// by <see cref="Dispatch(IAction)"/>.
         /// </remarks>
         public IState State => Volatile.Read(ref _state);
 
