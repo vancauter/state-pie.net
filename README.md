@@ -68,7 +68,7 @@ That second rule is what prevents unnecessary state publications.
 For simple scenarios, define a single root state and reducer directly.
 
 ```csharp
-using AtomicState;
+using SC.AtomicState;
 
 public sealed record CounterState(int Count) : IState;
 
@@ -101,7 +101,7 @@ Console.WriteLine(current.Count);
 Actions can also carry strongly typed payloads.
 
 ```csharp
-using AtomicState;
+using SC.AtomicState;
 
 public sealed record PersonState(string Name) : IState;
 
@@ -125,7 +125,7 @@ var action = Factory.CreateAction("@PERSON/SET_NAME", "Lee-Lee");
 For multi-part state, define named slices and combine them into a single root reducer.
 
 ```csharp
-using AtomicState;
+using SC.AtomicState;
 using System.Text.Json;
 
 public sealed record CounterState(int Count) : IState;
@@ -178,7 +178,7 @@ The intended `IStore.State` contract is that unsynchronized cross-thread readers
 state.
 
 ```csharp
-using AtomicState;
+using SC.AtomicState;
 
 public sealed record CounterState(int Count) : IState;
 
