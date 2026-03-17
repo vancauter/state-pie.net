@@ -17,6 +17,10 @@ namespace SC.AtomicState
     /// <returns>A <see cref="Dispatch"/> delegate that may intercept, transform, or forward actions.</returns>
     /// <remarks>
     /// Middleware is composed in registration order. Each delegate decides whether and when to invoke <paramref name="next"/>.
+    /// Middleware may reenter <see cref="IStore.Dispatch(IAction)"/>, and those nested actions participate in the
+    /// store's total serialized dispatch order. Middleware may also schedule work onto background execution contexts;
+    /// any later dispatch from that scheduled work is still serialized by the store, but it is outside the original
+    /// dispatch transaction.
     /// </remarks>
     public delegate Dispatch AtomicMiddleware(IStore store, Dispatch next);
 }

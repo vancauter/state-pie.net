@@ -169,7 +169,12 @@ returns a new instance.
 
 Each store exposes a replaying observable through `IStore.StateChanged`.
 
-New subscribers immediately receive the latest state snapshot. The sequence completes when the store is disposed.
+New subscribers immediately receive the latest state snapshot. The intended concurrency contract is that replay, live
+updates, completion, and disposal are observed in one linearized order. Observer callbacks are serialized per store
+stream, but they run on the thread performing the dispatch, completion, or disposal callback, with no built-in thread
+affinity or scheduler. The sequence completes when the store is disposed.
+
+The intended `IStore.State` contract is strong cross-thread visibility for the latest committed root state.
 
 ```csharp
 using AtomicState;
@@ -219,6 +224,10 @@ dispatch.
 
 Custom middleware can intercept, short-circuit, or forward actions through the `AtomicMiddleware` delegate.
 
+Middleware may call `Dispatch` reentrantly. When it does, nested actions participate in the same total serialized
+dispatch order as all other store work. Middleware may also schedule work onto background execution contexts. Any later
+dispatch from that scheduled work is still serialized by the store, but it is outside the original dispatch transaction.
+
 ## Thread-Safety Status
 
 AtomicState is being aligned with an explicit concurrency contract documented in
@@ -229,9 +238,11 @@ The current target contract is:
 - `Dispatch` execution is serialized.
 - `IStore.State` should provide strong cross-thread visibility.
 - `StateChanged` should provide strict linearized ordering across replay, live updates, completion, and disposal.
-- Observer callbacks are serialized per store stream, but there is no built-in scheduler or thread affinity.
+- Observer callbacks are serialized per store stream, but they run on the calling thread with no built-in scheduler or
+  thread affinity.
 - Middleware may perform nested dispatch, and nested actions participate in the total serialized dispatch order.
-- Custom middleware may schedule background work, but that work is outside the original dispatch transaction.
+- Custom middleware may schedule background work. That work is outside the original dispatch transaction, although any
+  later dispatch it performs is still serialized by the store.
 
 That work is tracked in [docs/Threadsafe-Actions.md](docs/Threadsafe-Actions.md).
 

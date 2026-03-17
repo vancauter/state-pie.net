@@ -19,15 +19,6 @@ observable pipeline and then tightening publication semantics, middleware orderi
 
 ## Implementation Order
 
-### Step 1: Write the contract down
-
-- [ ] Document the resolved guarantees for concurrent `Dispatch`, strong `State` reads, `StateChanged` subscription, and
-      serialized observer callbacks.
-- [ ] Document that callbacks have no built-in thread affinity and may run on the dispatching or terminating thread.
-- [ ] Explicitly state caller responsibilities, especially immutable state snapshots and pure reducers.
-
-Why this comes first: the fixes below only make sense once the intended runtime contract is explicit.
-
 ### Step 2: Fix `StateStream` subscribe and terminal race conditions
 
 - [ ] Rework `StateStream.Subscribe` so initial replay cannot race with `OnNext`, `OnCompleted`, `OnError`, or `Dispose`
@@ -66,17 +57,6 @@ Why this is separate: `State` is a public API contract, not just an internal imp
 - [ ] Add tests that cover reading `State` while observers are also receiving updates.
 
 Why this matters: strong visibility is easy to claim and easy to get subtly wrong without dedicated tests.
-
-### Step 6: Document and verify middleware ordering semantics
-
-- [ ] Document that middleware may reenter `Dispatch` and that nested actions participate in one total serialized
-      dispatch order.
-- [ ] Document that custom middleware may schedule work outside the store's serialized dispatch timeline.
-- [ ] Clarify that later dispatches from scheduled background work are still individually serialized, but are not part
-      of the original dispatch transaction.
-
-Why this is later: middleware behavior builds on the core store semantics, so it should be finalized after the base
-runtime contract is stable.
 
 ### Step 7: Add middleware ordering regression tests
 
