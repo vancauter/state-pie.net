@@ -27,6 +27,8 @@ single-threaded and delayed async scenarios.
 
 ### P3: Future enhancement
 
+- [ ] Add and maintain a dedicated `PerformanceTests` test class for perf-only scenarios.
+- [ ] Add a public helper for strongly typed access into the internal combined slice state shape.
 - [ ] Evaluate whether time-travel middleware belongs in the near-term roadmap after the stability and documentation
       gaps above are closed.
 
