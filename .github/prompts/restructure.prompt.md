@@ -17,7 +17,7 @@ complete restructure.
 - Read every source file under `./src` before deciding on structural changes.
 - After the full `./src` review, inspect dependent `./tests`, `./dev`, and any other relevant project files that must be
   updated to match the restructure.
-- Review the whole project structure with SOLID principles, maintainability, and .NET conventions in mind.
+- Review the whole project structure with SOLID principles, DDD, maintainability, and .NET conventions in mind.
 - Create, edit, add, move, rename, and remove files or directories when that materially improves the project.
 - Review naming at every level: directories, files, types, members, and public API terms.
 - Adapt tests so they match the new structure, names, and behavior.

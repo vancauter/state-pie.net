@@ -7,16 +7,6 @@ that are already covered by the current implementation and test suite.
 
 ## Priority Actions
 
-### P1: Make initialization failure behavior explicit
-
-- [x] Replace the blanket exception suppression in the store `@@INIT` path with an intentional contract.
-- [x] Decide whether initialization failures should fail store creation, be surfaced through diagnostics, or use an
-      explicit opt-in error callback.
-- [x] Update tests to verify the chosen initialization failure contract for reducer and middleware exceptions.
-
-Decision: initialization failures now fail store creation by default. Reducer or middleware exceptions raised during the
-internal `@@INIT` dispatch are propagated to the caller instead of leaving a partially initialized store instance.
-
 ### P2: Add a supported combined-slice access API
 
 - [ ] Add a public API for retrieving combined slice state by slice name and expected type.
