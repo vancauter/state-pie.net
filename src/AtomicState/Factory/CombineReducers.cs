@@ -15,7 +15,10 @@ namespace SC.AtomicState
         /// <returns>A tuple containing the initial combined root state and a reducer that delegates to each slice reducer.</returns>
         /// <exception cref="ArgumentException">Thrown when <paramref name="slices"/> is empty, contains a null entry, or contains duplicate slice names.</exception>
         /// <remarks>
-        /// The returned reducer expects to receive the root state shape created by this method. It preserves the existing root state reference when no slice produces a new state instance.
+        /// The returned reducer expects to receive the root state shape created by this method. It preserves the
+        /// existing root state reference when no slice produces a new state instance. That identity-preserving path is
+        /// intentional because it prevents unnecessary state publication and avoids allocating a replacement slice map
+        /// for actions that leave every slice unchanged.
         /// </remarks>
         public static (IState state, Reducer reducer) CombineReducers(params ISlice[] slices)
         {
@@ -50,9 +53,7 @@ namespace SC.AtomicState
                         $"[CombineReducers] Unexpected state type: {state?.GetType().Name}. Expected {nameof(CombinedState)}.");
                 }
 
-                // Clone once so each slice can update independently while unchanged slices retain identity.
-                var nextSliceStates = new Dictionary<string, IState>(currentRootState.States, StringComparer.Ordinal);
-                var changed = false;
+                Dictionary<string, IState>? nextSliceStates = null;
 
                 foreach (var sliceEntry in reducerDictionary)
                 {
@@ -65,12 +66,16 @@ namespace SC.AtomicState
                     var nextSliceState = sliceEntry.Value(currentSliceState, action);
                     if (!ReferenceEquals(nextSliceState, currentSliceState))
                     {
+                        // Delay cloning until the first actual slice change so no-op actions can return the current
+                        // root snapshot without paying for a transient dictionary allocation.
+                        nextSliceStates ??= new Dictionary<string, IState>(currentRootState.States, StringComparer.Ordinal);
                         nextSliceStates[sliceEntry.Key] = nextSliceState;
-                        changed = true;
                     }
                 }
 
-                return changed ? new CombinedState(nextSliceStates) : currentRootState;
+                // Reusing the current root instance keeps reference-based change detection aligned with reducer output
+                // and avoids publishing a synthetic root object for a logical no-op action.
+                return nextSliceStates is null ? currentRootState : new CombinedState(nextSliceStates);
             }
 
             return (initialRootState, rootReducer);
