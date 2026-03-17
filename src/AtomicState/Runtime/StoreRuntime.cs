@@ -1,7 +1,7 @@
 namespace SC.AtomicState.Runtime
 {
     /// <summary>
-    /// Implements the internal store runtime.
+    /// Implements the store runtime that owns serialized dispatch, state publication, and observable notifications.
     /// </summary>
     internal sealed class StoreRuntime : IStore
     {
@@ -26,6 +26,11 @@ namespace SC.AtomicState.Runtime
         private readonly StateStream _stateStream;
 
         /// <summary>
+        /// Publishes the latest committed state for lock-free readers.
+        /// </summary>
+        private IState _state;
+
+        /// <summary>
         /// Indicates whether the store has been disposed.
         /// </summary>
         private bool _isDisposed;
@@ -38,11 +43,14 @@ namespace SC.AtomicState.Runtime
         /// <summary>
         /// Initializes a new store runtime.
         /// </summary>
+        /// <param name="initialState">The initial root state to expose before the initialization pass runs.</param>
+        /// <param name="rootReducer">The root reducer that computes committed state transitions.</param>
+        /// <param name="middleware">Optional middleware applied around the serialized dispatch core.</param>
         internal StoreRuntime(IState initialState, Reducer rootReducer, params AtomicMiddleware[] middleware)
         {
             _rootReducer = rootReducer;
             _stateStream = new StateStream(initialState);
-            State = initialState;
+            _state = initialState;
 
             if (middleware.Length > 0)
             {
@@ -65,21 +73,40 @@ namespace SC.AtomicState.Runtime
         /// <summary>
         /// Gets the observable stream of state changes.
         /// </summary>
+        /// <remarks>
+        /// The returned stream replays the current committed state to new subscribers and receives live updates after
+        /// dispatch commits a replacement state instance.
+        /// </remarks>
         public IObservable<IState> StateChanged => _stateStream;
 
         /// <summary>
         /// Gets the current root state.
         /// </summary>
-        public IState State { get; private set; }
+        /// <remarks>
+        /// Uses an acquire read so un-synchronized readers can observe the latest committed state published by
+        /// <see cref="Dispatch(IAction)"/>.
+        /// </remarks>
+        public IState State => Volatile.Read(ref _state);
 
         /// <summary>
         /// Dispatches an action through the composed middleware pipeline.
         /// </summary>
+        /// <param name="action">The action to dispatch.</param>
+        /// <exception cref="ObjectDisposedException">Thrown when dispatch reaches the runtime after the store has been disposed.</exception>
+        /// <remarks>
+        /// Middleware executes around one serialized dispatch core. If the reducer returns a new state instance, that
+        /// state is published before observers are notified so direct <see cref="State"/> reads and stream delivery
+        /// remain aligned.
+        /// </remarks>
         public void Dispatch(IAction action) => _dispatch(action);
 
         /// <summary>
         /// Disposes the store and completes the state stream.
         /// </summary>
+        /// <remarks>
+        /// Disposal is idempotent. The disposed transition is serialized with dispatch so no later reducer execution can
+        /// commit additional state after disposal wins.
+        /// </remarks>
         public void Dispose()
         {
             lock (_dispatchLock)
@@ -106,10 +133,13 @@ namespace SC.AtomicState.Runtime
             {
                 ObjectDisposedException.ThrowIf(_isDisposed, nameof(StoreRuntime));
 
-                var nextState = _rootReducer(State, action);
-                if (!ReferenceEquals(nextState, State))
+                var currentState = _state;
+                var nextState = _rootReducer(currentState, action);
+                if (!ReferenceEquals(nextState, currentState))
                 {
-                    State = nextState;
+                    // Publish with release semantics before notifying observers so lock-free readers can observe the
+                    // same committed state that the stream is about to emit.
+                    Volatile.Write(ref _state, nextState);
                     stateToPublish = nextState;
                 }
             }
