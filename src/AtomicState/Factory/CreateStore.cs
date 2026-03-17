@@ -16,7 +16,7 @@ namespace SC.AtomicState
         /// <remarks>
         /// The created store performs an internal initialization dispatch so reducers can materialize derived initial state before external subscribers observe the store.
         /// </remarks>
-        public static IStore CreateStore(IState initialState, Reducer rootReducer) => new StoreRuntime(initialState, rootReducer);
+        public static IStore CreateStore(IState initialState, Reducer rootReducer) => new Store(initialState, rootReducer);
 
         /// <summary>
         /// Creates a root <see cref="IStore"/> with optional middleware that wraps dispatch.
@@ -32,6 +32,6 @@ namespace SC.AtomicState
         /// scheduled by middleware is outside the originating dispatch transaction, although any later dispatch from
         /// that work is still serialized by the store.
         /// </remarks>
-        public static IStore CreateStore(IState initialState, Reducer rootReducer, params AtomicMiddleware[] middleware) => new StoreRuntime(initialState, rootReducer, middleware);
+        public static IStore CreateStore(IState initialState, Reducer rootReducer, params AtomicMiddleware[] middleware) => new Store(initialState, rootReducer, middleware);
     }
 }

@@ -1,9 +1,9 @@
 namespace SC.AtomicState.Runtime
 {
     /// <summary>
-    /// Implements the store runtime that owns serialized dispatch, state publication, and observable notifications.
+    /// Implements the store that owns serialized dispatch, state publication, and observable notifications.
     /// </summary>
-    internal sealed class StoreRuntime : IStore
+    internal sealed class Store : IStore
     {
         /// <summary>
         /// Reuses the internal initialization action.
@@ -41,12 +41,12 @@ namespace SC.AtomicState.Runtime
         private readonly Reducer _rootReducer;
 
         /// <summary>
-        /// Initializes a new store runtime.
+        /// Initializes a new store.
         /// </summary>
         /// <param name="initialState">The initial root state to expose before the initialization pass runs.</param>
         /// <param name="rootReducer">The root reducer that computes committed state transitions.</param>
         /// <param name="middleware">Optional middleware applied around the serialized dispatch core.</param>
-        internal StoreRuntime(IState initialState, Reducer rootReducer, params AtomicMiddleware[] middleware)
+        internal Store(IState initialState, Reducer rootReducer, params AtomicMiddleware[] middleware)
         {
             _rootReducer = rootReducer;
             _stateStream = new StateStream(initialState);
@@ -131,7 +131,7 @@ namespace SC.AtomicState.Runtime
 
             lock (_dispatchLock)
             {
-                ObjectDisposedException.ThrowIf(_isDisposed, nameof(StoreRuntime));
+                ObjectDisposedException.ThrowIf(_isDisposed, nameof(Store));
 
                 var currentState = _state;
                 var nextState = _rootReducer(currentState, action);

@@ -2,7 +2,7 @@ using SC.AtomicState.Tests.Shared;
 
 namespace SC.AtomicState.Tests
 {
-    public class StoreRuntimeTests
+    public class StoreTests
     {
         [Fact]
         public void CreateStore_WhenReducerHandlesInit_RecomputesStateImmediately()
