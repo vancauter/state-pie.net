@@ -16,7 +16,7 @@ namespace AtomicRx
         /// <remarks>
         /// Async thunks are started without awaiting them on the caller thread.
         /// </remarks>
-        public static Middleware Create() => (store, next) => action =>
+        public static AtomicMiddleware Create() => (store, next) => action =>
         {
             if (action is IAction<Action<IStore>> syncThunkAction)
             {

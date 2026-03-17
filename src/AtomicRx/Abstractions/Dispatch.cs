@@ -15,5 +15,5 @@ namespace AtomicRx
     /// <remarks>
     /// Middleware is composed in registration order, with each delegate deciding whether and when to invoke <paramref name="next"/>.
     /// </remarks>
-    public delegate Dispatch Middleware(IStore store, Dispatch next);
+    public delegate Dispatch AtomicMiddleware(IStore store, Dispatch next);
 }

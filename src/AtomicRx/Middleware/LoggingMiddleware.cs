@@ -10,7 +10,11 @@ namespace AtomicRx
         /// <summary>
         /// Stores the logger used by the middleware.
         /// </summary>
-        private static readonly SimpleLogger s_log = new();
+        private static readonly SimpleLogger s_log = new(new LogOptions()
+        {
+            SourceName = "AtomicRx",
+            Template = "[{Timestamp}] <{SourceName}> {Message}"
+        });
 
         /// <summary>
         /// Creates logging middleware.
@@ -19,7 +23,7 @@ namespace AtomicRx
         /// <remarks>
         /// Logging failures are suppressed so diagnostics do not interrupt dispatch execution.
         /// </remarks>
-        public static Middleware Create() => (store, next) => action =>
+        public static AtomicMiddleware Create() => (store, next) => action =>
         {
             try
             {

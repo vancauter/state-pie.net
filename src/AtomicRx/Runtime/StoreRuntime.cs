@@ -38,7 +38,7 @@ namespace AtomicRx.Runtime
         /// <summary>
         /// Initializes a new store runtime.
         /// </summary>
-        internal StoreRuntime(IState initialState, Reducer rootReducer, params Middleware[] middleware)
+        internal StoreRuntime(IState initialState, Reducer rootReducer, params AtomicMiddleware[] middleware)
         {
             _rootReducer = rootReducer;
             _stateStream = new ReplayStateStream(initialState);

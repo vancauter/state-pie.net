@@ -6,6 +6,9 @@
     <AssemblyName>AtomicRx</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>AtomicRx.Tests</_Parameter1>
+    </AssemblyAttribute>
     <ProjectReference Include="../../../SimpleLog/src/SimpleLog/SimpleLog.csproj" />
   </ItemGroup>
 </Project>

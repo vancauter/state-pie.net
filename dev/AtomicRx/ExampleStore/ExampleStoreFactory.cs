@@ -4,7 +4,7 @@ namespace Dev.ExampleStore
 {
     public static class ExampleStoreFactory
     {
-        public static IStore Create(params Middleware[] middleware)
+        public static IStore Create(params AtomicMiddleware[] middleware)
         {
             var counterSlice = ExampleSlices.CreateCounterSlice();
             var personSlice = ExampleSlices.CreatePersonSlice();

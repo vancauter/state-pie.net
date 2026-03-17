@@ -28,6 +28,6 @@ namespace AtomicRx
         /// <remarks>
         /// Middleware wraps the store's base dispatch pipeline in the order provided.
         /// </remarks>
-        public static IStore CreateStore(IState initialState, Reducer rootReducer, params Middleware[] middleware) => new StoreRuntime(initialState, rootReducer, middleware);
+        public static IStore CreateStore(IState initialState, Reducer rootReducer, params AtomicMiddleware[] middleware) => new StoreRuntime(initialState, rootReducer, middleware);
     }
 }
