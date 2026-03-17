@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace SC.AtomicState.Tests.TestSupport
+namespace SC.AtomicState.Tests.Shared
 {
     internal static class StoreStateAssertions
     {

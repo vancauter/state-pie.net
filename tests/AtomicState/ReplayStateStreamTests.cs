@@ -1,4 +1,5 @@
 using SC.AtomicState.Runtime;
+using SC.AtomicState.Tests.Shared;
 
 namespace SC.AtomicState.Tests
 {

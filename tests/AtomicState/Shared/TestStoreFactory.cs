@@ -1,4 +1,4 @@
-namespace SC.AtomicState.Tests.TestSupport
+namespace SC.AtomicState.Tests.Shared
 {
     public static class TestStoreFactory
     {

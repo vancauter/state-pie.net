@@ -1,3 +1,5 @@
+using SC.AtomicState.Tests.Shared;
+
 namespace SC.AtomicState.Tests
 {
     public record Counter(int Value) : IState;

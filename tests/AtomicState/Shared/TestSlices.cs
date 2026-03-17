@@ -1,4 +1,4 @@
-namespace SC.AtomicState.Tests.TestSupport
+namespace SC.AtomicState.Tests.Shared
 {
     public sealed record CounterState(int Count) : IState;
     public sealed record PersonState(string Name, int Age) : IState;
