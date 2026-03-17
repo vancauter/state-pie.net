@@ -10,6 +10,12 @@ agent: "agent"
 Perform a comprehensive documentation and comment-refinement pass on all source code under `./src`. Comments explain the
 **why**, not what the code does. Documentation should be clear, concise, and follow C# conventions.
 
+## Tone and Perspective
+
+Comments and documentation should be professional, direct, and focused on utility for developers. Avoid marketing
+language or promotional content. Always write from a developer's perspective. Assume the reader is a competent developer
+who needs to understand the intent, constraints, and non-obvious behavior of the code.
+
 ## Public API Documentation
 
 - Apply full XML documentation to all public and protected members, including classes, methods, properties, and fields.
