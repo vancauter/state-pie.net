@@ -15,7 +15,6 @@
 
         "github.copilot.chat.switchAgent.enabled": true,
         "github.copilot.chat.copilotMemory.enabled": true,
-        "chat.tools.terminal.outputLocation": "chat",
 
         // --- File Exclusions ---
         "files.exclude": {
