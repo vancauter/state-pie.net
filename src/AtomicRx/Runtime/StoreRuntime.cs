@@ -23,7 +23,7 @@ namespace AtomicRx.Runtime
         /// <summary>
         /// Publishes state updates to observers.
         /// </summary>
-        private readonly ReplayStateStream _stateStream;
+        private readonly StateStream _stateStream;
 
         /// <summary>
         /// Indicates whether the store has been disposed.
@@ -31,9 +31,9 @@ namespace AtomicRx.Runtime
         private bool _isDisposed;
 
         /// <summary>
-        /// Stores the active root reducer.
+        /// Stores the root reducer.
         /// </summary>
-        private Reducer _rootReducer;
+        private readonly Reducer _rootReducer;
 
         /// <summary>
         /// Initializes a new store runtime.
@@ -41,7 +41,7 @@ namespace AtomicRx.Runtime
         internal StoreRuntime(IState initialState, Reducer rootReducer, params AtomicMiddleware[] middleware)
         {
             _rootReducer = rootReducer;
-            _stateStream = new ReplayStateStream(initialState);
+            _stateStream = new StateStream(initialState);
             State = initialState;
 
             if (middleware.Length > 0)
@@ -96,20 +96,6 @@ namespace AtomicRx.Runtime
         }
 
         /// <summary>
-        /// Replaces the active root reducer and reruns initialization.
-        /// </summary>
-        public void HotSwapReducer(Reducer newRoot)
-        {
-            lock (_dispatchLock)
-            {
-                ObjectDisposedException.ThrowIf(_isDisposed, nameof(StoreRuntime));
-                _rootReducer = newRoot;
-            }
-
-            RunInitPass();
-        }
-
-        /// <summary>
         /// Runs the active root reducer and publishes changed state.
         /// </summary>
         private void DispatchCore(IAction action)
@@ -128,6 +114,7 @@ namespace AtomicRx.Runtime
                 }
             }
 
+            // Publish outside the reducer lock so observers cannot block future dispatches.
             if (stateToPublish is not null)
             {
                 _stateStream.OnNext(stateToPublish);
@@ -145,6 +132,7 @@ namespace AtomicRx.Runtime
             }
             catch
             {
+                // Initialization is best-effort so middleware or reducers cannot prevent store creation.
             }
         }
     }

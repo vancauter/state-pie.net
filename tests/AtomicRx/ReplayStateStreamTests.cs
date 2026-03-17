@@ -8,7 +8,7 @@ namespace AtomicRx.Tests
         [Fact]
         public void Subscribe_WhenSubscriberJoinsAfterStateUpdates_ReplaysLatestState()
         {
-            using var stream = new ReplayStateStream(new CounterState(0));
+            using var stream = new StateStream(new CounterState(0));
 
             stream.OnNext(new CounterState(1));
             stream.OnNext(new CounterState(2));
@@ -25,7 +25,7 @@ namespace AtomicRx.Tests
         [Fact]
         public void OnCompleted_WhenStreamCompletes_ReplaysLastStateAndCompletionToFutureSubscribers()
         {
-            using var stream = new ReplayStateStream(new CounterState(0));
+            using var stream = new StateStream(new CounterState(0));
 
             var currentObserver = new RecordingObserver();
             using var currentSubscription = stream.Subscribe(currentObserver);
@@ -49,7 +49,7 @@ namespace AtomicRx.Tests
         [Fact]
         public void OnCompleted_WhenStreamAlreadyCompleted_IgnoresRepeatedCompletion()
         {
-            using var stream = new ReplayStateStream(new CounterState(0));
+            using var stream = new StateStream(new CounterState(0));
 
             var observer = new RecordingObserver();
             using var subscription = stream.Subscribe(observer);
@@ -73,7 +73,7 @@ namespace AtomicRx.Tests
         [Fact]
         public void OnError_WhenStreamFaults_ReplaysLastStateAndErrorToFutureSubscribers()
         {
-            using var stream = new ReplayStateStream(new CounterState(0));
+            using var stream = new StateStream(new CounterState(0));
 
             var currentObserver = new RecordingObserver();
             using var currentSubscription = stream.Subscribe(currentObserver);
@@ -99,7 +99,7 @@ namespace AtomicRx.Tests
         [Fact]
         public void OnError_WhenStreamAlreadyTerminated_IgnoresSubsequentErrors()
         {
-            using var stream = new ReplayStateStream(new CounterState(0));
+            using var stream = new StateStream(new CounterState(0));
 
             var observer = new RecordingObserver();
             using var subscription = stream.Subscribe(observer);
@@ -124,7 +124,7 @@ namespace AtomicRx.Tests
         [Fact]
         public void Dispose_WhenObserverSubscriptionDisposed_StopsFutureStateNotifications()
         {
-            using var stream = new ReplayStateStream(new CounterState(0));
+            using var stream = new StateStream(new CounterState(0));
 
             var observer = new RecordingObserver();
             using var subscription = stream.Subscribe(observer);
@@ -141,7 +141,7 @@ namespace AtomicRx.Tests
         [Fact]
         public void Subscribe_WhenSameObserverSubscribedTwice_DeliversFutureUpdatesOnlyOnce()
         {
-            using var stream = new ReplayStateStream(new CounterState(0));
+            using var stream = new StateStream(new CounterState(0));
 
             var observer = new RecordingObserver();
             using var firstSubscription = stream.Subscribe(observer);
@@ -156,7 +156,7 @@ namespace AtomicRx.Tests
         [Fact]
         public void Subscribe_WhenStreamDisposed_ThrowsObjectDisposedException()
         {
-            using var stream = new ReplayStateStream(new CounterState(0));
+            using var stream = new StateStream(new CounterState(0));
             stream.Dispose();
 
             _ = Assert.Throws<ObjectDisposedException>(() => stream.Subscribe(new RecordingObserver()));
@@ -165,7 +165,7 @@ namespace AtomicRx.Tests
         [Fact]
         public void OnNext_WhenStreamIsTerminated_IgnoresAdditionalStateUpdates()
         {
-            using var completedStream = new ReplayStateStream(new CounterState(0));
+            using var completedStream = new StateStream(new CounterState(0));
             var completedObserver = new RecordingObserver();
             using var completedSubscription = completedStream.Subscribe(completedObserver);
             completedObserver.Clear();
@@ -175,7 +175,7 @@ namespace AtomicRx.Tests
 
             Assert.Empty(completedObserver.States);
 
-            using var faultedStream = new ReplayStateStream(new CounterState(0));
+            using var faultedStream = new StateStream(new CounterState(0));
             var faultedObserver = new RecordingObserver();
             using var faultedSubscription = faultedStream.Subscribe(faultedObserver);
             faultedObserver.Clear();
@@ -185,7 +185,7 @@ namespace AtomicRx.Tests
 
             Assert.Empty(faultedObserver.States);
 
-            using var disposedStream = new ReplayStateStream(new CounterState(0));
+            using var disposedStream = new StateStream(new CounterState(0));
             var disposedObserver = new RecordingObserver();
             using var disposedSubscription = disposedStream.Subscribe(disposedObserver);
             disposedObserver.Clear();
@@ -199,13 +199,13 @@ namespace AtomicRx.Tests
         [Fact]
         public void Notifications_WhenObserverThrows_SwallowsObserverExceptions()
         {
-            using var errorStream = new ReplayStateStream(new CounterState(0));
+            using var errorStream = new StateStream(new CounterState(0));
             using var throwingNextAndErrorSubscription = errorStream.Subscribe(new ThrowingObserver(throwOnNext: true, throwOnError: true));
 
             errorStream.OnNext(new CounterState(1));
             errorStream.OnError(new InvalidOperationException("boom"));
 
-            using var completedStream = new ReplayStateStream(new CounterState(0));
+            using var completedStream = new StateStream(new CounterState(0));
             using var throwingCompletedSubscription = completedStream.Subscribe(new ThrowingObserver(throwOnCompleted: true));
 
             completedStream.OnCompleted();
@@ -214,7 +214,7 @@ namespace AtomicRx.Tests
         [Fact]
         public void Dispose_WhenStreamDisposed_CompletesCurrentObserversAndIgnoresRepeatedDispose()
         {
-            using var stream = new ReplayStateStream(new CounterState(0));
+            using var stream = new StateStream(new CounterState(0));
 
             var observer = new RecordingObserver();
             using var subscription = stream.Subscribe(observer);

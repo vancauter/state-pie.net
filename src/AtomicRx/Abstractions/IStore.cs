@@ -1,7 +1,7 @@
 namespace AtomicRx
 {
     /// <summary>
-    /// Represents a state store that owns the current application state and processes dispatched actions.
+    /// Represents a state store that owns the current root state and processes dispatched actions.
     /// </summary>
     /// <remarks>
     /// Implementations expose the latest state through <see cref="State"/> and replay it immediately to new <see cref="StateChanged"/> subscribers.
@@ -9,7 +9,7 @@ namespace AtomicRx
     public interface IStore : IDisposable
     {
         /// <summary>
-        /// Gets the current root state.
+        /// Gets the current root state snapshot.
         /// </summary>
         IState State { get; }
 
@@ -30,15 +30,5 @@ namespace AtomicRx
         /// Dispatch is serialized by the store implementation so reducer execution and state publication remain ordered.
         /// </remarks>
         void Dispatch(IAction action);
-
-        /// <summary>
-        /// Replaces the active root reducer.
-        /// </summary>
-        /// <param name="newRoot">New root reducer to use for subsequent dispatches.</param>
-        /// <exception cref="ObjectDisposedException">Thrown when the store has already been disposed.</exception>
-        /// <remarks>
-        /// Implementations rerun their initialization pass after the swap so the new reducer can derive state immediately.
-        /// </remarks>
-        void HotSwapReducer(Reducer newRoot);
     }
 }

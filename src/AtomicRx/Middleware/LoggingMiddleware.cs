@@ -31,6 +31,7 @@ namespace AtomicRx
             }
             catch
             {
+                // Diagnostics must never change dispatch behavior.
             }
 
             next(action);

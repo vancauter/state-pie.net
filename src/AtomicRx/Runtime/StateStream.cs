@@ -1,9 +1,9 @@
 namespace AtomicRx.Runtime
 {
     /// <summary>
-    /// Implements a replaying observable used by the store runtime.
+    /// Implements the observable used by the store runtime.
     /// </summary>
-    internal sealed class ReplayStateStream(IState initialState) : IObservable<IState>, IDisposable
+    internal sealed class StateStream(IState initialState) : IObservable<IState>, IDisposable
     {
         /// <summary>
         /// Stores the subscribed observers.
@@ -47,7 +47,7 @@ namespace AtomicRx.Runtime
 
             lock (_lock)
             {
-                ObjectDisposedException.ThrowIf(_isDisposed, nameof(ReplayStateStream));
+                ObjectDisposedException.ThrowIf(_isDisposed, nameof(StateStream));
 
                 shouldComplete = _isCompleted;
                 error = _error;
@@ -60,6 +60,7 @@ namespace AtomicRx.Runtime
                 }
             }
 
+            // Replay occurs outside the lock so observers cannot block subscription bookkeeping.
             if (shouldReplayState)
             {
                 TryNotifyNext(observer, stateToReplay!);
@@ -94,6 +95,7 @@ namespace AtomicRx.Runtime
                 snapshot = [.. _observers];
             }
 
+            // Notify using a stable snapshot so observers can subscribe or unsubscribe during callbacks.
             foreach (var observer in snapshot)
             {
                 TryNotifyNext(observer, value);
@@ -235,12 +237,12 @@ namespace AtomicRx.Runtime
         /// <summary>
         /// Represents an observer subscription.
         /// </summary>
-        private sealed class Subscription(ReplayStateStream owner, IObserver<IState> observer) : IDisposable
+        private sealed class Subscription(StateStream owner, IObserver<IState> observer) : IDisposable
         {
             /// <summary>
             /// Stores the owning state stream.
             /// </summary>
-            private readonly ReplayStateStream _owner = owner;
+            private readonly StateStream _owner = owner;
 
             /// <summary>
             /// Stores the subscribed observer.

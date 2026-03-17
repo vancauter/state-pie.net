@@ -13,6 +13,9 @@ namespace AtomicRx
         /// <param name="type">Non-empty action type string.</param>
         /// <returns>An <see cref="IAction"/> instance.</returns>
         /// <exception cref="ArgumentException">Thrown when <paramref name="type"/> is <see langword="null"/>, empty, or whitespace.</exception>
+        /// <remarks>
+        /// Use stable action type strings so reducers and middleware can rely on predictable message names.
+        /// </remarks>
         public static IAction CreateAction(string type)
         {
             if (string.IsNullOrWhiteSpace(type))

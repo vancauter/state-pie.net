@@ -5,50 +5,7 @@ namespace AtomicRx.Tests
     public class MiddlewareTests
     {
         [Fact]
-        public async Task ThunkMiddleware_WhenAsyncThunkDispatched_ExecutesPayload()
-        {
-            var slice = TestSlices.CreateCounterSlice();
-            var (rootState, rootReducer) = Factory.CombineReducers(slice);
-
-            using var store = Factory.CreateStore(rootState, rootReducer, ThunkMiddleware.Create());
-
-            var thunk = new Func<IStore, Task>(async currentStore =>
-            {
-                currentStore.Dispatch(Factory.CreateAction(TestSlices.Increment));
-                await Task.Delay(10);
-                currentStore.Dispatch(Factory.CreateAction(TestSlices.Increment));
-            });
-
-            store.Dispatch(Factory.CreateAction("THUNK", thunk));
-
-            await Task.Delay(50);
-
-            var counterState = StoreStateAssertions.GetSliceState<CounterState>(store.State, "counter");
-            Assert.Equal(2, counterState.Count);
-        }
-
-        [Fact]
-        public void ThunkMiddleware_WhenSyncThunkDispatched_ExecutesPayload()
-        {
-            var slice = TestSlices.CreateCounterSlice();
-            var (rootState, rootReducer) = Factory.CombineReducers(slice);
-
-            using var store = Factory.CreateStore(rootState, rootReducer, ThunkMiddleware.Create());
-
-            var thunk = new Action<IStore>(currentStore =>
-            {
-                currentStore.Dispatch(Factory.CreateAction(TestSlices.Increment));
-                currentStore.Dispatch(Factory.CreateAction(TestSlices.Increment));
-            });
-
-            store.Dispatch(Factory.CreateAction("THUNK", thunk));
-
-            var counterState = StoreStateAssertions.GetSliceState<CounterState>(store.State, "counter");
-            Assert.Equal(2, counterState.Count);
-        }
-
-        [Fact]
-        public async Task LoggingMiddleware_WhenThunkDispatchesNestedActions_RecordsThemInOrder()
+        public void LoggingMiddleware_WhenActionDispatched_RecordsActionTypeAndForwardsAction()
         {
             var slice = TestSlices.CreateCounterSlice();
             var (rootState, rootReducer) = Factory.CombineReducers(slice);
@@ -60,27 +17,49 @@ namespace AtomicRx.Tests
             {
                 Console.SetOut(writer);
 
-                using var store = Factory.CreateStore(rootState, rootReducer, LoggingMiddleware.Create(), ThunkMiddleware.Create());
+                using var store = Factory.CreateStore(rootState, rootReducer, LoggingMiddleware.Create());
 
-                var thunk = new Func<IStore, Task>(async currentStore =>
-                {
-                    currentStore.Dispatch(Factory.CreateAction(TestSlices.Increment));
-                    await Task.Delay(5);
-                    currentStore.Dispatch(Factory.CreateAction(TestSlices.Increment));
-                });
-
-                store.Dispatch(Factory.CreateAction("THUNK", thunk));
-                await Task.Delay(50);
+                store.Dispatch(Factory.CreateAction(TestSlices.Increment));
 
                 Console.SetOut(originalOut);
 
                 var output = writer.ToString();
-                var thunkIndex = output.IndexOf("THUNK", StringComparison.Ordinal);
+                var counterState = StoreStateAssertions.GetSliceState<CounterState>(store.State, "counter");
+
+                Assert.Contains(TestSlices.Increment, output, StringComparison.Ordinal);
+                Assert.Equal(1, counterState.Count);
+            }
+            finally
+            {
+                Console.SetOut(originalOut);
+            }
+        }
+
+        [Fact]
+        public void LoggingMiddleware_WhenMultipleActionsDispatched_RecordsThemInDispatchOrder()
+        {
+            var slice = TestSlices.CreateCounterSlice();
+            var (rootState, rootReducer) = Factory.CombineReducers(slice);
+
+            var writer = new StringWriter();
+            var originalOut = Console.Out;
+
+            try
+            {
+                Console.SetOut(writer);
+
+                using var store = Factory.CreateStore(rootState, rootReducer, LoggingMiddleware.Create());
+
+                store.Dispatch(Factory.CreateAction(TestSlices.Increment));
+                store.Dispatch(Factory.CreateAction(TestSlices.Increment));
+
+                Console.SetOut(originalOut);
+
+                var output = writer.ToString();
                 var firstIncrementIndex = output.IndexOf(TestSlices.Increment, StringComparison.Ordinal);
                 var secondIncrementIndex = output.IndexOf(TestSlices.Increment, firstIncrementIndex + 1, StringComparison.Ordinal);
 
-                Assert.True(thunkIndex >= 0, "Expected THUNK to be logged");
-                Assert.True(firstIncrementIndex > thunkIndex, "Expected first increment after THUNK");
+                Assert.True(firstIncrementIndex >= 0, "Expected first increment to be logged");
                 Assert.True(secondIncrementIndex > firstIncrementIndex, "Expected second increment after first increment");
             }
             finally

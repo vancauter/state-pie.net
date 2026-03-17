@@ -16,6 +16,9 @@ namespace AtomicRx
         /// <param name="reducer">Reducer function that computes next state for the slice.</param>
         /// <returns>An <see cref="ISlice"/> instance.</returns>
         /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is <see langword="null"/>, empty, or whitespace.</exception>
+        /// <remarks>
+        /// The returned slice adapts the strongly typed reducer to the untyped <see cref="ISlice"/> contract used by <see cref="CombineReducers(ISlice[])"/>.
+        /// </remarks>
         public static ISlice CreateSlice<TState>(string name, TState initialState, Reducer<TState> reducer) where TState : IState
         {
             if (string.IsNullOrWhiteSpace(name))

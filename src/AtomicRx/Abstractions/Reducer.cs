@@ -1,7 +1,7 @@
 namespace AtomicRx
 {
     /// <summary>
-    /// Represents a reducer that computes the next state from the current state and a dispatched action.
+    /// Represents a reducer that computes the next root state from the current state and a dispatched action.
     /// </summary>
     /// <param name="state">The current root state.</param>
     /// <param name="action">The dispatched action to handle.</param>
@@ -18,5 +18,8 @@ namespace AtomicRx
     /// <param name="state">The current slice state.</param>
     /// <param name="action">The dispatched action to handle.</param>
     /// <returns>The next slice state after applying the action.</returns>
+    /// <remarks>
+    /// Implementations should return the existing <paramref name="state"/> instance when no slice update is required.
+    /// </remarks>
     public delegate TState Reducer<TState>(TState state, IAction action) where TState : IState;
 }

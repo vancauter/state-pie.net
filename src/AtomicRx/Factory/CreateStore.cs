@@ -14,7 +14,7 @@ namespace AtomicRx
         /// <param name="rootReducer">A reducer that computes the next root state for each dispatched action.</param>
         /// <returns>An <see cref="IStore"/> instance.</returns>
         /// <remarks>
-        /// The created store performs an internal initialization dispatch so reducers can materialize derived initial state.
+        /// The created store performs an internal initialization dispatch so reducers can materialize derived initial state before external subscribers observe the store.
         /// </remarks>
         public static IStore CreateStore(IState initialState, Reducer rootReducer) => new StoreRuntime(initialState, rootReducer);
 
@@ -26,7 +26,7 @@ namespace AtomicRx
         /// <param name="middleware">Optional middleware pipeline applied in order.</param>
         /// <returns>An <see cref="IStore"/> instance with middleware applied.</returns>
         /// <remarks>
-        /// Middleware wraps the store's base dispatch pipeline in the order provided.
+        /// Middleware wraps the store's base dispatch pipeline in the order provided, so the first middleware receives each action first.
         /// </remarks>
         public static IStore CreateStore(IState initialState, Reducer rootReducer, params AtomicMiddleware[] middleware) => new StoreRuntime(initialState, rootReducer, middleware);
     }
