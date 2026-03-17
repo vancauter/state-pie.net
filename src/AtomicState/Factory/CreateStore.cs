@@ -27,9 +27,10 @@ namespace SC.AtomicState
         /// <returns>An <see cref="IStore"/> instance with middleware applied.</returns>
         /// <remarks>
         /// Middleware wraps the store's base dispatch pipeline in the order provided, so the first middleware receives
-        /// each action first. Reentrant dispatch triggered inside middleware is supported and is serialized with other
-        /// dispatch execution. Background work scheduled by middleware is outside the originating dispatch transaction,
-        /// although any later dispatch from that work is still serialized by the store.
+        /// each action first. Middleware may call <see cref="IStore.Dispatch(IAction)"/> again while a dispatch is
+        /// already in progress, and that nested dispatch is serialized with other dispatch execution. Background work
+        /// scheduled by middleware is outside the originating dispatch transaction, although any later dispatch from
+        /// that work is still serialized by the store.
         /// </remarks>
         public static IStore CreateStore(IState initialState, Reducer rootReducer, params AtomicMiddleware[] middleware) => new StoreRuntime(initialState, rootReducer, middleware);
     }

@@ -169,12 +169,13 @@ returns a new instance.
 
 Each store exposes a replaying observable through `IStore.StateChanged`.
 
-New subscribers immediately receive the latest state snapshot. The intended concurrency contract is that replay, live
-updates, completion, and disposal are observed in one linearized order. Observer callbacks are serialized per store
-stream, but they run on the thread performing the dispatch, completion, or disposal callback, with no built-in thread
-affinity or scheduler. The sequence completes when the store is disposed.
+New subscribers immediately receive the latest state snapshot. The intended concurrency contract is that subscription
+replay, live updates, completion, and disposal are observed in one linearized order. Observer callbacks are serialized
+per store stream, run on the calling thread, and have no built-in thread affinity or scheduler. The sequence completes
+when the store is disposed.
 
-The intended `IStore.State` contract is strong cross-thread visibility for the latest committed root state.
+The intended `IStore.State` contract is that unsynchronized cross-thread readers observe the latest committed root
+state.
 
 ```csharp
 using AtomicState;
@@ -224,32 +225,27 @@ dispatch.
 
 Custom middleware can intercept, short-circuit, or forward actions through the `AtomicMiddleware` delegate.
 
-Middleware may call `Dispatch` reentrantly. When it does, nested actions participate in the same total serialized
-dispatch order as all other store work. Middleware may also schedule work onto background execution contexts. Any later
-dispatch from that scheduled work is still serialized by the store, but it is outside the original dispatch transaction.
+Middleware may call `Dispatch` again while a dispatch is already in progress. When it does, nested actions participate
+in the same total serialized dispatch order as all other store work. Middleware may also schedule work onto background
+execution contexts. Any later dispatch from that scheduled work is still serialized by the store, but it is outside the
+original dispatch transaction.
 
 ## Thread-Safety Status
 
-AtomicState is being aligned with an explicit concurrency contract documented in
-[docs/Threadsafe-Actions.md](docs/Threadsafe-Actions.md).
-
-The current target contract is:
+AtomicState documents the following concurrency contract:
 
 - `Dispatch` execution is serialized.
-- `IStore.State` should provide strong cross-thread visibility.
-- `StateChanged` should provide strict linearized ordering across replay, live updates, completion, and disposal.
-- Observer callbacks are serialized per store stream, but they run on the calling thread with no built-in scheduler or
-  thread affinity.
-- Middleware may perform nested dispatch, and nested actions participate in the total serialized dispatch order.
-- Custom middleware may schedule background work. That work is outside the original dispatch transaction, although any
-  later dispatch it performs is still serialized by the store.
-
-That work is tracked in [docs/Threadsafe-Actions.md](docs/Threadsafe-Actions.md).
+- `IStore.State` provides strong cross-thread visibility for the latest committed root state.
+- `StateChanged` provides strict linearized ordering across subscription replay, live updates, completion, and disposal.
+- Observer callbacks are serialized per store stream, run on the calling thread, and have no built-in thread affinity or
+  scheduler.
+- Nested dispatch triggered by middleware participates in the same total serialized dispatch order.
+- Background work scheduled by middleware is outside the originating dispatch transaction, although any later dispatch
+  from that work is still serialized by the store.
 
 ## Current Limitations
 
 - Combined slice state is an internal runtime shape, so there is no public typed accessor for individual slices yet.
-- The thread-safety contract is documented, but parts of it are still planned work rather than completed guarantees.
 - The library does not currently ship higher-level async orchestration helpers.
 
 ## Development
@@ -273,8 +269,8 @@ The repository also includes:
 Contributions should keep the library aligned with its current scope: explicit state transitions, predictable reducer
 behavior, and a restrained built-in policy.
 
-If you are changing concurrency behavior, update both the implementation and
-[docs/Threadsafe-Actions.md](docs/Threadsafe-Actions.md).
+If you are changing concurrency behavior, update both the implementation and the public documentation in this README and
+the relevant API remarks.
 
 ## License
 
