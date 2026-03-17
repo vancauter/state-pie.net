@@ -1,13 +1,13 @@
-# AtomicState Thread-Safety Action Plan
+# AtomicState Thread-Safety Status
 
 ## Objective
 
-Close the known concurrency gaps in AtomicState in a safe implementation order, starting with correctness bugs in the
-observable pipeline and then tightening publication semantics, middleware ordering guarantees, tests, and documentation.
+Track only the remaining thread-safety gaps in AtomicState. Completed work should be removed from this document as it
+lands so the file stays focused on unfinished concurrency work.
 
 ## Resolved Contract Decisions
 
-- `IStore.State` must provide strong cross-thread visibility for unsynchronized readers.
+- `IStore.State` is intended to provide strong cross-thread visibility for unsynchronized readers.
 - `StateChanged` must provide strict linearized ordering across subscribe, replay, live updates, completion, and
   disposal races.
 - Observer callbacks are serialized per store stream, but they run on the calling thread with no built-in thread
@@ -17,60 +17,38 @@ observable pipeline and then tightening publication semantics, middleware orderi
   outside the core ordering guarantee.
 - When nested dispatch occurs, ordering is defined by the total serialized order of actual dispatch execution.
 
-## Implementation Order
+## Remaining Gaps
 
-### Step 2: Fix `StateStream` subscribe and terminal race conditions
+### Strong `IStore.State` Publication
 
-- [ ] Rework `StateStream.Subscribe` so initial replay cannot race with `OnNext`, `OnCompleted`, `OnError`, or `Dispose`
-      and produce out-of-order notifications.
-- [ ] Ensure a subscriber cannot observe `OnCompleted` or `OnError` followed by a replayed `OnNext`.
-- [ ] Ensure a subscriber cannot receive a newer live value before the initial replay of the last known state.
-- [ ] Preserve serialized callback delivery while keeping observer invocation outside internal bookkeeping locks.
+- The contract is documented, but the implementation is not yet defensible for unsynchronized cross-thread readers.
+- `StoreRuntime.State` is currently a normal auto-property updated under the dispatch lock. That preserves reducer-side
+  serialization, but it does not by itself establish a strong publication guarantee for lock-free readers.
+- This still needs an explicit publication mechanism with a simple read path.
 
-Why this is next: this is the highest-risk correctness bug because it can violate the observable contract even when
-callers use the API correctly.
+### Race-Focused Regression Coverage
 
-### Step 3: Add concurrency regression tests for `StateStream`
+- There are still no dedicated tests that repeatedly race `Subscribe` against `OnNext`.
+- There are still no dedicated tests that repeatedly race `Subscribe` against `OnCompleted`, `OnError`, or `Dispose`.
+- Current stream tests validate deterministic behavior in normal sequencing, but they do not stress the concurrency
+  edges that motivated this work.
 
-- [ ] Add tests that race `Subscribe` against `OnNext`.
-- [ ] Add tests that race `Subscribe` against `OnCompleted` and `OnError`.
-- [ ] Add tests that race `Subscribe` against `Dispose`.
-- [ ] Verify notification order and terminal behavior, not just eventual outcomes.
-- [ ] Verify callbacks remain serialized for a single store stream.
+### `IStore.State` Visibility Tests
 
-Why this follows immediately: `StateStream` is subtle enough that the fix should be locked in with repeatable
-race-focused tests before moving on.
+- There are no tests yet that verify direct `State` reads stay current under concurrent dispatch.
+- There are no tests yet proving the value returned by `State` matches the most recently committed store state while
+  observers are also receiving updates.
 
-### Step 4: Implement strong `IStore.State` publication
+### Middleware Reentrancy Regression Coverage
 
-- [ ] Implement strong publication for `State` so unsynchronized cross-thread readers observe the latest committed
-      state.
-- [ ] Choose the publication mechanism and keep the read path simple and defensible.
-- [ ] Verify the `State` getter remains aligned with the store's committed dispatch order.
-
-Why this is separate: `State` is a public API contract, not just an internal implementation detail.
-
-### Step 5: Add `IStore.State` visibility tests
-
-- [ ] Add tests that verify direct `State` reads stay current under concurrent dispatch.
-- [ ] Add tests that confirm the value exposed through `State` matches the value most recently committed by the store.
-- [ ] Add tests that cover reading `State` while observers are also receiving updates.
-
-Why this matters: strong visibility is easy to claim and easy to get subtly wrong without dedicated tests.
-
-### Step 7: Add middleware ordering regression tests
-
-- [ ] Add tests that verify nested dispatch produces the documented serialized ordering.
-- [ ] Add tests that verify middleware-triggered reentrant dispatch does not violate callback serialization.
-- [ ] Add tests that show scheduled background work is outside the original dispatch transaction while its later
-      dispatches still serialize correctly.
-
-Why this is last: these guarantees only become meaningful once the underlying store and stream semantics are fixed.
+- There are no dedicated tests yet for nested dispatch ordering through middleware.
+- There are no tests yet proving middleware-triggered reentrant dispatch preserves callback serialization.
+- There are no tests yet showing that background-scheduled middleware work falls outside the original dispatch
+  transaction while its later dispatches still serialize correctly.
 
 ## Exit Criteria
 
-- `StateStream` no longer produces out-of-order replay or terminal notifications under concurrent use.
-- Observer callbacks are serialized and documented as running on the calling thread with no built-in affinity.
-- The `State` property has an explicit, implemented, and tested cross-thread visibility contract.
-- Middleware reentrancy and nested dispatch ordering are documented and covered by tests.
-- Concurrency guarantees are covered by automated tests.
+- `StateStream` ordering and terminal behavior remain stable under race-focused concurrency tests.
+- The `State` property has an explicit, implemented, and tested cross-thread visibility mechanism.
+- Middleware reentrancy and nested dispatch ordering are covered by targeted regression tests.
+- The published documentation matches the implementation and test suite.
