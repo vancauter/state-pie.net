@@ -24,6 +24,24 @@ namespace SC.AtomicState.Tests
         }
 
         [Fact]
+        public void CreateAction_WhenTypeIsNull_ThrowsArgumentException() => _ = Assert.Throws<ArgumentException>(() => Factory.CreateAction(null!));
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData("\t")]
+        public void CreateAction_WhenTypeIsBlank_ThrowsArgumentException(string type) => _ = Assert.Throws<ArgumentException>(() => Factory.CreateAction(type));
+
+        [Fact]
+        public void CreateActionWithPayload_WhenTypeIsNull_ThrowsArgumentException() => _ = Assert.Throws<ArgumentException>(() => Factory.CreateAction(null!, "payload"));
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData("\t")]
+        public void CreateActionWithPayload_WhenTypeIsBlank_ThrowsArgumentException(string type) => _ = Assert.Throws<ArgumentException>(() => Factory.CreateAction(type, 1));
+
+        [Fact]
         public void CreateSlice_WhenCreated_ExposesNameStateAndReducer()
         {
             var slice = Factory.CreateSlice("counter", new Counter(0), (state, action) =>
@@ -37,6 +55,15 @@ namespace SC.AtomicState.Tests
             var next = slice.Reducer(slice.State, Factory.CreateAction("inc"));
             Assert.NotSame(slice.State, next);
         }
+
+        [Fact]
+        public void CreateSlice_WhenNameIsNull_ThrowsArgumentException() => _ = Assert.Throws<ArgumentException>(() => Factory.CreateSlice(null!, new Counter(0), (state, action) => state));
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData("\t")]
+        public void CreateSlice_WhenNameIsBlank_ThrowsArgumentException(string name) => _ = Assert.Throws<ArgumentException>(() => Factory.CreateSlice(name, new Counter(0), (state, action) => state));
 
         [Fact]
         public void CombineReducers_WhenStoreDispatches_EmitsUpdatedRootState()
@@ -64,6 +91,21 @@ namespace SC.AtomicState.Tests
 
             Assert.Equal(1, firstState.Value);
             Assert.Equal(12, secondState.Value);
+        }
+
+        [Fact]
+        public void CombineReducers_WhenNoSlicesProvided_ThrowsArgumentException() => _ = Assert.Throws<ArgumentException>(() => Factory.CombineReducers());
+
+        [Fact]
+        public void CombineReducers_WhenSliceCollectionContainsNull_ThrowsArgumentException() => _ = Assert.Throws<ArgumentException>(() => Factory.CombineReducers(TestSlices.CreateCounterSlice(), null!));
+
+        [Fact]
+        public void CombineReducers_WhenSliceNamesDuplicate_ThrowsArgumentException()
+        {
+            var firstSlice = Factory.CreateSlice("counter", new Counter(0), (state, action) => state);
+            var secondSlice = Factory.CreateSlice("counter", new Counter(1), (state, action) => state);
+
+            _ = Assert.Throws<ArgumentException>(() => Factory.CombineReducers(firstSlice, secondSlice));
         }
 
         private sealed class TestObserver(List<IState> destination) : IObserver<IState>

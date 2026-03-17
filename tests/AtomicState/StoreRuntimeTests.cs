@@ -114,6 +114,8 @@ namespace SC.AtomicState.Tests
 
                     lastObserved = current;
 
+                    // The dispatch loop advances committedTarget after each write so the reader only acknowledges
+                    // states that should already be globally visible through the volatile store state contract.
                     var expected = Volatile.Read(ref committedTarget);
                     if (current >= expected)
                     {

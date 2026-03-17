@@ -57,6 +57,7 @@ namespace SC.AtomicState.Tests.Shared
         {
             var (innerState, innerReducer) = Factory.CombineReducers(CreateInnerCounterSlice(), CreateInnerPersonSlice());
 
+            // The adapter keeps the nested combined reducer usable through the untyped slice contract.
             IState Adapter(IState state, IAction action) => innerReducer(state, action);
 
             return Factory.CreateSlice(

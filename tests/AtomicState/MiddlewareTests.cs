@@ -96,6 +96,8 @@ namespace SC.AtomicState.Tests
 
                 if (action.Type == outerAction)
                 {
+                    // The nested dispatch is triggered after the outer dispatch unwinds so the timeline proves the
+                    // store's serialized ordering rather than reducer recursion.
                     timeline.Add("dispatch:nested");
                     store.Dispatch(Factory.CreateAction(nestedAction));
                     timeline.Add("after:nested");
@@ -166,6 +168,8 @@ namespace SC.AtomicState.Tests
                 UpdateMaximum(ref maxConcurrentCallbacks, currentConcurrency);
                 observedCounts.Add(((CounterState)state).Count);
 
+                // The delay widens the overlap window so a broken stream implementation would expose concurrent
+                // observer callbacks instead of passing by luck.
                 Thread.Sleep(10);
 
                 _ = Interlocked.Decrement(ref activeCallbacks);
@@ -208,6 +212,8 @@ namespace SC.AtomicState.Tests
                 {
                     _ = Task.Run(async () =>
                     {
+                        // Separate task coordination from the actual background dispatch so the test can assert that
+                        // the original dispatch commits before the later out-of-band work re-enters the store.
                         _ = backgroundStarted.TrySetResult();
 
                         try

@@ -248,6 +248,8 @@ namespace SC.AtomicState.Tests
                 var counts = observer.GetCounts();
 
                 Assert.True(
+                    // Depending on which side wins the race, the subscriber may observe either the published state
+                    // directly or the initial replay followed by the newly published state, but never duplicates.
                     counts is [var current] && current == iteration ||
                     counts is [0, var replayedCurrent] && replayedCurrent == iteration,
                     $"Unexpected replay sequence: [{string.Join(", ", counts)}].");
@@ -352,6 +354,8 @@ namespace SC.AtomicState.Tests
         private static Task<IDisposable> StartConcurrentSubscribe(StateStream stream, IObserver<IState> observer, Barrier barrier) =>
             Task.Run(() =>
             {
+                // The barrier forces subscription and the competing stream action to start from the same point so the
+                // test exercises real ordering races instead of deterministic sequencing.
                 barrier.SignalAndWait();
                 return stream.Subscribe(observer);
             });

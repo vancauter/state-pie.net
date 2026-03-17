@@ -161,6 +161,7 @@ namespace SC.AtomicState.Tests
         private static long MeasureAllocatedBytes(Action action)
         {
             ForceFullCollection();
+            // The first read resets the current-thread allocation counter baseline before the measured work begins.
             _ = GC.GetAllocatedBytesForCurrentThread();
             var before = GC.GetAllocatedBytesForCurrentThread();
 
@@ -179,6 +180,8 @@ namespace SC.AtomicState.Tests
 
         private static void Warmup(Action action)
         {
+            // Warm the JIT and steady-state paths so perf assertions are about the dispatch implementation rather than
+            // first-use costs.
             for (var iteration = 0; iteration < s_warmupIterations; iteration++)
             {
                 action();
@@ -187,6 +190,7 @@ namespace SC.AtomicState.Tests
 
         private static void ForceFullCollection()
         {
+            // The double collect pattern reduces noise from pending finalizers before allocation-sensitive assertions.
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();

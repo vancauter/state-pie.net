@@ -14,6 +14,8 @@ namespace SC.AtomicState.Tests.Shared
                 "States",
                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
+            // Combined slice state stays intentionally internal, so tests reflect over the runtime shape instead of
+            // widening the public API just for assertions.
             var states = Assert.IsAssignableFrom<IReadOnlyDictionary<string, IState>>(statesProperty?.GetValue(rootState));
             Assert.True(states.TryGetValue(sliceName, out var sliceState), $"Expected slice '{sliceName}' to exist.");
 
