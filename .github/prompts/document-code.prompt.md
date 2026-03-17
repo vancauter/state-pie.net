@@ -23,6 +23,7 @@ who needs to understand the intent, constraints, and non-obvious behavior of the
 - Add `<exception cref="...">` tags for every exception that can be intentionally thrown by a method, and describe the
   exact triggering condition.
 - Use `<remarks>` for non-obvious behavior, thread-safety guarantees, or usage constraints.
+- Add examples in `<remarks>` where they clarify usage, especially for complex APIs.
 - Ensure every `<see cref="..."/>` tag correctly points to related types or methods.
 
 ## Internal Implementation Comments
