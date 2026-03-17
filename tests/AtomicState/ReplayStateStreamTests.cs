@@ -228,6 +228,141 @@ namespace SC.AtomicState.Tests
             Assert.Empty(observer.States);
         }
 
+        [Fact]
+        public async Task Subscribe_WhenRacedWithOnNext_ReplaysPreviousStateOrCurrentStateWithoutDuplication()
+        {
+            const int iterationCount = 128;
+
+            for (var iteration = 1; iteration <= iterationCount; iteration++)
+            {
+                using var stream = new StateStream(new CounterState(0));
+                using var barrier = new Barrier(2);
+
+                var observer = new ConcurrentRecordingObserver();
+                var subscribeTask = StartConcurrentSubscribe(stream, observer, barrier);
+                var publishTask = StartConcurrentAction(barrier, () => stream.OnNext(new CounterState(iteration)));
+
+                using var subscription = await subscribeTask;
+                await publishTask;
+
+                var counts = observer.GetCounts();
+
+                Assert.True(
+                    counts is [var current] && current == iteration ||
+                    counts is [0, var replayedCurrent] && replayedCurrent == iteration,
+                    $"Unexpected replay sequence: [{string.Join(", ", counts)}].");
+                Assert.Equal(0, observer.CompletedCount);
+                Assert.Null(observer.Error);
+            }
+        }
+
+        [Fact]
+        public async Task Subscribe_WhenRacedWithOnCompleted_ReplaysLatestStateAndCompletesOnce()
+        {
+            const int iterationCount = 128;
+
+            for (var iteration = 0; iteration < iterationCount; iteration++)
+            {
+                using var stream = new StateStream(new CounterState(0));
+                using var barrier = new Barrier(2);
+
+                var observer = new ConcurrentRecordingObserver();
+                var subscribeTask = StartConcurrentSubscribe(stream, observer, barrier);
+                var completeTask = StartConcurrentAction(barrier, stream.OnCompleted);
+
+                using var subscription = await subscribeTask;
+                await completeTask;
+
+                Assert.Equal([0], observer.GetCounts());
+                Assert.Equal(1, observer.CompletedCount);
+                Assert.Null(observer.Error);
+            }
+        }
+
+        [Fact]
+        public async Task Subscribe_WhenRacedWithOnError_ReplaysLatestStateAndPropagatesOneTerminalError()
+        {
+            const int iterationCount = 128;
+
+            for (var iteration = 0; iteration < iterationCount; iteration++)
+            {
+                using var stream = new StateStream(new CounterState(0));
+                using var barrier = new Barrier(2);
+
+                var observer = new ConcurrentRecordingObserver();
+                var failure = new InvalidOperationException($"boom-{iteration}");
+                var subscribeTask = StartConcurrentSubscribe(stream, observer, barrier);
+                var errorTask = StartConcurrentAction(barrier, () => stream.OnError(failure));
+
+                using var subscription = await subscribeTask;
+                await errorTask;
+
+                Assert.Equal([0], observer.GetCounts());
+                Assert.Equal(0, observer.CompletedCount);
+                Assert.Same(failure, observer.Error);
+            }
+        }
+
+        [Fact]
+        public async Task Subscribe_WhenRacedWithDispose_CompletesObserverOrThrowsObjectDisposedException()
+        {
+            const int iterationCount = 128;
+
+            for (var iteration = 0; iteration < iterationCount; iteration++)
+            {
+                using var stream = new StateStream(new CounterState(0));
+                using var barrier = new Barrier(2);
+
+                var observer = new ConcurrentRecordingObserver();
+                var subscribeTask = StartConcurrentSubscribe(stream, observer, barrier);
+                var disposeTask = StartConcurrentAction(barrier, stream.Dispose);
+
+                IDisposable? subscription = null;
+                ObjectDisposedException? disposedException = null;
+
+                try
+                {
+                    subscription = await subscribeTask;
+                }
+                catch (ObjectDisposedException exception)
+                {
+                    disposedException = exception;
+                }
+
+                await disposeTask;
+
+                if (disposedException is not null)
+                {
+                    Assert.Empty(observer.GetCounts());
+                    Assert.Equal(0, observer.CompletedCount);
+                    Assert.Null(observer.Error);
+                    continue;
+                }
+
+                using (subscription!)
+                {
+                }
+
+                Assert.Equal([0], observer.GetCounts());
+                Assert.Equal(1, observer.CompletedCount);
+                Assert.Null(observer.Error);
+            }
+        }
+
+        private static Task<IDisposable> StartConcurrentSubscribe(StateStream stream, IObserver<IState> observer, Barrier barrier) =>
+            Task.Run(() =>
+            {
+                barrier.SignalAndWait();
+                return stream.Subscribe(observer);
+            });
+
+        private static Task StartConcurrentAction(Barrier barrier, Action action) =>
+            Task.Run(() =>
+            {
+                barrier.SignalAndWait();
+                action();
+            });
+
         private sealed class RecordingObserver : IObserver<IState>
         {
             public List<IState> States { get; } = [];
@@ -273,6 +408,68 @@ namespace SC.AtomicState.Tests
                 if (throwOnNext)
                 {
                     throw new InvalidOperationException("next");
+                }
+            }
+        }
+
+        private sealed class ConcurrentRecordingObserver : IObserver<IState>
+        {
+            private readonly Lock _gate = new();
+            private readonly List<int> _counts = [];
+            private int _completedCount;
+            private Exception? _error;
+
+            public int CompletedCount
+            {
+                get
+                {
+                    lock (_gate)
+                    {
+                        return _completedCount;
+                    }
+                }
+            }
+
+            public Exception? Error
+            {
+                get
+                {
+                    lock (_gate)
+                    {
+                        return _error;
+                    }
+                }
+            }
+
+            public int[] GetCounts()
+            {
+                lock (_gate)
+                {
+                    return [.. _counts];
+                }
+            }
+
+            public void OnCompleted()
+            {
+                lock (_gate)
+                {
+                    _completedCount++;
+                }
+            }
+
+            public void OnError(Exception error)
+            {
+                lock (_gate)
+                {
+                    _error = error;
+                }
+            }
+
+            public void OnNext(IState value)
+            {
+                lock (_gate)
+                {
+                    _counts.Add(((CounterState)value).Count);
                 }
             }
         }
