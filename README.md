@@ -8,7 +8,6 @@ snapshots.
 
 ## Contents
 
-- [Status](#status)
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -22,13 +21,6 @@ snapshots.
 - [Thread-Safety Status](#thread-safety-status)
 - [Current Limitations](#current-limitations)
 - [Development](#development)
-
-## Status
-
-AtomicState is currently pre-release.
-
-Breaking changes are still acceptable when they materially improve the API, naming, or structure. The package story is
-not finalized yet, so this repository is currently the source of truth for usage and development guidance.
 
 ## Features
 
@@ -235,6 +227,10 @@ using var store = Factory.CreateStore(
 dispatch.
 
 Custom middleware can intercept, short-circuit, or forward actions through the `Middleware` delegate.
+
+Middleware receives an `IStore` handle for use by the returned dispatch delegate. That handle is not valid while the
+middleware pipeline is still being composed, so middleware factories should capture it and defer all store access until
+dispatch time.
 
 Middleware may call `Dispatch` again while a dispatch is already in progress. When it does, nested actions participate
 in the same total serialized dispatch order as all other store work. Middleware may also schedule work onto background
