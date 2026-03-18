@@ -12,6 +12,9 @@ namespace SC.AtomicState.Internal
         public IState State { get; } = initialState;
 
         /// <inheritdoc />
-        public Reducer Reducer { get; } = (state, action) => reducer((TState)state, action);
+        public Reducer Reducer { get; } = (state, action) =>
+            // Combined reducers store slice snapshots through the IState surface, so adapt back to the concrete slice
+            // type at the last possible boundary.
+            reducer((TState)state, action);
     }
 }

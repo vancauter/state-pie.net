@@ -36,6 +36,7 @@ namespace SC.AtomicState.Internal
                 var current = (Dispatch)DispatchCore;
                 for (var index = middleware.Length - 1; index >= 0; index--)
                 {
+                    // Compose from the tail so the first registered middleware becomes the outermost dispatch layer.
                     current = middleware[index](this, current);
                 }
 

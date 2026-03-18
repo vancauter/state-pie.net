@@ -12,13 +12,17 @@ namespace SC.AtomicState
         /// Gets a named slice state from a combined root state and casts it to <typeparamref name="TState"/>.
         /// </summary>
         /// <typeparam name="TState">Expected slice state type.</typeparam>
-        /// <param name="rootState">Root state produced by <see cref="Factory.CombineReducers(ISlice[])"/>.</param>
+        /// <param name="rootState">A combined root state produced by <see cref="Factory.CombineReducers(ISlice[])"/>.</param>
         /// <param name="sliceName">The slice name to read.</param>
         /// <returns>The typed slice state.</returns>
         /// <exception cref="ArgumentException">Thrown when <paramref name="sliceName"/> is <see langword="null"/>, empty, or whitespace.</exception>
-        /// <exception cref="InvalidOperationException">Thrown when <paramref name="rootState"/> was not produced by <see cref="Factory.CombineReducers(ISlice[])"/>.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when <paramref name="rootState"/> is not a combined state produced by <see cref="Factory.CombineReducers(ISlice[])"/>.</exception>
         /// <exception cref="KeyNotFoundException">Thrown when the combined root state does not contain <paramref name="sliceName"/>.</exception>
         /// <exception cref="InvalidCastException">Thrown when the slice exists but is not assignable to <typeparamref name="TState"/>.</exception>
+        /// <remarks>
+        /// Use <see cref="TryGetSliceState{TState}(IState, string, out TState?)"/> when the caller wants an optional
+        /// lookup instead of exception-based failure details.
+        /// </remarks>
         public static TState GetSliceState<TState>(IState rootState, string sliceName)
             where TState : class, IState
         {
@@ -54,6 +58,10 @@ namespace SC.AtomicState
         /// <returns><see langword="true"/> when the slice exists and is assignable to <typeparamref name="TState"/>; otherwise <see langword="false"/>.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="rootState"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">Thrown when <paramref name="sliceName"/> is <see langword="null"/>, empty, or whitespace.</exception>
+        /// <remarks>
+        /// This method intentionally folds unsupported root-state shapes, missing slices, and incompatible slice types
+        /// into the same <see langword="false"/> result.
+        /// </remarks>
         public static bool TryGetSliceState<TState>(IState rootState, string sliceName, [NotNullWhen(true)] out TState? sliceState)
             where TState : class, IState
         {

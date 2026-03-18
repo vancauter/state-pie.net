@@ -59,6 +59,7 @@ namespace SC.AtomicState
         /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is <see langword="null"/>, empty, or whitespace.</exception>
         /// <remarks>
         /// The returned slice adapts the strongly typed reducer to the untyped <see cref="ISlice"/> contract used by <see cref="CombineReducers(ISlice[])"/>.
+        /// Slice reducers should return the existing state instance when an action does not change that slice.
         /// </remarks>
         public static ISlice CreateSlice<TState>(string name, TState initialState, Reducer<TState> reducer) where TState : IState
         {
@@ -104,11 +105,14 @@ namespace SC.AtomicState
         /// <summary>
         /// Combines multiple <see cref="ISlice"/> instances into a single root state and reducer.
         /// </summary>
-        /// <param name="slices">An array of slices to combine. Each slice must have a unique name.</param>
-        /// <returns>A tuple containing the initial combined root state and a reducer that delegates to each slice reducer.</returns>
+        /// <param name="slices">An array of slices to combine. Each slice must be non-null and have a unique name.</param>
+        /// <returns>
+        /// A tuple containing the initial combined root state and a reducer that delegates to each slice reducer.
+        /// Pass both tuple members forward together when creating a store for the combined state.
+        /// </returns>
         /// <exception cref="ArgumentException">Thrown when <paramref name="slices"/> is empty, contains a null entry, or contains duplicate slice names.</exception>
         /// <remarks>
-        /// The returned reducer expects to receive the root state shape created by this method. It preserves the
+        /// The returned reducer only supports the combined root state shape created by this method. It preserves the
         /// existing root state reference when no slice produces a new state instance. That identity-preserving path is
         /// intentional because it prevents unnecessary state publication and avoids allocating a replacement slice map
         /// for actions that leave every slice unchanged.
