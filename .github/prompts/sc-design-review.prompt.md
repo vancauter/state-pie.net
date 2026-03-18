@@ -23,9 +23,12 @@ Review the relevant C# and .NET code for design quality and pattern fit.
 
 ## Output expectations
 
-1. Start with findings first, ordered by severity.
-2. Separate concrete design flaws from acceptable trade-offs and future improvements.
-3. Explain why each recommendation is worth the complexity it introduces.
+1. Code review and actions:
+    - ./docs/internal/[yyyyMMdd]-[##]-design-review.md (The review, conclusions, and recommendations)
+    - ./docs/internal/[yyyyMMdd]-[##]-design-review-actions.md (Action checklist based on the review)
+2. Start with findings first, ordered by severity.
+3. Separate concrete design flaws from acceptable trade-offs and future improvements.
+4. Explain why each recommendation is worth the complexity it introduces.
 
 ## References
 

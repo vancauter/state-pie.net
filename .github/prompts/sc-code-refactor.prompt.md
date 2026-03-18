@@ -9,7 +9,8 @@ agent: "C# Expert"
 
 # Code Refactor
 
-Run a focused or broad structural improvement pass over the relevant C# code.
+Run a focused or broad structural improvement pass over the relevant C# code, with a preference for modern design
+choices (such as Domain-Driven Design, clear boundaries, and maintainable abstractions) where practical.
 
 ## Workflow
 
@@ -17,7 +18,8 @@ Run a focused or broad structural improvement pass over the relevant C# code.
 2. Review the code for naming, layout, architecture, visibility, type shape, and helper scope issues.
 3. Inspect dependent tests, samples, docs, or tooling that need to move with the code.
 4. Scale the pass to the repository.
-5. Prefer the least risky change that materially improves the structure.
+5. Prefer the least risky change that materially improves the structure, but when multiple approaches are viable, favor
+   modern design patterns (e.g., DDD, SOLID, clear separation of concerns).
 6. Present the plan before editing when the change is substantial.
 7. Avoid cosmetic churn and avoid public-API changes unless the user explicitly asks for them.
 8. Update tests and downstream consumers for renamed, moved, or structurally significant code.
