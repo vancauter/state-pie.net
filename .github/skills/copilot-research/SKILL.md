@@ -1,83 +1,67 @@
 ---
 name: "copilot-research"
 description:
-    "Use when dealing with GitHub Copilot instruction, prompt, skill, and agent customization capabilities, reviewing
-    official examples, and creating internal memory from authoritative customization sources."
+    "Use when researching GitHub Copilot instructions, prompts, custom agents, or skills before creating or changing
+    customization files."
+argument-hint: "Describe which customization types are in scope and what you want to change"
 ---
 
 # Copilot Research
 
-Use this skill when the task is to study GitHub Copilot capabilities before changing or creating any instruction,
-prompt, agent, or related workflow file.
+Use this skill when the task is to study GitHub Copilot customization capabilities before changing or creating any
+instruction, prompt, agent, skill, or related workflow file.
 
-All workspace customization directories and files created or updated through this skill must live under `./.github/`.
+All workspace customization files created or updated through this skill must live under `./.github/`.
 
-## Use Cases
+## Required sources
 
-- Explore and understand custom instruction capabilities.
-- Explore and understand prompt file capabilities.
-- Review official and community examples before editing customization files.
-- Create or refresh internal memory based on authoritative customization documentation.
+Review the relevant official VS Code documentation before making recommendations or edits:
 
-## Required Sources
+1. Custom instructions: `https://code.visualstudio.com/docs/copilot/customization/custom-instructions`
+2. Prompt files: `https://code.visualstudio.com/docs/copilot/customization/prompt-files`
+3. Custom agents: `https://code.visualstudio.com/docs/copilot/customization/custom-agents`
+4. Agent skills: `https://code.visualstudio.com/docs/copilot/customization/agent-skills`
+5. Awesome Copilot examples and patterns: `https://awesome-copilot.github.com/`
 
-Review these sources before making recommendations or edits:
-
-1. Official custom instructions documentation:
-   `https://code.visualstudio.com/docs/copilot/customization/custom-instructions`
-2. Awesome Copilot examples and patterns: `https://awesome-copilot.github.com/`
-
-If the task also touches prompt files or custom agents, expand the research to the related official VS Code Copilot
-documentation for prompts and agents.
+Prefer official documentation when examples and docs conflict.
 
 ## Workflow
 
-1. Gather the current workspace context.
-    - Inspect any existing `.instructions.md`, `.prompt.md`, `.agent.md`, `copilot-instructions.md`, `AGENTS.md`, or
-      `SKILL.md` files under `./.github/` that may be affected.
-    - Identify whether the task is about instructions, prompts, agents, or skills.
-2. Read the authoritative documentation.
-    - Start with the official VS Code documentation.
-    - Use Awesome Copilot as a secondary source for examples and patterns.
-    - Prefer official documentation when examples and docs conflict.
-3. Extract the relevant capability model.
-    - Supported file locations.
-    - Supported frontmatter fields.
+1. Inspect the current workspace context.
+    - Read any affected `.instructions.md`, `.prompt.md`, `.agent.md`, `copilot-instructions.md`, `AGENTS.md`, or
+      `SKILL.md` files under `./.github/`.
+    - Identify which concerns are already present and where duplication exists.
+2. Build the capability model from the docs.
+    - Supported locations.
+    - Supported frontmatter.
     - Discovery behavior and triggering rules.
-    - Any file-type-specific constraints or best practices.
-4. Create or update internal memory.
-    - First inspect the existing memory directory to avoid duplicates.
-    - Store only durable facts that will help with future Copilot customization tasks.
-    - Keep the memory concise and practical.
+    - File-type-specific constraints and best practices.
+3. Decide which primitive each concern belongs to.
+    - Always-on shared guidance: `copilot-instructions.md` or `AGENTS.md`.
+    - Scoped standards or conventions: `.instructions.md`.
+    - Focused reusable slash command: `.prompt.md`.
+    - Persistent persona, tool policy, or handoffs: `.agent.md`.
+    - Portable task workflow with optional bundled resources: `SKILL.md`.
+4. Update internal memory.
+    - Inspect memory first to avoid duplicates.
+    - Store only durable facts that help with future Copilot customization work.
 5. Apply the findings.
-    - Normalize or create files using the officially supported structure under `./.github/`.
-    - Preserve the actual intent of existing instructions unless the user asks for behavioral changes.
+    - Normalize or create files using the supported structure under `./.github/`.
+    - Preserve the intent of existing files unless the user asks for behavioral changes.
 6. Validate the result.
-    - Check for frontmatter or diagnostics errors.
-    - Confirm references such as agent names match the actual registered names in the workspace.
+    - Check frontmatter and diagnostics.
+    - Confirm references such as agent names and linked files still resolve correctly.
 
-## Memory Guidance
-
-When creating memory from the researched sources, record short facts such as:
-
-- Where each customization type lives.
-- Which frontmatter keys are officially supported.
-- How the agent discovers instructions, prompts, agents, or skills.
-- Which source is authoritative when examples vary.
-
-Do not store long summaries or duplicate the documentation verbatim.
-
-## Output Expectations
+## Output expectations
 
 1. Summarize the relevant Copilot customization capabilities.
-2. Call out any constraints that affect the requested file type.
-3. State that internal memory was created or updated, if memory work was part of the task.
+2. Call out the constraints that affect the requested file types.
+3. State whether internal memory was created or updated.
 4. Then implement the requested customization changes.
 
-## Quality Bar
+## Quality bar
 
-- Keep all workspace customization directories and files under `./.github/`.
-- Use official formats and headers.
-- Keep frontmatter valid YAML.
+- Keep all workspace customization files under `./.github/`.
+- Use supported formats and frontmatter only.
 - Keep descriptions specific enough to improve discovery.
-- Preserve user intent while improving structure and consistency.
+- Avoid duplicating shared guidance across prompts, agents, skills, and instructions.
