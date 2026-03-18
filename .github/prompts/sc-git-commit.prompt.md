@@ -17,7 +17,9 @@ Create one or more git commits for the current workspace.
 4. Name each commit from the staged diff, not from the entire working tree.
 5. Use Conventional Commit formatting with a short imperative summary and add a body or footer when the change needs
    context.
-6. Repeat until all intended changes are committed.
+6. If you encounter a code error or compile error, stop and report it instead of debugging it or making implementation
+   changes.
+7. Repeat until all intended changes are committed.
 
 ## Output expectations
 

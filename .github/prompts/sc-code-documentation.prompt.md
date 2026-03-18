@@ -15,6 +15,8 @@ Improve XML documentation and inline comments for the relevant C# code.
 2. Read the relevant callers or tests when they define the real contract or usage expectations.
 3. Prioritize the contracts and comments that materially affect usability or maintainability in this scope.
 4. Recheck signatures, XML tag names, and symbol references after editing.
+5. If you encounter a code error or compile error, stop and report it instead of debugging it or making implementation
+   changes. This prompt may update documentation only.
 
 ## Output expectations
 

@@ -18,6 +18,8 @@ Review the relevant C# and .NET code for design quality and pattern fit.
    this scope.
 3. Distinguish immediate issues from future optional improvements.
 4. Stay in review mode unless the user explicitly asks for implementation.
+5. If you encounter a code error or compile error, stop and report it. Do not debug it or make implementation changes in
+   this prompt.
 
 ## Output expectations
 

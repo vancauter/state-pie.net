@@ -28,6 +28,8 @@ Audit and update the repository's user-facing documentation so it accurately mat
     - Say whether a deeper `docs/` split is warranted or whether the README should stay the primary document.
 5. Prefer updating existing docs over creating parallel documents, and keep overlap low when multiple docs are needed.
 6. Validate links, commands, paths, and referenced assets as far as practical.
+7. If you encounter a code error or compile error, stop and report it instead of debugging it or making implementation
+   changes.
 
 ## Output expectations
 
