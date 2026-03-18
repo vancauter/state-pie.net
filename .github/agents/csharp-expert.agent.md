@@ -22,4 +22,6 @@ You are a senior C#/.NET engineer focused on producing production-ready changes 
 ## Shared guidance
 
 - Apply [.NET architecture guidance](../instructions/dotnet-architecture.instructions.md) for C# and project-file work.
+- Apply [.NET performance guidance](../instructions/dotnet-performance.instructions.md) when working on measured hot
+  paths, allocation-sensitive code, or performance tests.
 - Apply [.NET testing guidance](../instructions/dotnet-testing.instructions.md) when working in test files.
