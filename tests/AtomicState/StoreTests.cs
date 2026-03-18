@@ -63,6 +63,54 @@ namespace SC.AtomicState.Tests
         }
 
         [Fact]
+        public void CreateStore_WhenMiddlewareReadsStateDuringComposition_ThrowsInvalidOperationException()
+        {
+            static IState rootReducer(IState state, IAction action) => state;
+
+            static Dispatch readStateDuringComposition(IStore store, Dispatch next)
+            {
+                _ = store.State;
+                return next;
+            }
+
+            var exception = Assert.Throws<InvalidOperationException>(() => Factory.CreateStore(new CounterState(0), rootReducer, readStateDuringComposition));
+
+            Assert.Equal("Middleware cannot access the store while the dispatch pipeline is being composed.", exception.Message);
+        }
+
+        [Fact]
+        public void CreateStore_WhenMiddlewareSubscribesDuringComposition_ThrowsInvalidOperationException()
+        {
+            static IState rootReducer(IState state, IAction action) => state;
+
+            static Dispatch subscribeDuringComposition(IStore store, Dispatch next)
+            {
+                _ = store.StateChanged.Subscribe(new NoOpObserver());
+                return next;
+            }
+
+            var exception = Assert.Throws<InvalidOperationException>(() => Factory.CreateStore(new CounterState(0), rootReducer, subscribeDuringComposition));
+
+            Assert.Equal("Middleware cannot access the store while the dispatch pipeline is being composed.", exception.Message);
+        }
+
+        [Fact]
+        public void CreateStore_WhenMiddlewareDispatchesDuringComposition_ThrowsInvalidOperationException()
+        {
+            static IState rootReducer(IState state, IAction action) => state;
+
+            static Dispatch dispatchDuringComposition(IStore store, Dispatch next)
+            {
+                store.Dispatch(Factory.CreateAction("composition.dispatch"));
+                return next;
+            }
+
+            var exception = Assert.Throws<InvalidOperationException>(() => Factory.CreateStore(new CounterState(0), rootReducer, dispatchDuringComposition));
+
+            Assert.Equal("Middleware cannot access the store while the dispatch pipeline is being composed.", exception.Message);
+        }
+
+        [Fact]
         public void State_WhenReadByObserverDuringNotification_MatchesPublishedState()
         {
             var observedPairs = new List<(int Published, int Current)>();

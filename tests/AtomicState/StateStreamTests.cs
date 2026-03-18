@@ -152,7 +152,23 @@ namespace SC.AtomicState.Tests
 
             stream.OnNext(new CounterState(5));
 
-            Assert.Equal(5, Assert.IsType<CounterState>(Assert.Single(observer.States)).Count);
+            Assert.Equal([5, 5], observer.States.Cast<CounterState>().Select(static state => state.Count));
+        }
+
+        [Fact]
+        public void Dispose_WhenSameObserverSubscribedTwice_LeavesOtherSubscriptionActive()
+        {
+            using var stream = new StateStream(new CounterState(0));
+
+            var observer = new RecordingObserver();
+            using var firstSubscription = stream.Subscribe(observer);
+            using var secondSubscription = stream.Subscribe(observer);
+            observer.Clear();
+
+            firstSubscription.Dispose();
+            stream.OnNext(new CounterState(5));
+
+            Assert.Equal([5], observer.States.Cast<CounterState>().Select(static state => state.Count));
         }
 
         [Fact]

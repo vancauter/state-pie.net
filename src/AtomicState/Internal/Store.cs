@@ -31,13 +31,15 @@ namespace SC.AtomicState.Internal
             _stateStream = new StateStream(initialState);
             _state = initialState;
 
+            var middlewareStore = new MiddlewareStore(this);
+
             if (middleware.Length > 0)
             {
                 var current = (Dispatch)DispatchCore;
                 for (var index = middleware.Length - 1; index >= 0; index--)
                 {
                     // Compose from the tail so the first registered middleware becomes the outermost dispatch layer.
-                    current = middleware[index](this, current);
+                    current = middleware[index](middlewareStore, current);
                 }
 
                 _dispatch = current;
@@ -47,6 +49,7 @@ namespace SC.AtomicState.Internal
                 _dispatch = DispatchCore;
             }
 
+            middlewareStore.Activate();
             RunInitPass();
         }
 
@@ -118,5 +121,55 @@ namespace SC.AtomicState.Internal
         /// the caller instead of leaving a partially initialized store instance in circulation.
         /// </remarks>
         private void RunInitPass() => _dispatch(s_initAction);
+
+        /// <summary>
+        /// Defers middleware-visible store access until the pipeline has been fully composed.
+        /// </summary>
+        private sealed class MiddlewareStore(Store owner) : IStore
+        {
+            private readonly Store _owner = owner;
+
+            private bool _isActive;
+
+            public IState State
+            {
+                get
+                {
+                    EnsureActive();
+                    return _owner.State;
+                }
+            }
+
+            public IObservable<IState> StateChanged
+            {
+                get
+                {
+                    EnsureActive();
+                    return _owner.StateChanged;
+                }
+            }
+
+            public void Activate() => Volatile.Write(ref _isActive, true);
+
+            public void Dispatch(IAction action)
+            {
+                EnsureActive();
+                _owner.Dispatch(action);
+            }
+
+            public void Dispose()
+            {
+                EnsureActive();
+                _owner.Dispose();
+            }
+
+            private void EnsureActive()
+            {
+                if (!Volatile.Read(ref _isActive))
+                {
+                    throw new InvalidOperationException("Middleware cannot access the store while the dispatch pipeline is being composed.");
+                }
+            }
+        }
     }
 }

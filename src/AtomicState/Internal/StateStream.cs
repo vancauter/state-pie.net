@@ -29,7 +29,11 @@ namespace SC.AtomicState.Internal
             {
                 ObjectDisposedException.ThrowIf(_isDisposed, nameof(StateStream));
 
-                registration = GetOrAddRegistration(observer);
+                registration = new Registration(observer);
+                if (!_isCompleted && _error is null)
+                {
+                    _observers.Add(registration);
+                }
 
                 // Queue replay and any terminal signal while the stream state is stable so subscribe cannot interleave
                 // with a concurrent publish and reverse the observer's first visible ordering.
@@ -168,30 +172,6 @@ namespace SC.AtomicState.Internal
             }
         }
 
-        /// <summary>
-        /// Reuses an existing live registration so one observer cannot receive duplicate live delivery paths.
-        /// </summary>
-        private Registration GetOrAddRegistration(IObserver<IState> observer)
-        {
-            foreach (var registration in _observers)
-            {
-                if (ReferenceEquals(registration.Observer, observer))
-                {
-                    return registration;
-                }
-            }
-
-            var created = new Registration(observer);
-            if (!_isCompleted && _error is null)
-            {
-                // Terminated streams still need deterministic replay and terminal delivery for future subscribers, but
-                // those one-off registrations must not rejoin the live observer set.
-                _observers.Add(created);
-            }
-
-            return created;
-        }
-
         private static void TryNotifyCompleted(IObserver<IState> observer)
         {
             try
@@ -248,7 +228,7 @@ namespace SC.AtomicState.Internal
         }
 
         /// <summary>
-        /// Owns one observer's callback queue so all notifications for that observer stay serialized.
+        /// Owns one subscription's callback queue so replay, live delivery, and terminal signals share one ordered path.
         /// </summary>
         private sealed class Registration(IObserver<IState> observer)
         {
@@ -334,7 +314,6 @@ namespace SC.AtomicState.Internal
         private sealed class Subscription(StateStream owner, Registration registration) : IDisposable
         {
             private readonly StateStream _owner = owner;
-
             private readonly Registration _registration = registration;
 
             /// <summary>
