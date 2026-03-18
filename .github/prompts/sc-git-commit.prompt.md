@@ -19,19 +19,6 @@ Create one or more git commits for the current workspace.
    context.
 6. Repeat until all intended changes are committed.
 
-## Safety rules
-
-- Do not stage unrelated changes together.
-- Do not commit files that appear to contain secrets, credentials, or local-only environment data.
-- Do not use destructive git commands or bypass hooks unless the user explicitly asks for it.
-
-## Message rules
-
-- Prefer one logical change per commit.
-- Choose the most specific Conventional Commit type that matches the staged change.
-- Use a scope only when it adds real signal.
-- Use `BREAKING CHANGE:` footers or `!` markers only for actual breaking changes.
-
 ## Output expectations
 
 1. Summarize the logical commit groups.

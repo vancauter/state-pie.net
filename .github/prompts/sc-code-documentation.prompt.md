@@ -13,20 +13,14 @@ Improve XML documentation and inline comments for the relevant C# code.
 
 1. Read the affected source files before editing.
 2. Read the relevant callers or tests when they define the real contract or usage expectations.
-3. Match the pass to the codebase and request.
-    - Small or internal-only areas: prioritize public surface and genuinely non-obvious internals.
-    - Larger or externally consumed areas: document contracts, constraints, invariants, and usage expectations more
-      comprehensively.
-4. Fix stale, vague, redundant, or misleading comments before adding new ones.
-5. Add XML documentation where it clarifies a public or reusable contract.
-6. Add inline comments only for intent, invariants, edge cases, lifecycle rules, or non-obvious trade-offs.
-7. Recheck signatures, XML tag names, and symbol references after editing.
+3. Prioritize the contracts and comments that materially affect usability or maintainability in this scope.
+4. Recheck signatures, XML tag names, and symbol references after editing.
 
-## Quality bar
+## Output expectations
 
-- Favor self-explanatory code over comment volume.
-- Keep comments precise, current, and professional.
-- Do not narrate syntax that is already obvious from the code.
+1. Summarize the documentation scope when the pass is broad.
+2. Report the major documentation improvements after editing.
+3. Call out any areas intentionally left undocumented or lightly documented.
 
 ## References
 

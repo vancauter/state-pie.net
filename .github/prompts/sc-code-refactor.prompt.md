@@ -17,22 +17,11 @@ Run a focused or broad structural improvement pass over the relevant C# code.
 2. Review the code for naming, layout, architecture, visibility, type shape, and helper scope issues.
 3. Inspect dependent tests, samples, docs, or tooling that need to move with the code.
 4. Scale the pass to the repository.
-
-- Small libraries or apps: remove ambiguity and unnecessary ceremony.
-- Medium or large systems: preserve explicit boundaries, migration sequencing, and package or namespace alignment.
-
 5. Prefer the least risky change that materially improves the structure.
 6. Present the plan before editing when the change is substantial.
 7. Avoid cosmetic churn and avoid public-API changes unless the user explicitly asks for them.
 8. Update tests and downstream consumers for renamed, moved, or structurally significant code.
 9. Validate with the relevant build and test tasks.
-
-## Decision rules
-
-- Prefer lower visibility when no legitimate caller needs the broader surface.
-- Prefer the type form that best matches identity, mutability, and value semantics.
-- Prefer behavior-preserving changes unless the user explicitly asks for API or behavior changes.
-- Leave code alone when the "improvement" is subjective, risky, or mostly stylistic.
 
 ## Output expectations
 

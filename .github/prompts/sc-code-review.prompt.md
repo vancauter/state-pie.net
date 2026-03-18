@@ -24,3 +24,8 @@ Review the current codebase and report the findings.
 2. Provide assumptions only when they materially affect the review.
 3. Summarize positives and residual risks.
 4. End with a numeric grade in the format `x.y/10` and explain the score briefly.
+
+## References
+
+- [.NET architecture guidance](../instructions/dotnet-architecture.instructions.md)
+- [.NET testing guidance](../instructions/dotnet-testing.instructions.md)
