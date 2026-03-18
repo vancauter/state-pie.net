@@ -52,7 +52,7 @@ dotnet add <your-project>.csproj reference src/AtomicState/AtomicState.csproj
 | `IAction` / `IAction<TPayload>` | Immutable-by-convention messages dispatched to the store                   |
 | `Reducer` / `Reducer<TState>`   | Functions that compute the next state from the current state and an action |
 | `IStore`                        | Owns the current root state, dispatch pipeline, and state stream           |
-| `ISlice`                        | Named slice definition used when composing a combined root reducer         |
+| `SliceHandle<TState>`           | Strongly typed slice identity used for composition and later state access  |
 | `Middleware`                    | Dispatch wrapper for diagnostics or custom interception                    |
 
 Two conventions are important for correct behavior:
@@ -60,7 +60,21 @@ Two conventions are important for correct behavior:
 - Reducers should be pure.
 - Reducers should return the existing state instance when nothing changed.
 
-That second rule is what prevents unnecessary state publications.
+That second rule is part of the library's change-detection contract, not just a style preference. AtomicState treats a
+new state reference as a real update, so returning a freshly allocated but value-equal state for a logical no-op action
+will still trigger publication work.
+
+In practice, reducer branches should follow this pattern:
+
+```csharp
+return action.Type switch
+{
+  Increment => current with { Count = current.Count + 1 },
+  _ => state
+};
+```
+
+Do not allocate a replacement state object for the `_` branch when nothing changed.
 
 ## Quick Start
 
@@ -156,8 +170,8 @@ using var store = Factory.CreateStore(rootState, rootReducer);
 store.Dispatch(Factory.CreateAction("@COUNTER/INCREMENT"));
 store.Dispatch(Factory.CreateAction("@PERSON/SET_NAME", "Lee-Lee"));
 
-var counter = StateAccess.GetSliceState<CounterState>(store.State, "counter");
-var person = StateAccess.GetSliceState<PersonState>(store.State, "person");
+var counter = StateAccess.GetSliceState(store.State, counterSlice);
+var person = StateAccess.GetSliceState(store.State, personSlice);
 
 Console.WriteLine($"{counter.Count}: {person.Name} ({person.Age})");
 ```
@@ -165,8 +179,13 @@ Console.WriteLine($"{counter.Count}: {person.Name} ({person.Age})");
 `Factory.CombineReducers` enforces unique slice names and preserves the existing root state reference when no slice
 returns a new instance.
 
-Each slice exposes its setup-time snapshot through `ISlice.InitialState`. That member is distinct from `IStore.State`,
-which always represents the current committed root snapshot.
+That means the identity rule applies at both levels:
+
+- each slice reducer should return the existing slice instance for logical no-op actions
+- the combined reducer then preserves the existing root-state instance when every slice does the same
+
+Each handle exposes its setup-time snapshot through `SliceHandle.InitialState`. That member is distinct from
+`IStore.State`, which always represents the current committed root snapshot.
 
 Store creation performs an internal `@@INIT` dispatch before returning. If reducer or middleware logic throws during
 that initialization pass, `Factory.CreateStore(...)` throws and no partially initialized store instance is returned.
@@ -250,6 +269,8 @@ AtomicState stays deliberately small.
   returned.
 - `Factory.CombineReducers(...)` builds a combined root state from named slices while preserving root-state identity for
   logical no-op actions.
+- Reducer identity is reference-based: returning an equal-but-new state object still counts as a change and can trigger
+  store publication.
 - The combined root-state shape remains internal. `StateAccess` is the supported way to read typed slice values from a
   combined store state.
 - Middleware wraps dispatch in registration order and can observe or redirect action flow without taking ownership of
@@ -270,8 +291,8 @@ AtomicState documents the following concurrency contract:
 
 ## Current Limitations
 
-- Combined slice state stays internal, but `StateAccess` provides a supported way to read named typed slices from a root
-  state produced by `Factory.CombineReducers(...)`.
+- Combined slice state stays internal, but `StateAccess` provides a supported way to read typed slices from a root state
+  produced by `Factory.CombineReducers(...)` by reusing the original `SliceHandle<TState>`.
 - The library does not currently ship higher-level async orchestration helpers.
 
 ## Development

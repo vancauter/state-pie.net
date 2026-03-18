@@ -23,23 +23,25 @@ Purpose: capture concrete follow-up work from the design review without repeatin
 
 ## Status Board
 
-- [ ] Action 1: Preserve slice identity through the public API
+- [x] Action 1: Preserve slice identity through the public API
 - [x] Action 2: Narrow the middleware extension boundary
 - [x] Action 3: Rename `ISlice.State` to `InitialState`
-- [ ] Action 4: Revisit the `CombineReducers(...)` return shape if action 1 expands composition metadata
-- [ ] Action 5: Strengthen documentation for reducer identity rules
+- [x] Action 4: Reviewed after action 1; no `CombineReducers(...)` return-shape change needed now
+- [x] Action 5: Strengthen documentation for reducer identity rules
 
 ## Action 1: Preserve Slice Identity Through the Public API
 
 Priority: high
 
+Status: completed on 2026-03-18
+
 Checklist:
 
-- [ ] design a stable slice token or equivalent access handle
-- [ ] update `Factory.CreateSlice(...)` and related composition flow to preserve slice identity
-- [ ] update combined-state access to use the new primary path
-- [ ] update example code and affected tests
-- [ ] validate build and non-performance tests
+- [x] design a stable slice token or equivalent access handle
+- [x] update `Factory.CreateSlice(...)` and related composition flow to preserve slice identity
+- [x] update combined-state access to use the new primary path
+- [x] update example code and affected tests
+- [x] validate build and non-performance tests
 
 ### Goal
 
@@ -80,6 +82,14 @@ setup-time value, but consumers still depend on raw string keys after compositio
 - tests cover successful typed access and failure modes for unsupported root states or mismatched slice tokens
 - `dotnet build *.sln`
 - `dotnet test tests/*/*.Tests.csproj --filter "Category!=Perf"`
+
+### Completion Notes
+
+- `Factory.CreateSlice(...)` now returns `SliceHandle<TState>` so callers can carry slice identity from creation through
+  access
+- `StateAccess` now uses slice handles instead of raw string names as the supported public access path
+- reducer composition keeps the existing internal string-keyed storage model while the public API becomes refactor-safe
+- examples and tests now read combined slice state through the original handles instead of repeating string literals
 
 ## Action 2: Narrow the Middleware Extension Boundary
 
@@ -203,12 +213,13 @@ easy to misunderstand next to `IStore.State`.
 
 Priority: low
 
+Status: reviewed on 2026-03-18; no change needed now
+
 Checklist:
 
-- [ ] decide whether action 1 actually requires additional composition metadata
-- [ ] replace the tuple only if a named result type adds clear value
-- [ ] update affected tests and docs if the return shape changes
-- [ ] validate build and non-performance tests
+- [x] decide whether action 1 actually requires additional composition metadata
+- [x] confirm the current tuple remains sufficient after action 1
+- [x] defer any named result type until composition returns more than root state and reducer
 
 ### Goal
 
@@ -244,16 +255,27 @@ that logically belongs to the composition result.
 - `dotnet build *.sln`
 - `dotnet test tests/*/*.Tests.csproj --filter "Category!=Perf"`
 
+### Review Notes
+
+- action 1 introduced `SliceHandle<TState>` as the stable public slice identity, so composition no longer needs to
+  return slice-access metadata separately
+- the current `(state, reducer)` tuple still matches the actual consumer flow for `Factory.CreateStore(...)`
+- a named composition result should only be introduced if `CombineReducers(...)` later needs to return an additional
+  public concept beyond root state and reducer
+- no code, tests, or README updates are needed for action 4 at this time
+
 ## Action 5: Strengthen Documentation for Reducer Identity Rules
 
 Priority: low
 
+Status: completed on 2026-03-18
+
 Checklist:
 
-- [ ] review README sections that describe reducer behavior
-- [ ] ensure examples consistently return the existing instance for no-op actions
-- [ ] strengthen any XML documentation that understates the identity rule
-- [ ] verify docs remain aligned with the implemented API shape
+- [x] review README sections that describe reducer behavior
+- [x] ensure examples consistently return the existing instance for no-op actions
+- [x] strengthen any XML documentation that understates the identity rule
+- [x] verify docs remain aligned with the implemented API shape
 
 ### Goal
 
@@ -287,6 +309,16 @@ This behavior is central to the library’s design, but it is enforced by conven
 
 - docs state the rule plainly and consistently
 - examples align with the documented rule
+
+### Completion Notes
+
+- the README now states that reducer identity is part of the library's change-detection contract rather than a style
+  preference
+- the README examples and architecture notes now explicitly reinforce returning the existing instance for logical no-op
+  actions
+- reducer delegate XML docs now state that equal-but-new state objects still count as changes because the library uses
+  reference-based detection
+- README wording was updated to stay aligned with the current handle-based slice access API
 
 ## Recommended Sequence
 
