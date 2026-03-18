@@ -24,10 +24,16 @@ Audit and update the repository's user-facing documentation so it accurately mat
       reference doc: create or update them only when they are justified by the repository's real needs.
         - GitHub-standard repository companion docs belong in their own root files when they exist. Do not fold their
           content into `README.md`, and do not treat README sections as substitutes for those files.
+        - When a justified companion doc is missing and an official GitHub-standard companion file or authoritative
+          source exists for that file type, fetch it and place the file in the correct repository location instead of
+          merely recommending it.
+        - Preserve repository-specific facts and constraints when adapting official companion files. Do not invent
+          policy text just to fill a template.
 4. Make an explicit call on missing-doc candidates instead of guessing.
     - Say whether dedicated API reference documentation is warranted.
     - Say whether contributing, changelog, security, support, or examples docs are warranted.
     - Say whether a deeper `docs/` split is warranted or whether the README should stay the primary document.
+    - Note when no official companion file exists for a candidate, or when the file type must remain repository-local.
 5. Prefer updating existing docs over creating parallel documents, and keep overlap low when multiple docs are needed.
 6. Validate links, commands, paths, and referenced assets as far as practical.
 7. If you encounter a code error or compile error, stop and report it instead of debugging it or making implementation
@@ -39,9 +45,11 @@ Audit and update the repository's user-facing documentation so it accurately mat
 2. State the proposed documentation set and where each document should live.
 3. Call out when GitHub-standard companion docs should remain separate from `README.md`.
 4. Explain which candidate documents are justified, which are unnecessary for now, and why.
-5. Summarize the major documentation updates after editing.
-6. Report what was validated and what could not be validated.
+5. When official companion files were fetched or adapted, name their source and where they were placed.
+6. Summarize the major documentation updates after editing.
+7. Report what was validated and what could not be validated.
 
 ## References
 
 - [Documentation authoring guidance](../instructions/documentation-authoring.instructions.md)
+- [GitHub default community health files](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file)
