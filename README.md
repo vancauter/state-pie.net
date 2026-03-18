@@ -8,6 +8,7 @@ snapshots.
 
 ## Contents
 
+- [Status](#status)
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -17,11 +18,19 @@ snapshots.
 - [Slice Composition](#slice-composition)
 - [Observing State](#observing-state)
 - [Middleware](#middleware)
+- [Architecture Notes](#architecture-notes)
 - [Thread-Safety Status](#thread-safety-status)
 - [Current Limitations](#current-limitations)
 - [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
+
+## Status
+
+AtomicState is currently pre-release.
+
+Breaking changes are still acceptable when they materially improve the API, naming, or structure. The package story is
+not finalized yet, so this repository is currently the source of truth for usage and development guidance.
 
 ## Features
 
@@ -40,10 +49,10 @@ AtomicState provides:
 
 NuGet packaging is planned, but the package details are not finalized yet.
 
-Placeholder:
+For now, consume AtomicState from a local clone with a project reference:
 
 ```bash
-dotnet add package AtomicState
+dotnet add <your-project>.csproj reference src/AtomicState/AtomicState.csproj
 ```
 
 ## Core Concepts
@@ -126,7 +135,6 @@ For multi-part state, define named slices and combine them into a single root re
 
 ```csharp
 using SC.AtomicState;
-using System.Text.Json;
 
 public sealed record CounterState(int Count) : IState;
 public sealed record PersonState(string Name, int Age) : IState;
@@ -235,6 +243,16 @@ in the same total serialized dispatch order as all other store work. Middleware 
 execution contexts. Any later dispatch from that scheduled work is still serialized by the store, but it is outside the
 original dispatch transaction.
 
+## Architecture Notes
+
+AtomicState stays deliberately small.
+
+- The public surface is centered on actions, reducers, slices, stores, and middleware rather than higher-level opinionated workflows.
+- `Factory.CreateStore(...)` owns the dispatch pipeline and runs an internal `@@INIT` action before the store is returned.
+- `Factory.CombineReducers(...)` builds a combined root state from named slices while preserving root-state identity for logical no-op actions.
+- The combined root-state shape remains internal. `StateAccess` is the supported way to read typed slice values from a combined store state.
+- Middleware wraps dispatch in registration order and can observe or redirect action flow without taking ownership of state storage.
+
 ## Thread-Safety Status
 
 AtomicState documents the following concurrency contract:
@@ -260,15 +278,16 @@ Common repository commands from the root:
 
 ```bash
 dotnet build *.sln
-dotnet test tests/*/*.Tests.csproj
-dotnet run --project dev/*/*.Dev.csproj
+dotnet test tests/*/*.Tests.csproj --filter "Category!=Perf"
+dotnet test tests/*/*.Tests.csproj --filter "Category=Perf"
+dotnet run --verbosity q --project dev/*/*.Dev.csproj
 ```
 
 The repository also includes:
 
 - A sample app under `dev/AtomicState`
 - Automated tests under `tests/AtomicState`
-- Ongoing design notes under `docs/`
+- No additional user-facing docs under `docs/` yet; this README is currently the primary user-facing document.
 
 ## Contributing
 
