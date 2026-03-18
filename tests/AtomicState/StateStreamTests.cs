@@ -181,6 +181,14 @@ namespace SC.AtomicState.Tests
         }
 
         [Fact]
+        public void Subscribe_WhenObserverIsNull_ThrowsArgumentNullException()
+        {
+            using var stream = new StateStream(new CounterState(0));
+
+            _ = Assert.Throws<ArgumentNullException>(() => stream.Subscribe(null!));
+        }
+
+        [Fact]
         public void OnNext_WhenStreamIsTerminated_IgnoresAdditionalStateUpdates()
         {
             using var completedStream = new StateStream(new CounterState(0));

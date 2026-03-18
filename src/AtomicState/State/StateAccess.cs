@@ -15,6 +15,7 @@ namespace SC.AtomicState
         /// <param name="rootState">A combined root state produced by <see cref="Factory.CombineReducers(ISlice[])"/>.</param>
         /// <param name="sliceName">The slice name to read.</param>
         /// <returns>The typed slice state.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="rootState"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">Thrown when <paramref name="sliceName"/> is <see langword="null"/>, empty, or whitespace.</exception>
         /// <exception cref="InvalidOperationException">Thrown when <paramref name="rootState"/> is not a combined state produced by <see cref="Factory.CombineReducers(ISlice[])"/>.</exception>
         /// <exception cref="KeyNotFoundException">Thrown when the combined root state does not contain <paramref name="sliceName"/>.</exception>
@@ -26,6 +27,7 @@ namespace SC.AtomicState
         public static TState GetSliceState<TState>(IState rootState, string sliceName)
             where TState : class, IState
         {
+            ArgumentNullException.ThrowIfNull(rootState);
             ArgumentException.ThrowIfNullOrWhiteSpace(sliceName);
 
             if (rootState is not CombinedState combinedState)

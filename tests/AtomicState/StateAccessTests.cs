@@ -27,6 +27,10 @@ namespace SC.AtomicState.Tests
         }
 
         [Fact]
+        public void GetSliceState_WhenRootStateIsNull_ThrowsArgumentNullException() =>
+         _ = Assert.Throws<ArgumentNullException>(() => StateAccess.GetSliceState<CounterState>(null!, "counter"));
+
+        [Fact]
         public void GetSliceState_WhenSliceIsMissing_ThrowsKeyNotFoundException()
         {
             var (rootState, _) = Factory.CombineReducers(TestSlices.CreateCounterSlice());

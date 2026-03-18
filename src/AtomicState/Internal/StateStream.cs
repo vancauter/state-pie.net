@@ -22,6 +22,8 @@ namespace SC.AtomicState.Internal
         /// </summary>
         public IDisposable Subscribe(IObserver<IState> observer)
         {
+            ArgumentNullException.ThrowIfNull(observer);
+
             var registration = default(Registration);
             var shouldDrain = false;
 
