@@ -4,6 +4,14 @@ namespace SC.AtomicState.Tests
 {
     public class FactoryTests
     {
+        private static void AssertInvalidArgument(Action action, string parameterName, string messageFragment)
+        {
+            var exception = Assert.Throws<ArgumentException>(action);
+
+            Assert.Equal(parameterName, exception.ParamName);
+            Assert.Contains(messageFragment, exception.Message, StringComparison.Ordinal);
+        }
+
         [Fact]
         public void CreateAction_WithoutPayload_ReturnsTypedAction()
         {
@@ -22,22 +30,22 @@ namespace SC.AtomicState.Tests
         }
 
         [Fact]
-        public void CreateAction_WhenTypeIsNull_ThrowsArgumentException() => _ = Assert.Throws<ArgumentException>(() => Factory.CreateAction(null!));
+        public void CreateAction_WhenTypeIsNull_ThrowsArgumentException() => AssertInvalidArgument(() => Factory.CreateAction(null!), "type", "Action type must be a non-empty string.");
 
         [Theory]
         [InlineData("")]
         [InlineData(" ")]
         [InlineData("\t")]
-        public void CreateAction_WhenTypeIsBlank_ThrowsArgumentException(string type) => _ = Assert.Throws<ArgumentException>(() => Factory.CreateAction(type));
+        public void CreateAction_WhenTypeIsBlank_ThrowsArgumentException(string type) => AssertInvalidArgument(() => Factory.CreateAction(type), "type", "Action type must be a non-empty string.");
 
         [Fact]
-        public void CreateAction_WithPayload_WhenTypeIsNull_ThrowsArgumentException() => _ = Assert.Throws<ArgumentException>(() => Factory.CreateAction(null!, "payload"));
+        public void CreateAction_WithPayload_WhenTypeIsNull_ThrowsArgumentException() => AssertInvalidArgument(() => Factory.CreateAction(null!, "payload"), "type", "Action type must be a non-empty string.");
 
         [Theory]
         [InlineData("")]
         [InlineData(" ")]
         [InlineData("\t")]
-        public void CreateAction_WithPayload_WhenTypeIsBlank_ThrowsArgumentException(string type) => _ = Assert.Throws<ArgumentException>(() => Factory.CreateAction(type, 1));
+        public void CreateAction_WithPayload_WhenTypeIsBlank_ThrowsArgumentException(string type) => AssertInvalidArgument(() => Factory.CreateAction(type, 1), "type", "Action type must be a non-empty string.");
 
         [Fact]
         public void CreateSlice_WhenCreated_ExposesNameStateAndReducer()
@@ -55,13 +63,13 @@ namespace SC.AtomicState.Tests
         }
 
         [Fact]
-        public void CreateSlice_WhenNameIsNull_ThrowsArgumentException() => _ = Assert.Throws<ArgumentException>(() => Factory.CreateSlice(null!, new CounterState(0), (state, action) => state));
+        public void CreateSlice_WhenNameIsNull_ThrowsArgumentException() => AssertInvalidArgument(() => Factory.CreateSlice(null!, new CounterState(0), (state, action) => state), "name", "Slice name must be a non-empty string.");
 
         [Theory]
         [InlineData("")]
         [InlineData(" ")]
         [InlineData("\t")]
-        public void CreateSlice_WhenNameIsBlank_ThrowsArgumentException(string name) => _ = Assert.Throws<ArgumentException>(() => Factory.CreateSlice(name, new CounterState(0), (state, action) => state));
+        public void CreateSlice_WhenNameIsBlank_ThrowsArgumentException(string name) => AssertInvalidArgument(() => Factory.CreateSlice(name, new CounterState(0), (state, action) => state), "name", "Slice name must be a non-empty string.");
 
         [Fact]
         public void CombineReducers_WhenStoreDispatches_UpdatesCombinedSliceState()

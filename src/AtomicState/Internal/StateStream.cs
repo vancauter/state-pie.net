@@ -200,6 +200,7 @@ namespace SC.AtomicState.Internal
             }
             catch
             {
+                // Observer callbacks are isolated so one subscriber cannot interrupt terminal delivery.
             }
         }
 
@@ -211,6 +212,7 @@ namespace SC.AtomicState.Internal
             }
             catch
             {
+                // Observer callbacks are isolated so one subscriber cannot interrupt terminal delivery.
             }
         }
 
@@ -222,6 +224,7 @@ namespace SC.AtomicState.Internal
             }
             catch
             {
+                // Observer callbacks are isolated so one subscriber cannot interrupt stream publication.
             }
         }
 
