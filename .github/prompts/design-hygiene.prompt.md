@@ -1,8 +1,6 @@
 ---
 name: "design-hygiene"
-description:
-    "Run a focused C# design pass for least exposure, type shape, purity, and adjacent maintainability improvements
-    without changing the public API."
+description: "Run a focused C# design pass for least exposure, type shape, and adjacent maintainability improvements."
 argument-hint: "Optional scope, folders, or extra design constraints to emphasize"
 agent: "C# Expert"
 ---
@@ -10,8 +8,7 @@ agent: "C# Expert"
 # Design Hygiene Pass
 
 Perform a focused design-quality pass over the current C# codebase. The goal is to identify and fix issues related to
-design hygiene, including excessive exposure, suboptimal type shapes, and missed opportunities for purity, while
-preserving the public API and minimizing churn.
+design hygiene, including excessive exposure, suboptimal type shapes, while minimizing churn.
 
 ## Mission
 
@@ -27,36 +24,12 @@ Review the implementation for:
     - Prefer the type that best matches identity, mutability, allocation, and value-semantics needs.
     - Do not rewrite public APIs in ways that break consumers unless explicitly requested.
 
-3. Pure-function opportunities.
-    - Prefer pure functions where practical.
-    - Identify methods that can become static, side-effect-free, or easier to reason about.
-    - Improve purity inside the implementation only.
-    - Do not change the public interface shape unless explicitly requested.
-
-## Additional Review Requirements
-
-Also check for the following because they frequently surface during the same pass:
-
-4. Immutability and intent.
-    - Prefer immutable state and immutable data carriers where appropriate.
-    - Check whether fields, properties, and helper types communicate mutability clearly.
-    - Prefer `readonly` where it strengthens correctness without harming usability.
-
-5. Type and member restrictions.
+3. Type and member restrictions.
     - Check for opportunities to use `sealed`, `static`, `readonly`, or file-scoped and internal-only helpers when they
       better express intent.
     - Remove inheritance surface that is not actually intended for extension.
 
-6. Responsibility and cohesion.
-    - Check whether classes have a single clear reason to change.
-    - Extract helpers only when it materially improves cohesion, purity, or readability.
-    - Avoid abstraction for abstraction's sake.
-
-7. Public API preservation.
-    - Preserve public behavior and public surface unless the task input explicitly allows API changes.
-    - Prefer internal refactors over consumer-facing changes.
-
-8. Validation.
+4. Validation.
     - Add or update tests for any behavioral or structural change that needs protection.
     - Prefer targeted tests over broad churn.
     - Build and run relevant tests when possible.
@@ -68,12 +41,11 @@ Also check for the following because they frequently surface during the same pas
 3. Group findings into:
     - exposure issues
     - type-shape issues
-    - purity issues
     - related design-hygiene issues
 4. Make only changes that are justified and low-risk.
 5. Preserve naming and architecture conventions already established in the repository unless there is a clear
    inconsistency.
-6. Avoid cosmetic churn and avoid changing code only to satisfy style preferences without a meaningful design benefit.
+6. Avoid cosmetic churn.
 
 ## Decision Rules
 
@@ -84,14 +56,11 @@ When deciding whether to change code, use these heuristics:
 - Prefer `struct` or `record struct` only when value semantics are clearly desired and copying costs remain reasonable.
 - Prefer `class` for reference identity, mutable state, inheritance-based design, or larger objects.
 - Prefer `static` methods when no instance state is required.
-- Prefer pure helpers when side effects are unnecessary.
 - Prefer leaving code alone when the "improvement" is subjective, risky, or public-API-affecting.
 
 ## Constraints
 
-- Do not change public interfaces, public type names, or public member signatures unless explicitly requested.
 - Do not introduce new abstractions unless they clearly improve maintainability or testability.
-- Do not perform broad renames or file moves unless they are necessary for a justified design correction.
 - Do not rewrite large areas of code for stylistic consistency alone.
 
 ## Output Expectations
@@ -101,7 +70,6 @@ When deciding whether to change code, use these heuristics:
 3. After implementation, summarize:
     - exposure changes
     - type-shape changes
-    - purity improvements
     - additional design-hygiene improvements
 4. Report build and test results.
 5. Call out any issues intentionally left unchanged because they would require public API changes or disproportionate
