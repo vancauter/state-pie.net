@@ -24,7 +24,7 @@ namespace SC.AtomicState.Tests
 
             var timeline = new List<string>();
 
-            Dispatch middleware(IStore store, Dispatch next) => action =>
+            Dispatch middleware(IDispatchContext context, Dispatch next) => action =>
             {
                 timeline.Add($"before:{action.Type}");
                 next(action);
@@ -34,7 +34,7 @@ namespace SC.AtomicState.Tests
                 {
                     // Re-enter after the outer pipeline unwinds so the timeline shows whether dispatches stay serialized.
                     timeline.Add("dispatch:nested");
-                    store.Dispatch(Factory.CreateAction(nestedAction));
+                    context.Dispatch(Factory.CreateAction(nestedAction));
                     timeline.Add("after:nested");
                 }
             };
@@ -86,13 +86,13 @@ namespace SC.AtomicState.Tests
             var activeCallbacks = 0;
             var maxConcurrentCallbacks = 0;
 
-            Dispatch middleware(IStore store, Dispatch next) => action =>
+            Dispatch middleware(IDispatchContext context, Dispatch next) => action =>
             {
                 next(action);
 
                 if (action.Type == outerAction)
                 {
-                    store.Dispatch(Factory.CreateAction(nestedAction));
+                    context.Dispatch(Factory.CreateAction(nestedAction));
                 }
             };
 
@@ -140,7 +140,7 @@ namespace SC.AtomicState.Tests
             var allowBackgroundDispatch = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             var backgroundCompleted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-            Dispatch middleware(IStore store, Dispatch next) => action =>
+            Dispatch middleware(IDispatchContext context, Dispatch next) => action =>
             {
                 if (action.Type == outerAction)
                 {
@@ -152,7 +152,7 @@ namespace SC.AtomicState.Tests
                         {
                             // This gate lets the test prove the original dispatch commits before background work re-enters.
                             await allowBackgroundDispatch.Task;
-                            store.Dispatch(Factory.CreateAction(backgroundAction));
+                            context.Dispatch(Factory.CreateAction(backgroundAction));
                             _ = backgroundCompleted.TrySetResult();
                         }
                         catch (Exception exception)

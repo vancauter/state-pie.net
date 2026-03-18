@@ -21,7 +21,7 @@ namespace SC.AtomicState
         /// The middleware uses one shared logger instance for all stores and logs before invoking the next dispatch
         /// delegate. Logging failures are suppressed so diagnostics do not interrupt dispatch execution.
         /// </remarks>
-        public static Middleware Create() => (store, next) => action =>
+        public static Middleware Create() => (_, next) => action =>
         {
             try
             {

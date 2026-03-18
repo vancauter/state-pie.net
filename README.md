@@ -231,9 +231,9 @@ dispatch.
 
 Custom middleware can intercept, short-circuit, or forward actions through the `Middleware` delegate.
 
-Middleware receives an `IStore` handle for use by the returned dispatch delegate. That handle is not valid while the
-middleware pipeline is still being composed, so middleware factories should capture it and defer all store access until
-dispatch time.
+Middleware receives an `IDispatchContext` handle that exposes only `Dispatch(IAction)`. Middleware can capture that
+context and use it from the returned dispatch delegate to trigger nested actions without taking ownership of store
+state, subscriptions, or disposal.
 
 Middleware may call `Dispatch` again while a dispatch is already in progress. When it does, nested actions participate
 in the same total serialized dispatch order as all other store work. Middleware may also schedule work onto background

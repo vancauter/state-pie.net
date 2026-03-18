@@ -24,7 +24,7 @@ Purpose: capture concrete follow-up work from the design review without repeatin
 ## Status Board
 
 - [ ] Action 1: Preserve slice identity through the public API
-- [ ] Action 2: Narrow the middleware extension boundary
+- [x] Action 2: Narrow the middleware extension boundary
 - [x] Action 3: Rename `ISlice.State` to `InitialState`
 - [ ] Action 4: Revisit the `CombineReducers(...)` return shape if action 1 expands composition metadata
 - [ ] Action 5: Strengthen documentation for reducer identity rules
@@ -85,13 +85,15 @@ setup-time value, but consumers still depend on raw string keys after compositio
 
 Priority: medium
 
+Status: completed on 2026-03-18
+
 Checklist:
 
-- [ ] decide the minimum middleware capabilities that must remain public
-- [ ] replace or narrow the middleware-facing store/context contract
-- [ ] preserve nested dispatch serialization semantics
-- [ ] update middleware behavior tests to match the revised contract
-- [ ] validate build and non-performance tests
+- [x] decide the minimum middleware capabilities that must remain public
+- [x] replace or narrow the middleware-facing store/context contract
+- [x] preserve nested dispatch serialization semantics
+- [x] update middleware behavior tests to match the revised contract
+- [x] validate build and non-performance tests
 
 ### Goal
 
@@ -131,6 +133,14 @@ compensates with guard logic and construction-time exceptions.
 - tests cover the allowed middleware behaviors directly
 - `dotnet build *.sln`
 - `dotnet test tests/*/*.Tests.csproj --filter "Category!=Perf"`
+
+### Completion Notes
+
+- middleware now receives `IDispatchContext` instead of `IStore`
+- the store no longer carries activation guard logic just to protect middleware from unsupported store access
+- nested dispatch and background dispatch middleware tests were preserved under the narrowed contract
+- composition-time guard tests were removed because the new API prevents those misuse cases by construction
+- the README and store factory documentation now describe dispatch-only middleware context
 
 ## Action 3: Rename `ISlice.State` to `InitialState`
 
