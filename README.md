@@ -22,8 +22,6 @@ snapshots.
 - [Thread-Safety Status](#thread-safety-status)
 - [Current Limitations](#current-limitations)
 - [Development](#development)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Status
 
@@ -247,11 +245,16 @@ original dispatch transaction.
 
 AtomicState stays deliberately small.
 
-- The public surface is centered on actions, reducers, slices, stores, and middleware rather than higher-level opinionated workflows.
-- `Factory.CreateStore(...)` owns the dispatch pipeline and runs an internal `@@INIT` action before the store is returned.
-- `Factory.CombineReducers(...)` builds a combined root state from named slices while preserving root-state identity for logical no-op actions.
-- The combined root-state shape remains internal. `StateAccess` is the supported way to read typed slice values from a combined store state.
-- Middleware wraps dispatch in registration order and can observe or redirect action flow without taking ownership of state storage.
+- The public surface is centered on actions, reducers, slices, stores, and middleware rather than higher-level
+  opinionated workflows.
+- `Factory.CreateStore(...)` owns the dispatch pipeline and runs an internal `@@INIT` action before the store is
+  returned.
+- `Factory.CombineReducers(...)` builds a combined root state from named slices while preserving root-state identity for
+  logical no-op actions.
+- The combined root-state shape remains internal. `StateAccess` is the supported way to read typed slice values from a
+  combined store state.
+- Middleware wraps dispatch in registration order and can observe or redirect action flow without taking ownership of
+  state storage.
 
 ## Thread-Safety Status
 
@@ -288,15 +291,3 @@ The repository also includes:
 - A sample app under `dev/AtomicState`
 - Automated tests under `tests/AtomicState`
 - No additional user-facing docs under `docs/` yet; this README is currently the primary user-facing document.
-
-## Contributing
-
-Contributions should keep the library aligned with its current scope: explicit state transitions, predictable reducer
-behavior, and a restrained built-in policy.
-
-If you are changing concurrency behavior, update both the implementation and the public documentation in this README and
-the relevant API remarks.
-
-## License
-
-Licensed under the terms in `LICENSE`.
