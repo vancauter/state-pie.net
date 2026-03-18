@@ -1,10 +1,11 @@
 namespace SC.AtomicState
 {
     /// <summary>
-    /// Represents a named slice that participates in a combined store state.
+    /// Represents the internal slice contract used during combined-state composition.
     /// </summary>
     /// <remarks>
-    /// Each slice contributes an initial <see cref="InitialState"/> value and a <see cref="Reducer"/> that is invoked by <see cref="Factory.CombineReducers(ISlice[])"/>.
+    /// Public callers normally work with <see cref="SliceHandle"/> values returned by <see cref="Factory.CreateSlice{TState}(string, TState, Reducer{TState})"/>.
+    /// The factory uses this contract internally when it builds a combined root state from those handles.
     /// </remarks>
     public interface ISlice
     {

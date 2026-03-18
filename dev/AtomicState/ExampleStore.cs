@@ -10,17 +10,18 @@ namespace SC.AtomicState.Dev
         public const string PersonAddAge = "@PERSON/ADD_AGE";
         public const string PersonSetName = "@PERSON/SET_NAME";
 
+        public static SliceHandle<CounterState> CounterSlice { get; } = CreateCounterSlice();
+
+        public static SliceHandle<PersonState> PersonSlice { get; } = CreatePersonSlice();
+
         public static IStore Create(params Middleware[] middleware)
         {
-            var counterSlice = CreateCounterSlice();
-            var personSlice = CreatePersonSlice();
-
-            var (state, reducer) = Factory.CombineReducers(counterSlice, personSlice);
+            var (state, reducer) = Factory.CombineReducers(CounterSlice, PersonSlice);
 
             return Factory.CreateStore(state, reducer, middleware);
         }
 
-        private static ISlice CreateCounterSlice() => Factory.CreateSlice(
+        private static SliceHandle<CounterState> CreateCounterSlice() => Factory.CreateSlice(
             name: "counter",
             initialState: new CounterState(0),
             reducer: (state, action) =>
@@ -33,7 +34,7 @@ namespace SC.AtomicState.Dev
                 };
             });
 
-        private static ISlice CreatePersonSlice() => Factory.CreateSlice(
+        private static SliceHandle<PersonState> CreatePersonSlice() => Factory.CreateSlice(
             name: "person",
             initialState: new PersonState("Guest", 30),
             reducer: (state, action) =>

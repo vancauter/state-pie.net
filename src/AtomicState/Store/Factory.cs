@@ -49,20 +49,22 @@ namespace SC.AtomicState
         }
 
         /// <summary>
-        /// Creates a typed <see cref="ISlice"/> with the provided name, initial state, and reducer.
+        /// Creates a typed <see cref="SliceHandle{TState}"/> with the provided name, initial state, and reducer.
         /// </summary>
         /// <typeparam name="TState">The concrete state type for the slice.</typeparam>
         /// <param name="name">The unique slice name.</param>
         /// <param name="initialState">Initial state instance for the slice.</param>
         /// <param name="reducer">Reducer function that computes next state for the slice.</param>
-        /// <returns>An <see cref="ISlice"/> instance.</returns>
+        /// <returns>A <see cref="SliceHandle{TState}"/> that callers can reuse for composition and state access.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="initialState"/> or <paramref name="reducer"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is <see langword="null"/>, empty, or whitespace.</exception>
         /// <remarks>
-        /// The returned slice adapts the strongly typed reducer to the untyped <see cref="ISlice"/> contract used by <see cref="CombineReducers(ISlice[])"/>.
+        /// The returned handle preserves slice identity across creation, reducer composition, and later state access.
+        /// The factory adapts the strongly typed reducer to the internal untyped <see cref="ISlice"/> contract used
+        /// by combined-state composition.
         /// Slice reducers should return the existing state instance when an action does not change that slice.
         /// </remarks>
-        public static ISlice CreateSlice<TState>(string name, TState initialState, Reducer<TState> reducer) where TState : IState
+        public static SliceHandle<TState> CreateSlice<TState>(string name, TState initialState, Reducer<TState> reducer) where TState : IState
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -72,7 +74,7 @@ namespace SC.AtomicState
             ArgumentNullException.ThrowIfNull(initialState);
             ArgumentNullException.ThrowIfNull(reducer);
 
-            return new StateSlice<TState>(name, initialState, reducer);
+            return new SliceHandle<TState>(new StateSlice<TState>(name, initialState, reducer));
         }
 
         /// <summary>
@@ -122,9 +124,9 @@ namespace SC.AtomicState
         }
 
         /// <summary>
-        /// Combines multiple <see cref="ISlice"/> instances into a single root state and reducer.
+        /// Combines multiple <see cref="SliceHandle"/> instances into a single root state and reducer.
         /// </summary>
-        /// <param name="slices">An array of slices to combine. Each slice must be non-null and have a unique name.</param>
+        /// <param name="slices">An array of slice handles to combine. Each handle must be non-null and have a unique name.</param>
         /// <returns>
         /// A tuple containing the initial combined root state and a reducer that delegates to each slice reducer.
         /// Pass both tuple members forward together when creating a store for the combined state.
@@ -136,7 +138,22 @@ namespace SC.AtomicState
         /// intentional because it prevents unnecessary state publication and avoids allocating a replacement slice map
         /// for actions that leave every slice unchanged.
         /// </remarks>
-        public static (IState state, Reducer reducer) CombineReducers(params ISlice[] slices)
+        public static (IState state, Reducer reducer) CombineReducers(params SliceHandle[] slices)
+        {
+            if (slices.Length == 0)
+            {
+                throw new ArgumentException("Must provide at least one slice to combine.", nameof(slices));
+            }
+
+            if (slices.Any(static slice => slice is null))
+            {
+                throw new ArgumentException("Slices cannot contain null entries.", nameof(slices));
+            }
+
+            return CombineReducersCore([.. slices.Select(static slice => slice.Slice)]);
+        }
+
+        private static (IState state, Reducer reducer) CombineReducersCore(ISlice[] slices)
         {
             if (slices.Length == 0)
             {

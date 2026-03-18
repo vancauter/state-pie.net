@@ -42,7 +42,7 @@ namespace SC.AtomicState.Tests
                 using var store = Factory.CreateStore(rootState, rootReducer, LoggingMiddleware.Create());
 
                 store.Dispatch(Factory.CreateAction(TestSlices.Increment));
-                counterState = StateAccess.GetSliceState<CounterState>(store.State, "counter");
+                counterState = StateAccess.GetSliceState(store.State, slice);
             });
 
             Assert.Contains(TestSlices.Increment, output, StringComparison.Ordinal);

@@ -24,7 +24,7 @@ namespace SC.AtomicState.Tests.Shared
         internal const string PersonAddAge = "person.add_age";
         internal const string PersonSetName = "person.set_name";
 
-        internal static ISlice CreateCounterSlice() => Factory.CreateSlice(
+        internal static SliceHandle<CounterState> CreateCounterSlice() => Factory.CreateSlice(
             name: "counter",
             initialState: new CounterState(0),
             reducer: (state, action) =>
@@ -37,7 +37,7 @@ namespace SC.AtomicState.Tests.Shared
                 };
             });
 
-        internal static ISlice CreateInnerCounterSlice() => Factory.CreateSlice(
+        internal static SliceHandle<CounterState> CreateInnerCounterSlice() => Factory.CreateSlice(
             name: "innerCounter",
             initialState: new CounterState(5),
             reducer: (state, action) =>
@@ -50,7 +50,7 @@ namespace SC.AtomicState.Tests.Shared
                 };
             });
 
-        internal static ISlice CreateInnerPersonSlice() => Factory.CreateSlice(
+        internal static SliceHandle<PersonState> CreateInnerPersonSlice() => Factory.CreateSlice(
             name: "innerPerson",
             initialState: new PersonState("Inner", 10),
             reducer: (state, action) =>
@@ -63,7 +63,7 @@ namespace SC.AtomicState.Tests.Shared
                 };
             });
 
-        internal static ISlice CreateNestedSlice()
+        internal static SliceHandle<IState> CreateNestedSlice()
         {
             var (innerState, innerReducer) = Factory.CombineReducers(CreateInnerCounterSlice(), CreateInnerPersonSlice());
 
@@ -76,7 +76,7 @@ namespace SC.AtomicState.Tests.Shared
                 reducer: adapter);
         }
 
-        internal static ISlice CreatePersonSlice() => Factory.CreateSlice(
+        internal static SliceHandle<PersonState> CreatePersonSlice() => Factory.CreateSlice(
             name: "person",
             initialState: new PersonState("Guest", 30),
             reducer: (state, action) =>

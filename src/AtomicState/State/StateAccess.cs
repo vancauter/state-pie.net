@@ -4,31 +4,39 @@ using SC.AtomicState.Internal;
 namespace SC.AtomicState
 {
     /// <summary>
-    /// Provides supported access to slice state produced by <see cref="Factory.CombineReducers(ISlice[])"/>.
+    /// Provides supported access to slice state produced by <see cref="Factory.CombineReducers(SliceHandle[])"/>.
     /// </summary>
     public static class StateAccess
     {
         /// <summary>
-        /// Gets a named slice state from a combined root state and casts it to <typeparamref name="TState"/>.
+        /// Gets a typed slice state from a combined root state using a previously created slice handle.
         /// </summary>
         /// <typeparam name="TState">Expected slice state type.</typeparam>
-        /// <param name="rootState">A combined root state produced by <see cref="Factory.CombineReducers(ISlice[])"/>.</param>
-        /// <param name="sliceName">The slice name to read.</param>
+        /// <param name="rootState">A combined root state produced by <see cref="Factory.CombineReducers(SliceHandle[])"/>.</param>
+        /// <param name="sliceHandle">The slice handle to read.</param>
         /// <returns>The typed slice state.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="rootState"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentException">Thrown when <paramref name="sliceName"/> is <see langword="null"/>, empty, or whitespace.</exception>
-        /// <exception cref="InvalidOperationException">Thrown when <paramref name="rootState"/> is not a combined state produced by <see cref="Factory.CombineReducers(ISlice[])"/>.</exception>
-        /// <exception cref="KeyNotFoundException">Thrown when the combined root state does not contain <paramref name="sliceName"/>.</exception>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="sliceHandle"/> is <see langword="null"/>.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when <paramref name="rootState"/> is not a combined state produced by <see cref="Factory.CombineReducers(SliceHandle[])"/>.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown when the combined root state does not contain the requested slice.</exception>
         /// <exception cref="InvalidCastException">Thrown when the slice exists but is not assignable to <typeparamref name="TState"/>.</exception>
         /// <remarks>
-        /// Use <see cref="TryGetSliceState{TState}(IState, string, out TState?)"/> when the caller wants an optional
+        /// Use <see cref="TryGetSliceState{TState}(IState, SliceHandle{TState}, out TState?)"/> when the caller wants an optional
         /// lookup instead of exception-based failure details.
         /// </remarks>
-        public static TState GetSliceState<TState>(IState rootState, string sliceName)
+        public static TState GetSliceState<TState>(IState rootState, SliceHandle<TState> sliceHandle)
             where TState : class, IState
         {
             ArgumentNullException.ThrowIfNull(rootState);
-            ArgumentException.ThrowIfNullOrWhiteSpace(sliceName);
+            ArgumentNullException.ThrowIfNull(sliceHandle);
+
+            return GetSliceStateCore<TState>(rootState, sliceHandle.Name);
+        }
+
+        private static TState GetSliceStateCore<TState>(IState rootState, string sliceName)
+            where TState : class, IState
+        {
+            ArgumentNullException.ThrowIfNull(rootState);
 
             if (rootState is not CombinedState combinedState)
             {
@@ -54,24 +62,24 @@ namespace SC.AtomicState
         /// Attempts to get a named slice state from a combined root state.
         /// </summary>
         /// <typeparam name="TState">Expected slice state type.</typeparam>
-        /// <param name="rootState">Root state produced by <see cref="Factory.CombineReducers(ISlice[])"/>.</param>
-        /// <param name="sliceName">The slice name to read.</param>
+        /// <param name="rootState">Root state produced by <see cref="Factory.CombineReducers(SliceHandle[])"/>.</param>
+        /// <param name="sliceHandle">The slice handle to read.</param>
         /// <param name="sliceState">The typed slice state when the lookup succeeds; otherwise <see langword="null"/>.</param>
         /// <returns><see langword="true"/> when the slice exists and is assignable to <typeparamref name="TState"/>; otherwise <see langword="false"/>.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="rootState"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentException">Thrown when <paramref name="sliceName"/> is <see langword="null"/>, empty, or whitespace.</exception>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="sliceHandle"/> is <see langword="null"/>.</exception>
         /// <remarks>
         /// This method intentionally folds unsupported root-state shapes, missing slices, and incompatible slice types
         /// into the same <see langword="false"/> result.
         /// </remarks>
-        public static bool TryGetSliceState<TState>(IState rootState, string sliceName, [NotNullWhen(true)] out TState? sliceState)
+        public static bool TryGetSliceState<TState>(IState rootState, SliceHandle<TState> sliceHandle, [NotNullWhen(true)] out TState? sliceState)
             where TState : class, IState
         {
             ArgumentNullException.ThrowIfNull(rootState);
-            ArgumentException.ThrowIfNullOrWhiteSpace(sliceName);
+            ArgumentNullException.ThrowIfNull(sliceHandle);
 
             if (rootState is CombinedState combinedState &&
-                combinedState.States.TryGetValue(sliceName, out var candidate) &&
+                combinedState.States.TryGetValue(sliceHandle.Name, out var candidate) &&
                 candidate is TState typedState)
             {
                 sliceState = typedState;

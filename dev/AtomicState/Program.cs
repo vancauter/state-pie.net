@@ -23,8 +23,8 @@ namespace SC.AtomicState.Dev
             store.Dispatch(Factory.CreateAction(ExampleStore.PersonAddAge));
             store.Dispatch(Factory.CreateAction(ExampleStore.PersonSetName, "Lee-Lee"));
 
-            var counter = StateAccess.GetSliceState<CounterState>(store.State, "counter");
-            var person = StateAccess.GetSliceState<PersonState>(store.State, "person");
+            var counter = StateAccess.GetSliceState(store.State, ExampleStore.CounterSlice);
+            var person = StateAccess.GetSliceState(store.State, ExampleStore.PersonSlice);
 
             s_log.Info($"Counter: {counter.Count}");
             s_log.Info($"Person: {person.Name} ({person.Age})");

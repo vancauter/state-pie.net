@@ -124,8 +124,8 @@ namespace SC.AtomicState.Tests
 
             Assert.True(observed.Count >= 3);
 
-            var firstState = StateAccess.GetSliceState<CounterState>(store.State, "a");
-            var secondState = StateAccess.GetSliceState<CounterState>(store.State, "b");
+            var firstState = StateAccess.GetSliceState(store.State, firstSlice);
+            var secondState = StateAccess.GetSliceState(store.State, secondSlice);
 
             Assert.Equal(1, firstState.Count);
             Assert.Equal(12, secondState.Count);

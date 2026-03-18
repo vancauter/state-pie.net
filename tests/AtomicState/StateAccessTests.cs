@@ -11,8 +11,8 @@ namespace SC.AtomicState.Tests
             var personSlice = TestSlices.CreatePersonSlice();
             var (rootState, _) = Factory.CombineReducers(counterSlice, personSlice);
 
-            var counterState = StateAccess.GetSliceState<CounterState>(rootState, "counter");
-            var personState = StateAccess.GetSliceState<PersonState>(rootState, "person");
+            var counterState = StateAccess.GetSliceState(rootState, counterSlice);
+            var personState = StateAccess.GetSliceState(rootState, personSlice);
 
             Assert.Equal(0, counterState.Count);
             Assert.Equal("Guest", personState.Name);
@@ -21,21 +21,29 @@ namespace SC.AtomicState.Tests
         [Fact]
         public void GetSliceState_WhenRootStateIsNotCombined_ThrowsInvalidOperationException()
         {
-            var exception = Assert.Throws<InvalidOperationException>(() => StateAccess.GetSliceState<CounterState>(new CounterState(0), "counter"));
+            var counterSlice = TestSlices.CreateCounterSlice();
+
+            var exception = Assert.Throws<InvalidOperationException>(() => StateAccess.GetSliceState(new CounterState(0), counterSlice));
 
             Assert.Contains(nameof(Factory.CombineReducers), exception.Message, StringComparison.Ordinal);
         }
 
         [Fact]
-        public void GetSliceState_WhenRootStateIsNull_ThrowsArgumentNullException() =>
-         _ = Assert.Throws<ArgumentNullException>(() => StateAccess.GetSliceState<CounterState>(null!, "counter"));
+        public void GetSliceState_WhenRootStateIsNull_ThrowsArgumentNullException()
+        {
+            var counterSlice = TestSlices.CreateCounterSlice();
+
+            _ = Assert.Throws<ArgumentNullException>(() => StateAccess.GetSliceState(null!, counterSlice));
+        }
 
         [Fact]
         public void GetSliceState_WhenSliceIsMissing_ThrowsKeyNotFoundException()
         {
-            var (rootState, _) = Factory.CombineReducers(TestSlices.CreateCounterSlice());
+            var counterSlice = TestSlices.CreateCounterSlice();
+            var personSlice = TestSlices.CreatePersonSlice();
+            var (rootState, _) = Factory.CombineReducers(counterSlice);
 
-            var exception = Assert.Throws<KeyNotFoundException>(() => StateAccess.GetSliceState<PersonState>(rootState, "person"));
+            var exception = Assert.Throws<KeyNotFoundException>(() => StateAccess.GetSliceState(rootState, personSlice));
 
             Assert.Contains("person", exception.Message, StringComparison.Ordinal);
         }
@@ -43,9 +51,14 @@ namespace SC.AtomicState.Tests
         [Fact]
         public void GetSliceState_WhenSliceTypeDoesNotMatch_ThrowsInvalidCastException()
         {
-            var (rootState, _) = Factory.CombineReducers(TestSlices.CreateCounterSlice());
+            var counterSlice = TestSlices.CreateCounterSlice();
+            var mismatchedSlice = Factory.CreateSlice(
+                name: "counter",
+                initialState: new PersonState("Guest", 30),
+                reducer: (state, action) => state);
+            var (rootState, _) = Factory.CombineReducers(counterSlice);
 
-            var exception = Assert.Throws<InvalidCastException>(() => StateAccess.GetSliceState<PersonState>(rootState, "counter"));
+            var exception = Assert.Throws<InvalidCastException>(() => StateAccess.GetSliceState(rootState, mismatchedSlice));
 
             Assert.Contains("counter", exception.Message, StringComparison.Ordinal);
         }
@@ -53,9 +66,10 @@ namespace SC.AtomicState.Tests
         [Fact]
         public void TryGetSliceState_WhenSliceExistsWithExpectedType_ReturnsTrueAndSliceState()
         {
-            var (rootState, _) = Factory.CombineReducers(TestSlices.CreateCounterSlice());
+            var counterSlice = TestSlices.CreateCounterSlice();
+            var (rootState, _) = Factory.CombineReducers(counterSlice);
 
-            var found = StateAccess.TryGetSliceState<CounterState>(rootState, "counter", out var counterState);
+            var found = StateAccess.TryGetSliceState(rootState, counterSlice, out var counterState);
 
             Assert.True(found);
             Assert.NotNull(counterState);
@@ -65,9 +79,11 @@ namespace SC.AtomicState.Tests
         [Fact]
         public void TryGetSliceState_WhenSliceDoesNotExist_ReturnsFalse()
         {
-            var (rootState, _) = Factory.CombineReducers(TestSlices.CreateCounterSlice());
+            var counterSlice = TestSlices.CreateCounterSlice();
+            var personSlice = TestSlices.CreatePersonSlice();
+            var (rootState, _) = Factory.CombineReducers(counterSlice);
 
-            var found = StateAccess.TryGetSliceState<PersonState>(rootState, "person", out var personState);
+            var found = StateAccess.TryGetSliceState(rootState, personSlice, out var personState);
 
             Assert.False(found);
             Assert.Null(personState);
@@ -76,9 +92,14 @@ namespace SC.AtomicState.Tests
         [Fact]
         public void TryGetSliceState_WhenSliceTypeDoesNotMatch_ReturnsFalse()
         {
-            var (rootState, _) = Factory.CombineReducers(TestSlices.CreateCounterSlice());
+            var counterSlice = TestSlices.CreateCounterSlice();
+            var mismatchedSlice = Factory.CreateSlice(
+                name: "counter",
+                initialState: new PersonState("Guest", 30),
+                reducer: (state, action) => state);
+            var (rootState, _) = Factory.CombineReducers(counterSlice);
 
-            var found = StateAccess.TryGetSliceState<PersonState>(rootState, "counter", out var personState);
+            var found = StateAccess.TryGetSliceState(rootState, mismatchedSlice, out var personState);
 
             Assert.False(found);
             Assert.Null(personState);
