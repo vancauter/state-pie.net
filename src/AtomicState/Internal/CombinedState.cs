@@ -1,7 +1,7 @@
 namespace SC.AtomicState.Internal
 {
     /// <summary>
-    /// Represents a root state composed from named slice states.
+    /// Represents a combined root state composed from named slice states.
     /// </summary>
     internal sealed class CombinedState(IReadOnlyDictionary<string, IState> sliceStates) : IState
     {

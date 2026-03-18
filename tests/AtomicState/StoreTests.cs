@@ -47,7 +47,7 @@ namespace SC.AtomicState.Tests
         {
             static IState rootReducer(IState state, IAction action) => state;
 
-            static Dispatch ThrowOnInit(IStore store, Dispatch next) => action =>
+            static Dispatch throwOnInit(IStore store, Dispatch next) => action =>
             {
                 if (action.Type == "@@INIT")
                 {
@@ -57,7 +57,7 @@ namespace SC.AtomicState.Tests
                 next(action);
             };
 
-            var exception = Assert.Throws<InvalidOperationException>(() => Factory.CreateStore(new CounterState(0), rootReducer, ThrowOnInit));
+            var exception = Assert.Throws<InvalidOperationException>(() => Factory.CreateStore(new CounterState(0), rootReducer, throwOnInit));
 
             Assert.Equal("middleware init failure", exception.Message);
         }
@@ -65,17 +65,9 @@ namespace SC.AtomicState.Tests
         [Fact]
         public void State_WhenReadByObserverDuringNotification_MatchesPublishedState()
         {
-            static IState rootReducer(IState state, IAction action)
-            {
-                var currentState = (CounterState)state;
-                return action.Type == TestSlices.Increment
-                    ? new CounterState(currentState.Count + 1)
-                    : state;
-            }
-
             var observedPairs = new List<(int Published, int Current)>();
 
-            using var store = Factory.CreateStore(new CounterState(0), rootReducer);
+            using var store = Factory.CreateStore(new CounterState(0), TestReducers.CounterIncrement);
             using var subscription = store.StateChanged.Subscribe(new CallbackObserver(state =>
             {
                 observedPairs.Add((((CounterState)state).Count, ((CounterState)store.State).Count));
@@ -95,17 +87,9 @@ namespace SC.AtomicState.Tests
         [Fact]
         public async Task State_WhenReadFromConcurrentReader_ObservesEachCommittedUpdate()
         {
-            static IState rootReducer(IState state, IAction action)
-            {
-                var currentState = (CounterState)state;
-                return action.Type == TestSlices.Increment
-                    ? new CounterState(currentState.Count + 1)
-                    : state;
-            }
-
             const int dispatchCount = 256;
 
-            using var store = Factory.CreateStore(new CounterState(0), rootReducer);
+            using var store = Factory.CreateStore(new CounterState(0), TestReducers.CounterIncrement);
             using var stopReaders = new CancellationTokenSource();
 
             var committedTarget = 0;
@@ -154,19 +138,6 @@ namespace SC.AtomicState.Tests
 
             Assert.Null(readerFailure);
             Assert.Equal(dispatchCount, ((CounterState)store.State).Count);
-        }
-
-        private sealed class CallbackObserver(Action<IState> onNext) : IObserver<IState>
-        {
-            public void OnCompleted()
-            {
-            }
-
-            public void OnError(Exception error)
-            {
-            }
-
-            public void OnNext(IState value) => onNext(value);
         }
     }
 }

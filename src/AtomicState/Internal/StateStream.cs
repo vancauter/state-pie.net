@@ -5,34 +5,16 @@ namespace SC.AtomicState.Internal
     /// </summary>
     internal sealed class StateStream(IState initialState) : IObservable<IState>, IDisposable
     {
-        /// <summary>
-        /// Tracks registrations that should receive future live publications.
-        /// </summary>
         private readonly List<Registration> _observers = [];
 
-        /// <summary>
-        /// Protects stream state so subscription, publication, and termination observe one stream-level order.
-        /// </summary>
         private readonly Lock _lock = new();
 
-        /// <summary>
-        /// Prevents new subscriptions after disposal and suppresses repeated disposal work.
-        /// </summary>
         private bool _isDisposed;
 
-        /// <summary>
-        /// Distinguishes a graceful terminal state from an active stream.
-        /// </summary>
         private bool _isCompleted;
 
-        /// <summary>
-        /// Captures the terminal fault so future subscribers observe the same outcome.
-        /// </summary>
         private Exception? _error;
 
-        /// <summary>
-        /// Retains the latest committed state for immediate replay to new subscribers.
-        /// </summary>
         private IState? _lastState = initialState;
 
         /// <summary>
@@ -49,7 +31,7 @@ namespace SC.AtomicState.Internal
 
                 registration = GetOrAddRegistration(observer);
 
-                // Replay and termination are queued while the stream state is stable so subscribe cannot interleave
+                // Queue replay and any terminal signal while the stream state is stable so subscribe cannot interleave
                 // with a concurrent publish and reverse the observer's first visible ordering.
                 if (_lastState is not null)
                 {
@@ -66,7 +48,7 @@ namespace SC.AtomicState.Internal
                 }
             }
 
-            // Delivery stays outside the stream lock so user callbacks cannot stall other stream bookkeeping.
+            // Deliver outside the stream lock so user callbacks cannot stall other stream bookkeeping.
             registration.Drain(shouldDrain);
 
             return new Subscription(this, registration);
@@ -89,7 +71,7 @@ namespace SC.AtomicState.Internal
                 snapshot = [.. _observers];
             }
 
-            // The snapshot decouples callback-side subscription churn from the current publication pass.
+            // Snapshot the observer set so callback-side subscription churn cannot perturb this publication pass.
             foreach (var observer in snapshot)
             {
                 observer.Publish(Notification.OnNext(value));
@@ -202,7 +184,7 @@ namespace SC.AtomicState.Internal
             var created = new Registration(observer);
             if (!_isCompleted && _error is null)
             {
-                // Terminated streams still need deterministic replay/terminal delivery for future subscribers, but
+                // Terminated streams still need deterministic replay and terminal delivery for future subscribers, but
                 // those one-off registrations must not rejoin the live observer set.
                 _observers.Add(created);
             }
@@ -210,9 +192,6 @@ namespace SC.AtomicState.Internal
             return created;
         }
 
-        /// <summary>
-        /// Shields the stream from observer completion failures.
-        /// </summary>
         private static void TryNotifyCompleted(IObserver<IState> observer)
         {
             try
@@ -224,9 +203,6 @@ namespace SC.AtomicState.Internal
             }
         }
 
-        /// <summary>
-        /// Shields the stream from observer fault-handling failures.
-        /// </summary>
         private static void TryNotifyError(IObserver<IState> observer, Exception exception)
         {
             try
@@ -238,9 +214,6 @@ namespace SC.AtomicState.Internal
             }
         }
 
-        /// <summary>
-        /// Shields the stream from observer next-value failures.
-        /// </summary>
         private static void TryNotifyNext(IObserver<IState> observer, IState value)
         {
             try
@@ -264,9 +237,6 @@ namespace SC.AtomicState.Internal
             public static Notification OnNext(IState state) => new(NotificationKind.Next, state, null);
         }
 
-        /// <summary>
-        /// Selects which observer callback the queued notification will invoke.
-        /// </summary>
         private enum NotificationKind
         {
             Next,
@@ -279,24 +249,12 @@ namespace SC.AtomicState.Internal
         /// </summary>
         private sealed class Registration(IObserver<IState> observer)
         {
-            /// <summary>
-            /// Exposes the observer identity used to deduplicate live registrations.
-            /// </summary>
             public IObserver<IState> Observer { get; } = observer;
 
-            /// <summary>
-            /// Protects queue ownership so exactly one thread drains this observer at a time.
-            /// </summary>
             private readonly Lock _gate = new();
 
-            /// <summary>
-            /// Buffers notifications that arrived while another thread was already delivering callbacks.
-            /// </summary>
             private readonly Queue<Notification> _pending = [];
 
-            /// <summary>
-            /// Acts as the observer-local drain token.
-            /// </summary>
             private bool _isDraining;
 
             /// <summary>
@@ -341,8 +299,8 @@ namespace SC.AtomicState.Internal
                     {
                         if (_pending.Count == 0)
                         {
-                            // The token is released only after the queue is observed empty so the next publisher can
-                            // safely take exclusive ownership of delivery.
+                            // Release the token only after the queue is observed empty so the next publisher can take
+                            // exclusive ownership of delivery safely.
                             _isDraining = false;
                             return;
                         }
@@ -372,14 +330,8 @@ namespace SC.AtomicState.Internal
         /// </summary>
         private sealed class Subscription(StateStream owner, Registration registration) : IDisposable
         {
-            /// <summary>
-            /// Carries the stream instance that owns the registration.
-            /// </summary>
             private readonly StateStream _owner = owner;
 
-            /// <summary>
-            /// Carries the registration to remove when the subscription is disposed.
-            /// </summary>
             private readonly Registration _registration = registration;
 
             /// <summary>

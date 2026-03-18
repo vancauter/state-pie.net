@@ -159,15 +159,15 @@ namespace SC.AtomicState
                     var nextSliceState = sliceEntry.Value(currentSliceState, action);
                     if (!ReferenceEquals(nextSliceState, currentSliceState))
                     {
-                        // Delay cloning until the first actual slice change so no-op actions can return the current
-                        // root snapshot without paying for a transient dictionary allocation.
+                        // Clone only after the first real change so no-op actions can keep the current root snapshot
+                        // without paying for a transient dictionary allocation.
                         nextSliceStates ??= new Dictionary<string, IState>(currentRootState.States, StringComparer.Ordinal);
                         nextSliceStates[sliceEntry.Key] = nextSliceState;
                     }
                 }
 
-                // Reusing the current root instance keeps reference-based change detection aligned with reducer output
-                // and avoids publishing a synthetic root object for a logical no-op action.
+                // Reuse the current root instance so reference-based change detection stays aligned with reducer
+                // output and no synthetic root object is published for a logical no-op action.
                 return nextSliceStates is null ? currentRootState : new CombinedState(nextSliceStates);
             }
 

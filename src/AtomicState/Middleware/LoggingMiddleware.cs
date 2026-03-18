@@ -7,9 +7,6 @@ namespace SC.AtomicState
     /// </summary>
     public static class LoggingMiddleware
     {
-        /// <summary>
-        /// Stores the logger used by the middleware.
-        /// </summary>
         private static readonly SimpleLogger s_log = new(new LogOptions()
         {
             SourceName = "AtomicState",
@@ -17,7 +14,7 @@ namespace SC.AtomicState
         });
 
         /// <summary>
-        /// Creates logging middleware.
+        /// Creates middleware that logs each action type before forwarding the action.
         /// </summary>
         /// <returns>A middleware delegate that logs each dispatched action before forwarding it.</returns>
         /// <remarks>

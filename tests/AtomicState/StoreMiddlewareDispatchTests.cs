@@ -2,72 +2,8 @@ using SC.AtomicState.Tests.Shared;
 
 namespace SC.AtomicState.Tests
 {
-    public class MiddlewareTests
+    public class StoreMiddlewareDispatchTests
     {
-        [Fact]
-        public void LoggingMiddleware_WhenActionDispatched_RecordsActionTypeAndForwardsAction()
-        {
-            var slice = TestSlices.CreateCounterSlice();
-            var (rootState, rootReducer) = Factory.CombineReducers(slice);
-
-            var writer = new StringWriter();
-            var originalOut = Console.Out;
-
-            try
-            {
-                Console.SetOut(writer);
-
-                using var store = Factory.CreateStore(rootState, rootReducer, LoggingMiddleware.Create());
-
-                store.Dispatch(Factory.CreateAction(TestSlices.Increment));
-
-                Console.SetOut(originalOut);
-
-                var output = writer.ToString();
-                var counterState = StoreStateAssertions.GetSliceState<CounterState>(store.State, "counter");
-
-                Assert.Contains(TestSlices.Increment, output, StringComparison.Ordinal);
-                Assert.Equal(1, counterState.Count);
-            }
-            finally
-            {
-                Console.SetOut(originalOut);
-            }
-        }
-
-        [Fact]
-        public void LoggingMiddleware_WhenMultipleActionsDispatched_RecordsThemInDispatchOrder()
-        {
-            var slice = TestSlices.CreateCounterSlice();
-            var (rootState, rootReducer) = Factory.CombineReducers(slice);
-
-            var writer = new StringWriter();
-            var originalOut = Console.Out;
-
-            try
-            {
-                Console.SetOut(writer);
-
-                using var store = Factory.CreateStore(rootState, rootReducer, LoggingMiddleware.Create());
-
-                store.Dispatch(Factory.CreateAction(TestSlices.Increment));
-                store.Dispatch(Factory.CreateAction(TestSlices.Increment));
-
-                Console.SetOut(originalOut);
-
-                var output = writer.ToString();
-                var firstIncrementIndex = output.IndexOf(TestSlices.Increment, StringComparison.Ordinal);
-                var secondIncrementIndex = output.IndexOf(TestSlices.Increment, firstIncrementIndex + 1, StringComparison.Ordinal);
-
-                Assert.True(firstIncrementIndex >= 0, "Expected first increment to be logged");
-                Assert.True(secondIncrementIndex > firstIncrementIndex, "Expected second increment after first increment");
-            }
-            finally
-            {
-                Console.SetOut(originalOut);
-            }
-        }
-
         [Fact]
         public void Dispatch_WhenMiddlewareTriggersNestedDispatch_PreservesSerializedDispatchOrder()
         {
@@ -96,8 +32,7 @@ namespace SC.AtomicState.Tests
 
                 if (action.Type == outerAction)
                 {
-                    // The nested dispatch is triggered after the outer dispatch unwinds so the timeline proves the
-                    // store's serialized ordering rather than reducer recursion.
+                    // Re-enter after the outer pipeline unwinds so the timeline shows whether dispatches stay serialized.
                     timeline.Add("dispatch:nested");
                     store.Dispatch(Factory.CreateAction(nestedAction));
                     timeline.Add("after:nested");
@@ -168,8 +103,7 @@ namespace SC.AtomicState.Tests
                 UpdateMaximum(ref maxConcurrentCallbacks, currentConcurrency);
                 observedCounts.Add(((CounterState)state).Count);
 
-                // The delay widens the overlap window so a broken stream implementation would expose concurrent
-                // observer callbacks instead of passing by luck.
+                // Hold the callback open long enough for a nested dispatch to overlap if observer notifications are not serialized.
                 Thread.Sleep(10);
 
                 _ = Interlocked.Decrement(ref activeCallbacks);
@@ -212,12 +146,11 @@ namespace SC.AtomicState.Tests
                 {
                     _ = Task.Run(async () =>
                     {
-                        // Separate task coordination from the actual background dispatch so the test can assert that
-                        // the original dispatch commits before the later out-of-band work re-enters the store.
                         _ = backgroundStarted.TrySetResult();
 
                         try
                         {
+                            // This gate lets the test prove the original dispatch commits before background work re-enters.
                             await allowBackgroundDispatch.Task;
                             store.Dispatch(Factory.CreateAction(backgroundAction));
                             _ = backgroundCompleted.TrySetResult();
@@ -271,19 +204,6 @@ namespace SC.AtomicState.Tests
                     return;
                 }
             }
-        }
-
-        private sealed class CallbackObserver(Action<IState> onNext) : IObserver<IState>
-        {
-            public void OnCompleted()
-            {
-            }
-
-            public void OnError(Exception error)
-            {
-            }
-
-            public void OnNext(IState value) => onNext(value);
         }
     }
 }

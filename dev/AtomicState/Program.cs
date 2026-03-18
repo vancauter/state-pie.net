@@ -23,6 +23,12 @@ namespace SC.AtomicState.Dev
             store.Dispatch(Factory.CreateAction(ExampleStore.PersonAddAge));
             store.Dispatch(Factory.CreateAction(ExampleStore.PersonSetName, "Lee-Lee"));
 
+            var counter = StateAccess.GetSliceState<CounterState>(store.State, "counter");
+            var person = StateAccess.GetSliceState<PersonState>(store.State, "person");
+
+            s_log.Info($"Counter: {counter.Count}");
+            s_log.Info($"Person: {person.Name} ({person.Age})");
+
             // Disposing the store will call OnCompleted on the internal subject which
             // in turn invokes the observer's OnCompleted. The observer's completion
             // handler runs the provided callback, disposing the subscription.

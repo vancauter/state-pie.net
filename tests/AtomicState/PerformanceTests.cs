@@ -12,9 +12,7 @@ namespace SC.AtomicState.Tests
         [Fact]
         public void Dispatch_WhenReducerReturnsSameInstance_CompletesHighVolumeRunWithinReasonableTime()
         {
-            static IState rootReducer(IState state, IAction action) => state;
-
-            using var store = Factory.CreateStore(new CounterState(0), rootReducer);
+            using var store = Factory.CreateStore(new CounterState(0), TestReducers.NoOp);
             var action = Factory.CreateAction("perf.noop");
 
             Warmup(() => store.Dispatch(action));
@@ -37,9 +35,7 @@ namespace SC.AtomicState.Tests
         [Fact]
         public void Dispatch_WhenReducerReturnsSameInstance_KeepsAllocationsNearZero()
         {
-            static IState rootReducer(IState state, IAction action) => state;
-
-            using var store = Factory.CreateStore(new CounterState(0), rootReducer);
+            using var store = Factory.CreateStore(new CounterState(0), TestReducers.NoOp);
             var action = Factory.CreateAction("perf.noop");
 
             Warmup(() => store.Dispatch(action));
@@ -61,16 +57,7 @@ namespace SC.AtomicState.Tests
         [Fact]
         public void Dispatch_WhenStateChangesAndObserverSubscribed_StaysWithinPerDispatchAllocationBudget()
         {
-            static IState rootReducer(IState state, IAction action)
-            {
-                var currentState = (CounterState)state;
-
-                return action.Type == TestSlices.Increment
-                    ? new CounterState(currentState.Count + 1)
-                    : state;
-            }
-
-            using var store = Factory.CreateStore(new CounterState(0), rootReducer);
+            using var store = Factory.CreateStore(new CounterState(0), TestReducers.CounterIncrement);
             using var subscription = store.StateChanged.Subscribe(new NoOpObserver());
             var action = Factory.CreateAction(TestSlices.Increment);
 
@@ -128,11 +115,9 @@ namespace SC.AtomicState.Tests
         [Fact]
         public void Subscribe_WhenObserversAreDisposed_ReleasesObserverInstancesAfterCollection()
         {
-            static IState rootReducer(IState state, IAction action) => state;
-
             const int observerCount = 2_000;
 
-            using var store = Factory.CreateStore(new CounterState(0), rootReducer);
+            using var store = Factory.CreateStore(new CounterState(0), TestReducers.NoOp);
             var references = new List<WeakReference>(observerCount);
 
             for (var iteration = 0; iteration < observerCount; iteration++)
@@ -195,22 +180,6 @@ namespace SC.AtomicState.Tests
             GC.WaitForPendingFinalizers();
             GC.Collect();
         }
-
-        private sealed class NoOpObserver : IObserver<IState>
-        {
-            public void OnCompleted()
-            {
-            }
-
-            public void OnError(Exception error)
-            {
-            }
-
-            public void OnNext(IState value)
-            {
-            }
-        }
-
         private sealed class CountingObserver : IObserver<IState>, IDisposable
         {
             public int NextCount { get; private set; }

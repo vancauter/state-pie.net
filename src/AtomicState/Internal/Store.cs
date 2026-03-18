@@ -5,39 +5,18 @@ namespace SC.AtomicState.Internal
     /// </summary>
     internal sealed class Store : IStore
     {
-        /// <summary>
-        /// Reuses the internal initialization action.
-        /// </summary>
         private static readonly IAction s_initAction = Factory.CreateAction("@@INIT");
 
-        /// <summary>
-        /// Serializes reducer execution and disposal transitions.
-        /// </summary>
         private readonly Lock _dispatchLock = new();
 
-        /// <summary>
-        /// Stores the composed dispatch pipeline.
-        /// </summary>
         private readonly Dispatch _dispatch;
 
-        /// <summary>
-        /// Publishes state updates to observers.
-        /// </summary>
         private readonly StateStream _stateStream;
 
-        /// <summary>
-        /// Publishes the latest committed state for lock-free readers.
-        /// </summary>
         private IState _state;
 
-        /// <summary>
-        /// Indicates whether the store has been disposed.
-        /// </summary>
         private bool _isDisposed;
 
-        /// <summary>
-        /// Stores the root reducer.
-        /// </summary>
         private readonly Reducer _rootReducer;
 
         /// <summary>
@@ -70,34 +49,13 @@ namespace SC.AtomicState.Internal
             RunInitPass();
         }
 
-        /// <summary>
-        /// Gets the observable stream of state changes.
-        /// </summary>
-        /// <remarks>
-        /// The returned stream replays the current committed state to new subscribers and receives live updates after
-        /// dispatch commits a replacement state instance.
-        /// </remarks>
+        /// <inheritdoc />
         public IObservable<IState> StateChanged => _stateStream;
 
-        /// <summary>
-        /// Gets the current root state.
-        /// </summary>
-        /// <remarks>
-        /// Uses an acquire read so readers that are not synchronized can observe the latest committed state published
-        /// by <see cref="Dispatch(IAction)"/>.
-        /// </remarks>
+        /// <inheritdoc />
         public IState State => Volatile.Read(ref _state);
 
-        /// <summary>
-        /// Dispatches an action through the composed middleware pipeline.
-        /// </summary>
-        /// <param name="action">The action to dispatch.</param>
-        /// <exception cref="ObjectDisposedException">Thrown when dispatch reaches the runtime after the store has been disposed.</exception>
-        /// <remarks>
-        /// Middleware executes around one serialized dispatch core. If the reducer returns a new state instance, that
-        /// state is published before observers are notified so direct <see cref="State"/> reads and stream delivery
-        /// remain aligned.
-        /// </remarks>
+        /// <inheritdoc />
         public void Dispatch(IAction action) => _dispatch(action);
 
         /// <summary>
@@ -144,7 +102,7 @@ namespace SC.AtomicState.Internal
                 }
             }
 
-            // Publish outside the reducer lock so observers cannot block future dispatches.
+            // Publish outside the reducer lock so observer callbacks cannot block future dispatches.
             if (stateToPublish is not null)
             {
                 _stateStream.OnNext(stateToPublish);

@@ -1,18 +1,28 @@
 namespace SC.AtomicState.Tests.Shared
 {
-    public sealed record CounterState(int Count) : IState;
-    public sealed record PersonState(string Name, int Age) : IState;
+    /// <summary>
+    /// Minimal counter state used by reducer and store tests that only care about numeric transitions.
+    /// </summary>
+    internal sealed record CounterState(int Count) : IState;
 
-    public static class TestSlices
+    /// <summary>
+    /// Minimal person state used by combined-state tests that need a second independently addressable slice.
+    /// </summary>
+    internal sealed record PersonState(string Name, int Age) : IState;
+
+    /// <summary>
+    /// Provides reusable action names and slice factories so tests can share the same lightweight state model.
+    /// </summary>
+    internal static class TestSlices
     {
-        public const string Increment = "counter.increment";
-        public const string Decrement = "counter.decrement";
-        public const string InnerIncrement = "inner.counter.increment";
-        public const string InnerDecrement = "inner.counter.decrement";
-        public const string InnerPersonAddAge = "inner.person.add_age";
-        public const string InnerPersonSetName = "inner.person.set_name";
-        public const string PersonAddAge = "person.add_age";
-        public const string PersonSetName = "person.set_name";
+        internal const string Increment = "counter.increment";
+        internal const string Decrement = "counter.decrement";
+        internal const string InnerIncrement = "inner.counter.increment";
+        internal const string InnerDecrement = "inner.counter.decrement";
+        internal const string InnerPersonAddAge = "inner.person.add_age";
+        internal const string InnerPersonSetName = "inner.person.set_name";
+        internal const string PersonAddAge = "person.add_age";
+        internal const string PersonSetName = "person.set_name";
 
         internal static ISlice CreateCounterSlice() => Factory.CreateSlice(
             name: "counter",
@@ -58,15 +68,15 @@ namespace SC.AtomicState.Tests.Shared
             var (innerState, innerReducer) = Factory.CombineReducers(CreateInnerCounterSlice(), CreateInnerPersonSlice());
 
             // The adapter keeps the nested combined reducer usable through the untyped slice contract.
-            IState Adapter(IState state, IAction action) => innerReducer(state, action);
+            IState adapter(IState state, IAction action) => innerReducer(state, action);
 
             return Factory.CreateSlice(
                 name: "nested",
                 initialState: innerState,
-                reducer: Adapter);
+                reducer: adapter);
         }
 
-        public static ISlice CreatePersonSlice() => Factory.CreateSlice(
+        internal static ISlice CreatePersonSlice() => Factory.CreateSlice(
             name: "person",
             initialState: new PersonState("Guest", 30),
             reducer: (state, action) =>

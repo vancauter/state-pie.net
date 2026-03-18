@@ -1,23 +1,17 @@
 namespace SC.AtomicState.Internal
 {
     /// <summary>
-    /// Represents the internal <see cref="ISlice"/> implementation.
+    /// Adapts a strongly typed slice definition to the untyped <see cref="ISlice"/> contract.
     /// </summary>
     internal sealed class StateSlice<TState>(string name, TState initialState, Reducer<TState> reducer) : ISlice where TState : IState
     {
-        /// <summary>
-        /// Gets the slice name.
-        /// </summary>
+        /// <inheritdoc />
         public string Name { get; } = name;
 
-        /// <summary>
-        /// Gets the initial slice state.
-        /// </summary>
+        /// <inheritdoc />
         public IState State { get; } = initialState;
 
-        /// <summary>
-        /// Gets the reducer adapter exposed through <see cref="ISlice"/>.
-        /// </summary>
+        /// <inheritdoc />
         public Reducer Reducer { get; } = (state, action) => reducer((TState)state, action);
     }
 }

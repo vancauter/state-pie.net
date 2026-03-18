@@ -7,15 +7,6 @@ that are already covered by the current implementation and test suite.
 
 ## Priority Actions
 
-### P2: Add a supported combined-slice access API
-
-- [ ] Add a public API for retrieving combined slice state by slice name and expected type.
-- [ ] Update docs and examples to use that API instead of recommending serialization or test-only reflection helpers.
-- [ ] Remove reflection-based access patterns from tests where a public accessor can validate the intended contract.
-
-Why this matters: combined state remains an internal runtime shape today, and even the test suite relies on reflection
-to read slices. That is a strong signal that the public API is still missing an ergonomic read path.
-
 ### P3: Align installation docs with shipping reality
 
 - [ ] Remove or replace the placeholder `dotnet add package AtomicState` guidance until package metadata and delivery

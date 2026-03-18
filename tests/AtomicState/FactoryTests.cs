@@ -2,8 +2,6 @@ using SC.AtomicState.Tests.Shared;
 
 namespace SC.AtomicState.Tests
 {
-    public record Counter(int Value) : IState;
-
     public class FactoryTests
     {
         [Fact]
@@ -33,20 +31,20 @@ namespace SC.AtomicState.Tests
         public void CreateAction_WhenTypeIsBlank_ThrowsArgumentException(string type) => _ = Assert.Throws<ArgumentException>(() => Factory.CreateAction(type));
 
         [Fact]
-        public void CreateActionWithPayload_WhenTypeIsNull_ThrowsArgumentException() => _ = Assert.Throws<ArgumentException>(() => Factory.CreateAction(null!, "payload"));
+        public void CreateAction_WithPayload_WhenTypeIsNull_ThrowsArgumentException() => _ = Assert.Throws<ArgumentException>(() => Factory.CreateAction(null!, "payload"));
 
         [Theory]
         [InlineData("")]
         [InlineData(" ")]
         [InlineData("\t")]
-        public void CreateActionWithPayload_WhenTypeIsBlank_ThrowsArgumentException(string type) => _ = Assert.Throws<ArgumentException>(() => Factory.CreateAction(type, 1));
+        public void CreateAction_WithPayload_WhenTypeIsBlank_ThrowsArgumentException(string type) => _ = Assert.Throws<ArgumentException>(() => Factory.CreateAction(type, 1));
 
         [Fact]
         public void CreateSlice_WhenCreated_ExposesNameStateAndReducer()
         {
-            var slice = Factory.CreateSlice("counter", new Counter(0), (state, action) =>
+            var slice = Factory.CreateSlice("counter", new CounterState(0), (state, action) =>
             {
-                return action.Type == "inc" ? new Counter(state.Value + 1) : state;
+                return action.Type == "inc" ? new CounterState(state.Count + 1) : state;
             });
 
             Assert.Equal("counter", slice.Name);
@@ -57,26 +55,26 @@ namespace SC.AtomicState.Tests
         }
 
         [Fact]
-        public void CreateSlice_WhenNameIsNull_ThrowsArgumentException() => _ = Assert.Throws<ArgumentException>(() => Factory.CreateSlice(null!, new Counter(0), (state, action) => state));
+        public void CreateSlice_WhenNameIsNull_ThrowsArgumentException() => _ = Assert.Throws<ArgumentException>(() => Factory.CreateSlice(null!, new CounterState(0), (state, action) => state));
 
         [Theory]
         [InlineData("")]
         [InlineData(" ")]
         [InlineData("\t")]
-        public void CreateSlice_WhenNameIsBlank_ThrowsArgumentException(string name) => _ = Assert.Throws<ArgumentException>(() => Factory.CreateSlice(name, new Counter(0), (state, action) => state));
+        public void CreateSlice_WhenNameIsBlank_ThrowsArgumentException(string name) => _ = Assert.Throws<ArgumentException>(() => Factory.CreateSlice(name, new CounterState(0), (state, action) => state));
 
         [Fact]
-        public void CombineReducers_WhenStoreDispatches_EmitsUpdatedRootState()
+        public void CombineReducers_WhenStoreDispatches_UpdatesCombinedSliceState()
         {
-            var firstSlice = Factory.CreateSlice("a", new Counter(0), (state, action) => action.Type == "inc_a" ? new Counter(state.Value + 1) : state);
-            var secondSlice = Factory.CreateSlice("b", new Counter(10), (state, action) => action.Type == "inc_b" ? new Counter(state.Value + 2) : state);
+            var firstSlice = Factory.CreateSlice("a", new CounterState(0), (state, action) => action.Type == "inc_a" ? new CounterState(state.Count + 1) : state);
+            var secondSlice = Factory.CreateSlice("b", new CounterState(10), (state, action) => action.Type == "inc_b" ? new CounterState(state.Count + 2) : state);
 
             var (rootState, rootReducer) = Factory.CombineReducers(firstSlice, secondSlice);
 
             using var store = Factory.CreateStore(rootState, rootReducer);
 
             var observed = new List<IState>();
-            var collector = new TestObserver(observed);
+            var collector = new ListObserver(observed);
             using var subscription = store.StateChanged.Subscribe(collector);
 
             Assert.NotEmpty(observed);
@@ -86,11 +84,11 @@ namespace SC.AtomicState.Tests
 
             Assert.True(observed.Count >= 3);
 
-            var firstState = StoreStateAssertions.GetSliceState<Counter>(store.State, "a");
-            var secondState = StoreStateAssertions.GetSliceState<Counter>(store.State, "b");
+            var firstState = StateAccess.GetSliceState<CounterState>(store.State, "a");
+            var secondState = StateAccess.GetSliceState<CounterState>(store.State, "b");
 
-            Assert.Equal(1, firstState.Value);
-            Assert.Equal(12, secondState.Value);
+            Assert.Equal(1, firstState.Count);
+            Assert.Equal(12, secondState.Count);
         }
 
         [Fact]
@@ -102,25 +100,10 @@ namespace SC.AtomicState.Tests
         [Fact]
         public void CombineReducers_WhenSliceNamesDuplicate_ThrowsArgumentException()
         {
-            var firstSlice = Factory.CreateSlice("counter", new Counter(0), (state, action) => state);
-            var secondSlice = Factory.CreateSlice("counter", new Counter(1), (state, action) => state);
+            var firstSlice = Factory.CreateSlice("counter", new CounterState(0), (state, action) => state);
+            var secondSlice = Factory.CreateSlice("counter", new CounterState(1), (state, action) => state);
 
             _ = Assert.Throws<ArgumentException>(() => Factory.CombineReducers(firstSlice, secondSlice));
-        }
-
-        private sealed class TestObserver(List<IState> destination) : IObserver<IState>
-        {
-            private readonly List<IState> _destination = destination;
-
-            public void OnCompleted()
-            {
-            }
-
-            public void OnError(Exception error)
-            {
-            }
-
-            public void OnNext(IState value) => _destination.Add(value);
         }
     }
 }

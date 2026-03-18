@@ -54,7 +54,7 @@ dotnet add package AtomicState
 | `Reducer` / `Reducer<TState>`   | Functions that compute the next state from the current state and an action |
 | `IStore`                        | Owns the current root state, dispatch pipeline, and state stream           |
 | `ISlice`                        | Named slice definition used when composing a combined root reducer         |
-| `AtomicMiddleware`              | Dispatch wrapper for diagnostics or custom interception                    |
+| `Middleware`                    | Dispatch wrapper for diagnostics or custom interception                    |
 
 Two conventions are important for correct behavior:
 
@@ -158,8 +158,10 @@ using var store = Factory.CreateStore(rootState, rootReducer);
 store.Dispatch(Factory.CreateAction("@COUNTER/INCREMENT"));
 store.Dispatch(Factory.CreateAction("@PERSON/SET_NAME", "Lee-Lee"));
 
-// Combined state is currently easiest to inspect through observation or serialization.
-Console.WriteLine(JsonSerializer.Serialize(store.State));
+var counter = StateAccess.GetSliceState<CounterState>(store.State, "counter");
+var person = StateAccess.GetSliceState<PersonState>(store.State, "person");
+
+Console.WriteLine($"{counter.Count}: {person.Name} ({person.Age})");
 ```
 
 `Factory.CombineReducers` enforces unique slice names and preserves the existing root state reference when no slice
@@ -226,7 +228,7 @@ using var store = Factory.CreateStore(
 `LoggingMiddleware` writes each dispatched action type and suppresses logging failures so diagnostics cannot interrupt
 dispatch.
 
-Custom middleware can intercept, short-circuit, or forward actions through the `AtomicMiddleware` delegate.
+Custom middleware can intercept, short-circuit, or forward actions through the `Middleware` delegate.
 
 Middleware may call `Dispatch` again while a dispatch is already in progress. When it does, nested actions participate
 in the same total serialized dispatch order as all other store work. Middleware may also schedule work onto background
@@ -248,7 +250,8 @@ AtomicState documents the following concurrency contract:
 
 ## Current Limitations
 
-- Combined slice state is an internal runtime shape, so there is no public typed accessor for individual slices yet.
+- Combined slice state stays internal, but `StateAccess` provides a supported way to read named typed slices from a root
+  state produced by `Factory.CombineReducers(...)`.
 - The library does not currently ship higher-level async orchestration helpers.
 
 ## Development

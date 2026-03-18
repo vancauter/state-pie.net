@@ -3,8 +3,10 @@ using SC.AtomicState.Tests.Shared;
 
 namespace SC.AtomicState.Tests
 {
-    public class ReplayStateStreamTests
+    public class StateStreamTests
     {
+        private static readonly TimeSpan s_concurrentStartTimeout = TimeSpan.FromSeconds(1);
+
         [Fact]
         public void Subscribe_WhenSubscriberJoinsAfterStateUpdates_ReplaysLatestState()
         {
@@ -238,20 +240,19 @@ namespace SC.AtomicState.Tests
                 using var stream = new StateStream(new CounterState(0));
                 using var barrier = new Barrier(2);
 
-                var observer = new ConcurrentRecordingObserver();
+                // Start both sides from the same synchronization point so the test exercises the race rather than a fixed order.
+                var observer = new ConcurrentRecordingObserver<CounterState, int>(state => state.Count);
                 var subscribeTask = StartConcurrentSubscribe(stream, observer, barrier);
                 var publishTask = StartConcurrentAction(barrier, () => stream.OnNext(new CounterState(iteration)));
 
                 using var subscription = await subscribeTask;
                 await publishTask;
 
-                var counts = observer.GetCounts();
+                var counts = observer.GetValues();
 
                 Assert.True(
-                    // Depending on which side wins the race, the subscriber may observe either the published state
-                    // directly or the initial replay followed by the newly published state, but never duplicates.
-                    counts is [var current] && current == iteration ||
-                    counts is [0, var replayedCurrent] && replayedCurrent == iteration,
+                    (counts is [var current] && current == iteration) ||
+                    (counts is [0, var replayedCurrent] && replayedCurrent == iteration),
                     $"Unexpected replay sequence: [{string.Join(", ", counts)}].");
                 Assert.Equal(0, observer.CompletedCount);
                 Assert.Null(observer.Error);
@@ -268,14 +269,14 @@ namespace SC.AtomicState.Tests
                 using var stream = new StateStream(new CounterState(0));
                 using var barrier = new Barrier(2);
 
-                var observer = new ConcurrentRecordingObserver();
+                var observer = new ConcurrentRecordingObserver<CounterState, int>(state => state.Count);
                 var subscribeTask = StartConcurrentSubscribe(stream, observer, barrier);
                 var completeTask = StartConcurrentAction(barrier, stream.OnCompleted);
 
                 using var subscription = await subscribeTask;
                 await completeTask;
 
-                Assert.Equal([0], observer.GetCounts());
+                Assert.Equal([0], observer.GetValues());
                 Assert.Equal(1, observer.CompletedCount);
                 Assert.Null(observer.Error);
             }
@@ -291,7 +292,7 @@ namespace SC.AtomicState.Tests
                 using var stream = new StateStream(new CounterState(0));
                 using var barrier = new Barrier(2);
 
-                var observer = new ConcurrentRecordingObserver();
+                var observer = new ConcurrentRecordingObserver<CounterState, int>(state => state.Count);
                 var failure = new InvalidOperationException($"boom-{iteration}");
                 var subscribeTask = StartConcurrentSubscribe(stream, observer, barrier);
                 var errorTask = StartConcurrentAction(barrier, () => stream.OnError(failure));
@@ -299,7 +300,7 @@ namespace SC.AtomicState.Tests
                 using var subscription = await subscribeTask;
                 await errorTask;
 
-                Assert.Equal([0], observer.GetCounts());
+                Assert.Equal([0], observer.GetValues());
                 Assert.Equal(0, observer.CompletedCount);
                 Assert.Same(failure, observer.Error);
             }
@@ -315,7 +316,7 @@ namespace SC.AtomicState.Tests
                 using var stream = new StateStream(new CounterState(0));
                 using var barrier = new Barrier(2);
 
-                var observer = new ConcurrentRecordingObserver();
+                var observer = new ConcurrentRecordingObserver<CounterState, int>(state => state.Count);
                 var subscribeTask = StartConcurrentSubscribe(stream, observer, barrier);
                 var disposeTask = StartConcurrentAction(barrier, stream.Dispose);
 
@@ -335,17 +336,17 @@ namespace SC.AtomicState.Tests
 
                 if (disposedException is not null)
                 {
-                    Assert.Empty(observer.GetCounts());
+                    Assert.Empty(observer.GetValues());
                     Assert.Equal(0, observer.CompletedCount);
                     Assert.Null(observer.Error);
                     continue;
                 }
 
-                using (subscription!)
+                using (subscription)
                 {
                 }
 
-                Assert.Equal([0], observer.GetCounts());
+                Assert.Equal([0], observer.GetValues());
                 Assert.Equal(1, observer.CompletedCount);
                 Assert.Null(observer.Error);
             }
@@ -354,127 +355,23 @@ namespace SC.AtomicState.Tests
         private static Task<IDisposable> StartConcurrentSubscribe(StateStream stream, IObserver<IState> observer, Barrier barrier) =>
             Task.Run(() =>
             {
-                // The barrier forces subscription and the competing stream action to start from the same point so the
-                // test exercises real ordering races instead of deterministic sequencing.
-                barrier.SignalAndWait();
+                SignalAndWait(barrier);
                 return stream.Subscribe(observer);
             });
 
         private static Task StartConcurrentAction(Barrier barrier, Action action) =>
             Task.Run(() =>
             {
-                barrier.SignalAndWait();
+                SignalAndWait(barrier);
                 action();
             });
 
-        private sealed class RecordingObserver : IObserver<IState>
+        private static void SignalAndWait(Barrier barrier)
         {
-            public List<IState> States { get; } = [];
-
-            public int CompletedCount { get; private set; }
-
-            public Exception? Error { get; private set; }
-
-            public void Clear()
+            // Fail fast when one side faults before rendezvous so the race tests surface a timeout instead of hanging indefinitely.
+            if (!barrier.SignalAndWait(s_concurrentStartTimeout))
             {
-                States.Clear();
-                CompletedCount = 0;
-                Error = null;
-            }
-
-            public void OnCompleted() => CompletedCount++;
-
-            public void OnError(Exception error) => Error = error;
-
-            public void OnNext(IState value) => States.Add(value);
-        }
-
-        private sealed class ThrowingObserver(bool throwOnNext = false, bool throwOnError = false, bool throwOnCompleted = false) : IObserver<IState>
-        {
-            public void OnCompleted()
-            {
-                if (throwOnCompleted)
-                {
-                    throw new InvalidOperationException("completed");
-                }
-            }
-
-            public void OnError(Exception error)
-            {
-                if (throwOnError)
-                {
-                    throw new InvalidOperationException("error");
-                }
-            }
-
-            public void OnNext(IState value)
-            {
-                if (throwOnNext)
-                {
-                    throw new InvalidOperationException("next");
-                }
-            }
-        }
-
-        private sealed class ConcurrentRecordingObserver : IObserver<IState>
-        {
-            private readonly Lock _gate = new();
-            private readonly List<int> _counts = [];
-            private int _completedCount;
-            private Exception? _error;
-
-            public int CompletedCount
-            {
-                get
-                {
-                    lock (_gate)
-                    {
-                        return _completedCount;
-                    }
-                }
-            }
-
-            public Exception? Error
-            {
-                get
-                {
-                    lock (_gate)
-                    {
-                        return _error;
-                    }
-                }
-            }
-
-            public int[] GetCounts()
-            {
-                lock (_gate)
-                {
-                    return [.. _counts];
-                }
-            }
-
-            public void OnCompleted()
-            {
-                lock (_gate)
-                {
-                    _completedCount++;
-                }
-            }
-
-            public void OnError(Exception error)
-            {
-                lock (_gate)
-                {
-                    _error = error;
-                }
-            }
-
-            public void OnNext(IState value)
-            {
-                lock (_gate)
-                {
-                    _counts.Add(((CounterState)value).Count);
-                }
+                throw new TimeoutException("Timed out while synchronizing concurrent test actions.");
             }
         }
     }
