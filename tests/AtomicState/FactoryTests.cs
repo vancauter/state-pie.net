@@ -12,6 +12,13 @@ namespace SC.AtomicState.Tests
             Assert.Contains(messageFragment, exception.Message, StringComparison.Ordinal);
         }
 
+        private static void AssertNullArgument(Action action, string parameterName)
+        {
+            var exception = Assert.Throws<ArgumentNullException>(action);
+
+            Assert.Equal(parameterName, exception.ParamName);
+        }
+
         [Fact]
         public void CreateAction_WithoutPayload_ReturnsTypedAction()
         {
@@ -69,7 +76,32 @@ namespace SC.AtomicState.Tests
         [InlineData("")]
         [InlineData(" ")]
         [InlineData("\t")]
-        public void CreateSlice_WhenNameIsBlank_ThrowsArgumentException(string name) => AssertInvalidArgument(() => Factory.CreateSlice(name, new CounterState(0), (state, action) => state), "name", "Slice name must be a non-empty string.");
+        public void CreateSlice_WhenNameIsBlank_ThrowsArgumentException(string name) =>
+            AssertInvalidArgument(() => Factory.CreateSlice(name, new CounterState(0), (state, action) => state), "name", "Slice name must be a non-empty string.");
+
+        [Fact]
+        public void CreateSlice_WhenInitialStateIsNull_ThrowsArgumentNullException() =>
+            AssertNullArgument(() => Factory.CreateSlice("counter", (CounterState)null!, (state, action) => state), "initialState");
+
+        [Fact]
+        public void CreateSlice_WhenReducerIsNull_ThrowsArgumentNullException() =>
+            AssertNullArgument(() => Factory.CreateSlice("counter", new CounterState(0), null!), "reducer");
+
+        [Fact]
+        public void CreateStore_WhenInitialStateIsNull_ThrowsArgumentNullException() =>
+            AssertNullArgument(() => Factory.CreateStore(null!, TestReducers.NoOp), "initialState");
+
+        [Fact]
+        public void CreateStore_WhenRootReducerIsNull_ThrowsArgumentNullException() =>
+            AssertNullArgument(() => Factory.CreateStore(new CounterState(0), null!), "rootReducer");
+
+        [Fact]
+        public void CreateStore_WithMiddleware_WhenInitialStateIsNull_ThrowsArgumentNullException() =>
+            AssertNullArgument(() => Factory.CreateStore(null!, TestReducers.NoOp, LoggingMiddleware.Create()), "initialState");
+
+        [Fact]
+        public void CreateStore_WithMiddleware_WhenRootReducerIsNull_ThrowsArgumentNullException() =>
+            AssertNullArgument(() => Factory.CreateStore(new CounterState(0), null!, LoggingMiddleware.Create()), "rootReducer");
 
         [Fact]
         public void CombineReducers_WhenStoreDispatches_UpdatesCombinedSliceState()

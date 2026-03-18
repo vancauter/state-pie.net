@@ -56,6 +56,7 @@ namespace SC.AtomicState
         /// <param name="initialState">Initial state instance for the slice.</param>
         /// <param name="reducer">Reducer function that computes next state for the slice.</param>
         /// <returns>An <see cref="ISlice"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="initialState"/> or <paramref name="reducer"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is <see langword="null"/>, empty, or whitespace.</exception>
         /// <remarks>
         /// The returned slice adapts the strongly typed reducer to the untyped <see cref="ISlice"/> contract used by <see cref="CombineReducers(ISlice[])"/>.
@@ -68,6 +69,9 @@ namespace SC.AtomicState
                 throw new ArgumentException("Slice name must be a non-empty string.", nameof(name));
             }
 
+            ArgumentNullException.ThrowIfNull(initialState);
+            ArgumentNullException.ThrowIfNull(reducer);
+
             return new StateSlice<TState>(name, initialState, reducer);
         }
 
@@ -77,12 +81,19 @@ namespace SC.AtomicState
         /// <param name="initialState">Initial root state.</param>
         /// <param name="rootReducer">A reducer that computes the next root state for each dispatched action.</param>
         /// <returns>An <see cref="IStore"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="initialState"/> or <paramref name="rootReducer"/> is <see langword="null"/>.</exception>
         /// <remarks>
         /// The created store performs an internal initialization dispatch so reducers can materialize derived initial
         /// state before external subscribers observe the store. Initialization is part of store creation, so failures
         /// during that dispatch prevent the store from being created and are propagated unchanged to the caller.
         /// </remarks>
-        public static IStore CreateStore(IState initialState, Reducer rootReducer) => new Store(initialState, rootReducer);
+        public static IStore CreateStore(IState initialState, Reducer rootReducer)
+        {
+            ArgumentNullException.ThrowIfNull(initialState);
+            ArgumentNullException.ThrowIfNull(rootReducer);
+
+            return new Store(initialState, rootReducer);
+        }
 
         /// <summary>
         /// Creates a root <see cref="IStore"/> with optional middleware that wraps dispatch.
@@ -91,6 +102,7 @@ namespace SC.AtomicState
         /// <param name="rootReducer">Root reducer.</param>
         /// <param name="middleware">Optional middleware pipeline applied in order.</param>
         /// <returns>An <see cref="IStore"/> instance with middleware applied.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="initialState"/> or <paramref name="rootReducer"/> is <see langword="null"/>.</exception>
         /// <remarks>
         /// Middleware wraps the store's base dispatch pipeline in the order provided, so the first middleware receives
         /// each action first. Middleware receives an <see cref="IStore"/> handle for use by the returned dispatch
@@ -101,7 +113,13 @@ namespace SC.AtomicState
         /// still serialized by the store. Initialization is part of store creation, so failures during the internal
         /// initialization dispatch prevent the store from being created and are propagated unchanged to the caller.
         /// </remarks>
-        public static IStore CreateStore(IState initialState, Reducer rootReducer, params Middleware[] middleware) => new Store(initialState, rootReducer, middleware);
+        public static IStore CreateStore(IState initialState, Reducer rootReducer, params Middleware[] middleware)
+        {
+            ArgumentNullException.ThrowIfNull(initialState);
+            ArgumentNullException.ThrowIfNull(rootReducer);
+
+            return new Store(initialState, rootReducer, middleware);
+        }
 
         /// <summary>
         /// Combines multiple <see cref="ISlice"/> instances into a single root state and reducer.
