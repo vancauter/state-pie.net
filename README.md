@@ -165,6 +165,9 @@ Console.WriteLine($"{counter.Count}: {person.Name} ({person.Age})");
 `Factory.CombineReducers` enforces unique slice names and preserves the existing root state reference when no slice
 returns a new instance.
 
+Each slice exposes its setup-time snapshot through `ISlice.InitialState`. That member is distinct from `IStore.State`,
+which always represents the current committed root snapshot.
+
 Store creation performs an internal `@@INIT` dispatch before returning. If reducer or middleware logic throws during
 that initialization pass, `Factory.CreateStore(...)` throws and no partially initialized store instance is returned.
 

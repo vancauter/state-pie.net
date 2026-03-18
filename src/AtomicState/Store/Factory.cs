@@ -157,7 +157,7 @@ namespace SC.AtomicState
             }
 
             var reducerDictionary = slices.ToDictionary(slice => slice.Name, slice => slice.Reducer, StringComparer.Ordinal);
-            var mutableSliceStates = slices.ToDictionary(slice => slice.Name, slice => slice.State, StringComparer.Ordinal);
+            var mutableSliceStates = slices.ToDictionary(slice => slice.Name, slice => slice.InitialState, StringComparer.Ordinal);
             var initialSliceStates = new ReadOnlyDictionary<string, IState>(mutableSliceStates);
             var initialRootState = new CombinedState(initialSliceStates);
 

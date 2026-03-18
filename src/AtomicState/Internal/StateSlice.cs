@@ -9,7 +9,7 @@ namespace SC.AtomicState.Internal
         public string Name { get; } = name;
 
         /// <inheritdoc />
-        public IState State { get; } = initialState;
+        public IState InitialState { get; } = initialState;
 
         /// <inheritdoc />
         public Reducer Reducer { get; } = (state, action) =>

@@ -63,10 +63,10 @@ namespace SC.AtomicState.Tests
             });
 
             Assert.Equal("counter", slice.Name);
-            _ = Assert.IsAssignableFrom<IState>(slice.State);
+            _ = Assert.IsAssignableFrom<IState>(slice.InitialState);
 
-            var next = slice.Reducer(slice.State, Factory.CreateAction("inc"));
-            Assert.NotSame(slice.State, next);
+            var next = slice.Reducer(slice.InitialState, Factory.CreateAction("inc"));
+            Assert.NotSame(slice.InitialState, next);
         }
 
         [Fact]

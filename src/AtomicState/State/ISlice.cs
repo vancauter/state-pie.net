@@ -4,7 +4,7 @@ namespace SC.AtomicState
     /// Represents a named slice that participates in a combined store state.
     /// </summary>
     /// <remarks>
-    /// Each slice contributes an initial <see cref="State"/> value and a <see cref="Reducer"/> that is invoked by <see cref="Factory.CombineReducers(ISlice[])"/>.
+    /// Each slice contributes an initial <see cref="InitialState"/> value and a <see cref="Reducer"/> that is invoked by <see cref="Factory.CombineReducers(ISlice[])"/>.
     /// </remarks>
     public interface ISlice
     {
@@ -16,7 +16,7 @@ namespace SC.AtomicState
         /// <summary>
         /// Gets the initial state snapshot for the slice.
         /// </summary>
-        IState State { get; }
+        IState InitialState { get; }
 
         /// <summary>
         /// Gets the reducer that computes the next slice state.

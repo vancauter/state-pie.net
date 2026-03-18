@@ -17,7 +17,7 @@ namespace SC.AtomicState.Tests
 
             var slice = TestSlices.CreateCounterSlice();
 
-            using var store = Factory.CreateStore(slice.State, rootReducer);
+            using var store = Factory.CreateStore(slice.InitialState, rootReducer);
 
             Assert.Equal(5, ((CounterState)store.State).Count);
         }
@@ -37,7 +37,7 @@ namespace SC.AtomicState.Tests
 
             var slice = TestSlices.CreateCounterSlice();
 
-            var exception = Assert.Throws<InvalidOperationException>(() => Factory.CreateStore(slice.State, rootReducer));
+            var exception = Assert.Throws<InvalidOperationException>(() => Factory.CreateStore(slice.InitialState, rootReducer));
 
             Assert.Equal("init failure", exception.Message);
         }
