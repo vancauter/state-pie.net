@@ -20,9 +20,11 @@ Improve XML documentation and inline comments for the relevant C# code.
 
 ## Output expectations
 
-1. Summarize the documentation scope when the pass is broad.
-2. Report the major documentation improvements after editing.
-3. Call out any areas intentionally left undocumented or lightly documented.
+1. Added, normalized, or improved XML documentation on public APIs.
+2. Added, normalized, or improved inline comments.
+3. Summarize the documentation scope when the pass is broad.
+4. Report the documentation and commenting improvements after editing.
+5. Call out any areas intentionally left undocumented or lightly documented.
 
 ## References
 
