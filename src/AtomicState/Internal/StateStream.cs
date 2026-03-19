@@ -90,7 +90,8 @@ namespace SC.AtomicState.Internal
                 snapshot = [.. _observers];
             }
 
-            // Snapshot the observer set so callback-side subscription churn cannot perturb this publication pass.
+            // Make a copy of the observer list before notifying them so any subscriptions/un-subscriptions
+            // that happen during callbacks won't affect this notification round
             foreach (var observer in snapshot)
             {
                 observer.Publish(Notification.OnNext(value));
