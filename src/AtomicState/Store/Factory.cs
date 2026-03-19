@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using SC.AtomicState.Internal;
-using Microsoft.Extensions.Logging;
 
 namespace SC.AtomicState
 {
@@ -116,42 +115,10 @@ namespace SC.AtomicState
             ArgumentNullException.ThrowIfNull(initialState);
             ArgumentNullException.ThrowIfNull(rootReducer);
 
-            return new Store(initialState, rootReducer, null, middleware);
+            return new Store(initialState, rootReducer, middleware);
         }
 
-        /// <summary>
-        /// Creates a root <see cref="IStore"/> with an optional <see cref="ILogger"/> for observability and optional middleware.
-        /// </summary>
-        public static IStore CreateStore(IState initialState, Reducer rootReducer, ILogger? logger)
-        {
-            ArgumentNullException.ThrowIfNull(initialState);
-            ArgumentNullException.ThrowIfNull(rootReducer);
-
-            return new Store(initialState, rootReducer, logger);
-        }
-
-        /// <summary>
-        /// Creates a root <see cref="IStore"/> with an optional <see cref="ILogger"/> and middleware pipeline.
-        /// </summary>
-        public static IStore CreateStore(IState initialState, Reducer rootReducer, ILogger? logger, params Middleware[] middleware)
-        {
-            ArgumentNullException.ThrowIfNull(initialState);
-            ArgumentNullException.ThrowIfNull(rootReducer);
-
-            return new Store(initialState, rootReducer, logger, middleware);
-        }
-
-        /// <summary>
-        /// Creates a root <see cref="IStore"/> using an <see cref="ILoggerFactory"/> to create a logger for the stream.
-        /// </summary>
-        public static IStore CreateStore(IState initialState, Reducer rootReducer, ILoggerFactory? loggerFactory, params Middleware[] middleware)
-        {
-            ArgumentNullException.ThrowIfNull(initialState);
-            ArgumentNullException.ThrowIfNull(rootReducer);
-
-            var logger = loggerFactory?.CreateLogger("SC.AtomicState.StateStream");
-            return new Store(initialState, rootReducer, logger, middleware);
-        }
+        // Logging removed: stores no longer accept ILogger or ILoggerFactory. Use CreateStore overloads without logging.
 
         /// <summary>
         /// Combines multiple <see cref="SliceHandle"/> instances into a single root state and reducer.
