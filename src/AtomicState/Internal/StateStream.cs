@@ -1,13 +1,10 @@
-using Microsoft.Extensions.Logging;
-
 namespace SC.AtomicState.Internal
 {
     /// <summary>
     /// Coordinates replay, live publication, and terminal delivery for one store stream.
     /// </summary>
-    internal sealed class StateStream(IState initialState, ILogger? logger = null) : IObservable<IState>, IDisposable
+    internal sealed class StateStream(IState initialState) : IObservable<IState>, IDisposable
     {
-        private readonly ILogger? _logger = logger;
         private readonly List<Registration> _observers = [];
 
         private readonly Lock _lock = new();
@@ -19,16 +16,6 @@ namespace SC.AtomicState.Internal
         private Exception? _error;
 
         private IState? _lastState = initialState;
-
-        // LoggerMessage delegates for high-performance structured logging
-        private static readonly Action<ILogger, string, Exception?> s_observerOnNextThrown =
-            LoggerMessage.Define<string>(LogLevel.Warning, new EventId(1001, "ObserverOnNextThrew"), "StateStream observer {ObserverType} threw during OnNext");
-
-        private static readonly Action<ILogger, string, Exception?> s_observerOnErrorThrown =
-            LoggerMessage.Define<string>(LogLevel.Warning, new EventId(1002, "ObserverOnErrorThrew"), "StateStream observer {ObserverType} threw during OnError");
-
-        private static readonly Action<ILogger, string, Exception?> s_observerOnCompletedThrown =
-            LoggerMessage.Define<string>(LogLevel.Warning, new EventId(1003, "ObserverOnCompletedThrew"), "StateStream observer {ObserverType} threw during OnCompleted");
 
         /// <summary>
         /// Registers an observer and schedules its replay and terminal sequence in stream order.
@@ -44,7 +31,7 @@ namespace SC.AtomicState.Internal
             {
                 ObjectDisposedException.ThrowIf(_isDisposed, nameof(StateStream));
 
-                registration = new Registration(observer, _logger);
+                registration = new Registration(observer);
                 if (!_isCompleted && _error is null)
                 {
                     _observers.Add(registration);
@@ -188,63 +175,39 @@ namespace SC.AtomicState.Internal
             }
         }
 
-        private static void TryNotifyCompleted(IObserver<IState> observer, ILogger? logger)
+        private static void TryNotifyCompleted(IObserver<IState> observer)
         {
             try
             {
                 observer.OnCompleted();
             }
-            catch (Exception ex)
+            catch
             {
-                // Observer callbacks are isolated so one subscriber cannot interrupt terminal delivery.
-                try
-                {
-                    if (logger is not null)
-                    {
-                        s_observerOnCompletedThrown(logger, observer?.GetType().FullName ?? "<null>", ex);
-                    }
-                }
-                catch { }
+                // Swallow observer exceptions.
             }
         }
 
-        private static void TryNotifyError(IObserver<IState> observer, Exception exception, ILogger? logger)
+        private static void TryNotifyError(IObserver<IState> observer, Exception exception)
         {
             try
             {
                 observer.OnError(exception);
             }
-            catch (Exception ex)
+            catch
             {
-                // Observer callbacks are isolated so one subscriber cannot interrupt terminal delivery.
-                try
-                {
-                    if (logger is not null)
-                    {
-                        s_observerOnErrorThrown(logger, observer?.GetType().FullName ?? "<null>", ex);
-                    }
-                }
-                catch { }
+                // Swallow observer exceptions.
             }
         }
 
-        private static void TryNotifyNext(IObserver<IState> observer, IState value, ILogger? logger)
+        private static void TryNotifyNext(IObserver<IState> observer, IState value)
         {
             try
             {
                 observer.OnNext(value);
             }
-            catch (Exception ex)
+            catch
             {
-                // Observer callbacks are isolated so one subscriber cannot interrupt stream publication.
-                try
-                {
-                    if (logger is not null)
-                    {
-                        s_observerOnNextThrown(logger, observer?.GetType().FullName ?? "<null>", ex);
-                    }
-                }
-                catch { }
+                // Swallow observer exceptions.
             }
         }
 
@@ -270,11 +233,9 @@ namespace SC.AtomicState.Internal
         /// <summary>
         /// Owns one subscription's callback queue so replay, live delivery, and terminal signals share one ordered path.
         /// </summary>
-        private sealed class Registration(IObserver<IState> observer, ILogger? logger)
+        private sealed class Registration(IObserver<IState> observer)
         {
             public IObserver<IState> Observer { get; } = observer;
-
-            private readonly ILogger? _logger = logger;
 
             private readonly Lock _gate = new();
 
@@ -335,17 +296,17 @@ namespace SC.AtomicState.Internal
 
                     if (notification.Kind == NotificationKind.Next)
                     {
-                        TryNotifyNext(Observer, notification.State!, _logger);
+                        TryNotifyNext(Observer, notification.State!);
                         continue;
                     }
 
                     if (notification.Kind == NotificationKind.Error)
                     {
-                        TryNotifyError(Observer, notification.Error!, _logger);
+                        TryNotifyError(Observer, notification.Error!);
                         continue;
                     }
 
-                    TryNotifyCompleted(Observer, _logger);
+                    TryNotifyCompleted(Observer);
                 }
             }
         }

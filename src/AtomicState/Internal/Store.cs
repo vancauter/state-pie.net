@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+
 
 namespace SC.AtomicState.Internal
 {
@@ -27,10 +27,10 @@ namespace SC.AtomicState.Internal
         /// <param name="initialState">The initial root state to expose before the initialization pass runs.</param>
         /// <param name="rootReducer">The root reducer that computes committed state transitions.</param>
         /// <param name="middleware">Optional middleware applied around the serialized dispatch core.</param>
-        internal Store(IState initialState, Reducer rootReducer, ILogger? logger = null, params Middleware[] middleware)
+        internal Store(IState initialState, Reducer rootReducer, params Middleware[] middleware)
         {
             _rootReducer = rootReducer;
-            _stateStream = new StateStream(initialState, logger);
+            _stateStream = new StateStream(initialState);
             _state = initialState;
 
             var middlewareContext = new MiddlewareDispatchContext(this);
