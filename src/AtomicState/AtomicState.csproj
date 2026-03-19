@@ -11,7 +11,5 @@
     </AssemblyAttribute>
     <ProjectReference Include="../../../SimpleLog/src/SimpleLog/SimpleLog.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
-  </ItemGroup>
+  <!-- Logging abstractions removed: not used by the library anymore -->
 </Project>
