@@ -3,6 +3,7 @@ name: "sc-git-commit"
 description: "Use when creating one or more git commits for the current workspace."
 argument-hint: "Commit scope, grouping preference, or message conventions to follow"
 agent: "Git Commit Expert"
+model: "GPT-5 mini"
 ---
 
 # Git Commit
