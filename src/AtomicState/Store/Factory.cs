@@ -21,9 +21,7 @@ namespace SC.AtomicState
         public static IAction CreateAction(string type)
         {
             if (string.IsNullOrWhiteSpace(type))
-            {
                 throw new ArgumentException("Action type must be a non-empty string.", nameof(type));
-            }
 
             return new StoreAction(type);
         }
@@ -42,9 +40,7 @@ namespace SC.AtomicState
         public static IAction<TPayload> CreateAction<TPayload>(string type, TPayload payload)
         {
             if (string.IsNullOrWhiteSpace(type))
-            {
                 throw new ArgumentException("Action type must be a non-empty string.", nameof(type));
-            }
 
             return new StoreAction<TPayload>(type, payload);
         }
@@ -68,9 +64,8 @@ namespace SC.AtomicState
         public static SliceHandle<TState> CreateSlice<TState>(string name, TState initialState, Reducer<TState> reducer) where TState : IState
         {
             if (string.IsNullOrWhiteSpace(name))
-            {
                 throw new ArgumentException("Slice name must be a non-empty string.", nameof(name));
-            }
+
 
             ArgumentNullException.ThrowIfNull(initialState);
             ArgumentNullException.ThrowIfNull(reducer);
@@ -176,14 +171,10 @@ namespace SC.AtomicState
         public static (IState state, Reducer reducer) CombineReducers(params SliceHandle[] slices)
         {
             if (slices.Length == 0)
-            {
                 throw new ArgumentException("Must provide at least one slice to combine.", nameof(slices));
-            }
 
             if (slices.Any(static slice => slice is null))
-            {
                 throw new ArgumentException("Slices cannot contain null entries.", nameof(slices));
-            }
 
             return CombineReducersCore([.. slices.Select(static slice => slice.Slice)]);
         }
@@ -191,22 +182,16 @@ namespace SC.AtomicState
         private static (IState state, Reducer reducer) CombineReducersCore(ISlice[] slices)
         {
             if (slices.Length == 0)
-            {
                 throw new ArgumentException("Must provide at least one slice to combine.", nameof(slices));
-            }
 
             if (slices.Any(static slice => slice is null))
-            {
                 throw new ArgumentException("Slices cannot contain null entries.", nameof(slices));
-            }
 
             var duplicateGroup = slices.GroupBy(slice => slice.Name, StringComparer.Ordinal)
                 .FirstOrDefault(group => group.Count() > 1);
 
             if (duplicateGroup is not null)
-            {
                 throw new ArgumentException($"Duplicate slice name detected: {duplicateGroup.Key}", nameof(slices));
-            }
 
             var reducerDictionary = slices.ToDictionary(slice => slice.Name, slice => slice.Reducer, StringComparer.Ordinal);
             var mutableSliceStates = slices.ToDictionary(slice => slice.Name, slice => slice.InitialState, StringComparer.Ordinal);
@@ -216,20 +201,14 @@ namespace SC.AtomicState
             IState rootReducer(IState state, IAction action)
             {
                 if (state is not CombinedState currentRootState)
-                {
-                    throw new InvalidOperationException(
-                        $"[CombineReducers] Unexpected state type: {state?.GetType().Name}. Expected {nameof(CombinedState)}.");
-                }
+                    throw new InvalidOperationException($"CombineReducers: Unexpected state type: {state?.GetType().Name}. Expected {nameof(CombinedState)}.");
 
                 Dictionary<string, IState>? nextSliceStates = null;
 
                 foreach (var sliceEntry in reducerDictionary)
                 {
                     if (!currentRootState.States.TryGetValue(sliceEntry.Key, out var currentSliceState))
-                    {
-                        throw new InvalidOperationException(
-                            $"[CombineReducers] Missing slice state for key: {sliceEntry.Key} in current root state.");
-                    }
+                        throw new InvalidOperationException($"[CombineReducers] Missing slice state for key: {sliceEntry.Key} in current root state.");
 
                     var nextSliceState = sliceEntry.Value(currentSliceState, action);
                     if (!ReferenceEquals(nextSliceState, currentSliceState))
