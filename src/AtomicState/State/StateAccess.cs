@@ -30,30 +30,14 @@ namespace SC.AtomicState
             ArgumentNullException.ThrowIfNull(rootState);
             ArgumentNullException.ThrowIfNull(sliceHandle);
 
-            return GetSliceStateCore<TState>(rootState, sliceHandle.Name);
-        }
-
-        private static TState GetSliceStateCore<TState>(IState rootState, string sliceName)
-            where TState : class, IState
-        {
-            ArgumentNullException.ThrowIfNull(rootState);
-
             if (rootState is not CombinedState combinedState)
-            {
-                throw new InvalidOperationException(
-                    $"Root state '{rootState.GetType().Name}' was not created by {nameof(Factory)}.{nameof(Factory.CombineReducers)}.");
-            }
+                throw new InvalidOperationException($"Root state '{rootState.GetType().Name}' was not created by {nameof(Factory)}.{nameof(Factory.CombineReducers)}.");
 
-            if (!combinedState.States.TryGetValue(sliceName, out var sliceState))
-            {
-                throw new KeyNotFoundException($"Combined root state does not contain a slice named '{sliceName}'.");
-            }
+            if (!combinedState.States.TryGetValue(sliceHandle.Name, out var sliceState))
+                throw new KeyNotFoundException($"Combined root state does not contain a slice named '{sliceHandle.Name}'.");
 
             if (sliceState is not TState typedState)
-            {
-                throw new InvalidCastException(
-                    $"Slice '{sliceName}' is '{sliceState.GetType().Name}', not '{typeof(TState).Name}'.");
-            }
+                throw new InvalidCastException($"Slice '{sliceHandle.Name}' is '{sliceState.GetType().Name}', not '{typeof(TState).Name}'.");
 
             return typedState;
         }

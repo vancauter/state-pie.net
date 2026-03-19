@@ -65,7 +65,6 @@ namespace SC.AtomicState
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Slice name must be a non-empty string.", nameof(name));
 
-
             ArgumentNullException.ThrowIfNull(initialState);
             ArgumentNullException.ThrowIfNull(reducer);
 
@@ -148,20 +147,23 @@ namespace SC.AtomicState
 
         private static (IState state, Reducer reducer) CombineReducersCore(ISlice[] slices)
         {
-            if (slices.Length == 0)
-                throw new ArgumentException("Must provide at least one slice to combine.", nameof(slices));
-
-            if (slices.Any(static slice => slice is null))
-                throw new ArgumentException("Slices cannot contain null entries.", nameof(slices));
-
             var duplicateGroup = slices.GroupBy(slice => slice.Name, StringComparer.Ordinal)
                 .FirstOrDefault(group => group.Count() > 1);
 
             if (duplicateGroup is not null)
                 throw new ArgumentException($"Duplicate slice name detected: {duplicateGroup.Key}", nameof(slices));
 
+            // Root refers to the root of the combined state, not the store root.
+            // The combined state is a flat map of slice states, so the root reducer delegates to each slice reducer with
+            // the corresponding slice state.
             var reducerDictionary = slices.ToDictionary(slice => slice.Name, slice => slice.Reducer, StringComparer.Ordinal);
             var mutableSliceStates = slices.ToDictionary(slice => slice.Name, slice => slice.InitialState, StringComparer.Ordinal);
+
+            // The root state is a combined snapshot of all slice states.
+            // The combined state captures the initial state of all slices, so the store starts with a complete root
+            // snapshot and reducers can rely on that shape from the start.
+            // The combined state is immutable, so the root reducer can cheaply preserve the existing root snapshot
+            // when no slice changes to avoid unnecessary publication and allocations.
             var initialSliceStates = new ReadOnlyDictionary<string, IState>(mutableSliceStates);
             var initialRootState = new CombinedState(initialSliceStates);
 
@@ -175,7 +177,7 @@ namespace SC.AtomicState
                 foreach (var sliceEntry in reducerDictionary)
                 {
                     if (!currentRootState.States.TryGetValue(sliceEntry.Key, out var currentSliceState))
-                        throw new InvalidOperationException($"[CombineReducers] Missing slice state for key: {sliceEntry.Key} in current root state.");
+                        throw new InvalidOperationException($"CombineReducers: Missing slice state for key: {sliceEntry.Key} in current root state.");
 
                     var nextSliceState = sliceEntry.Value(currentSliceState, action);
                     if (!ReferenceEquals(nextSliceState, currentSliceState))

@@ -8,17 +8,11 @@ namespace SC.AtomicState.Internal
     internal sealed class Store : IStore
     {
         private static readonly IAction s_initAction = Factory.CreateAction("@@INIT");
-
         private readonly Lock _dispatchLock = new();
-
         private readonly Dispatch _dispatch;
-
         private readonly StateStream _stateStream;
-
         private IState _state;
-
         private bool _isDisposed;
-
         private readonly Reducer _rootReducer;
 
         /// <summary>
