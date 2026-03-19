@@ -1,11 +1,14 @@
-using System.Text.Json;
 using SC.SimpleLog;
 
 namespace SC.AtomicState.Dev
 {
     public class Program
     {
-        private static readonly SimpleLogger s_log = new();
+        private static readonly SimpleLogger s_log = new(new LogOptions()
+        {
+            SourceName = "Dev",
+            Template = "[{Timestamp}] <{SourceName}> {Message}"
+        });
 
         public static void Main()
         {
@@ -26,8 +29,8 @@ namespace SC.AtomicState.Dev
             var counter = StateAccess.GetSliceState(store.State, ExampleStore.CounterSlice);
             var person = StateAccess.GetSliceState(store.State, ExampleStore.PersonSlice);
 
-            s_log.Info($"Counter: {counter.Count}");
-            s_log.Info($"Person: {person.Name} ({person.Age})");
+            s_log.Debug($"Counter: {counter.Count}");
+            s_log.Debug($"Person: {person.Name} ({person.Age})");
 
             // Disposing the store will call OnCompleted on the internal subject which
             // in turn invokes the observer's OnCompleted. The observer's completion
@@ -40,9 +43,10 @@ namespace SC.AtomicState.Dev
         {
             private readonly Action? _unsubscribe = unsubscribe;
 
-            public void OnNext(IState state) => s_log.Debug($"State changed: {JsonSerializer.Serialize(state)}");
+            // Fix: serialize state to JSON for more readable output in the console. (Custom ToString implementations?)
+            public void OnNext(IState state) => s_log.Debug($"State changed: {state}");
             public void OnError(Exception error) { _unsubscribe?.Invoke(); s_log.Error($"Error: {error}"); }
-            public void OnCompleted() { _unsubscribe?.Invoke(); s_log.Info("Unsubscribed and completed."); }
+            public void OnCompleted() { _unsubscribe?.Invoke(); s_log.Debug("Unsubscribed and completed."); }
         }
     }
 }
