@@ -34,6 +34,11 @@ Follow the following steps rigorously!
    changes to the design.
 7. If CODING_PLAN is not complete, Goto step 1.
 
+8. Finalize: When CODING_PLAN is complete, summarize the changes made, and any relevant notes for future reference. If a
+   design document was provided, update it with the final implementation details and any deviations from the original
+   design. And update the `<design-document-name>-status.md` with the completion of the entire task and any relevant
+   notes or reflections on the implementation process.
+
 # Guidelines
 
 - Build context from the existing codebase before editing. Understand the current design, public surface, and caller
