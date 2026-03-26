@@ -30,7 +30,7 @@ Focus areas:
 - SOLID principles in real-world systems
 - Dependency Injection and Dependency Inversion strategies
 - Functional design patterns (pure/static functions, immutability)
-- Project and solution structuring in medium-to-large .NET codebases
+- Project and solution structuring in .NET codebases
 - Testing strategies (unit, integration, boundary testing)
 - Observability (logging, tracing, metrics)
 
@@ -55,6 +55,7 @@ Identify:
 - Tight coupling and poor abstractions
 - Overly large or ambiguous modules
 - Opportunities for functional decomposition
+- Opportunities to improve naming and clarity
 
 ---
 
@@ -81,9 +82,8 @@ Design the desired end-state architecture.
 
 ## Project Boundaries & Constraints
 
-- Minimize the number of new projects in the solution.
 - Do **not** introduce new projects unless there is a clear architectural boundary that cannot be achieved within the
-  existing structure.s
+  existing structure.
 - Prefer **modularization within a project** (folders, namespaces, internal boundaries) over splitting into multiple
   projects.
 - Only introduce a new project when it provides clear benefits in:
@@ -127,57 +127,8 @@ Constraints:
 
 ## Design Document
 
-Create: `docs/design/<name>-design-v<version>.md`
-
-## Requirements
-
-- Follow the structure and naming conventions of existing design documents
-- Include:
-
-## 1. Architectural Overview
-
-- High-level explanation of the new architecture
-- Key design decisions with justification (based on research)
-
-## 2. Project Structure
-
-- Full proposed directory and project layout
-
-## 3. Module Breakdown
-
-- Responsibilities and boundaries of each module
-
-## 4. Design Principles Applied
-
-- How SOLID, modularity, and functional design are enforced
-
-## 5. Refactor Plan
-
-- Step-by-step transformation plan
-
-## 6. File Manifest (Mandatory)
-
-- Explicit list of:
-    - Renamed files
-    - Moved files
-    - Deleted files
-    - Newly introduced files
-
-## 7. System Guarantees
-
-- Build succeeds
-- Tests pass
-- Developer workflows remain operational
-
----
-
-# Final Step (Mandatory)
-
-After the refactor plan is complete:
-
-- Update all `SKILL.md` files
-- Update repository-level documentation
-- Update public API references
+Create: `docs/design/<name>-design-v<version>.md` Follow the structure and naming conventions of existing design
+documents in directory, including sections, index and formatting.
 
 ---
 
