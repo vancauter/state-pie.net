@@ -22,6 +22,9 @@ Follow the following steps rigorously!
 - Create or update a `<design-document-name>-status.md` file to track progress if missing; mirror existing status file
   examples in `docs/` and record current assumptions and plan there.
 - Create an internal `CODING_PLAN` that breaks the design into small, testable implementation steps mapped to TODOs.
+- When you discover repository-scoped facts (conventions, build/test commands, important design decisions), create or
+  update a repository memory under `/memories/repo/` using the required JSON schema (`subject`, `fact`, `citations`,
+  `reason`, `category`). Only store stable, actionable facts; avoid secrets. Cite the files that support the fact.
 
 # Repeat the following steps until the CODING_PLAN is completely implemented:
 
