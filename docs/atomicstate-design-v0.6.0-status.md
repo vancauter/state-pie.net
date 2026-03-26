@@ -7,10 +7,11 @@ Summary: Tracks implementation progress against the v0.6.0 design document (`doc
 Status:
 
 - [x] Read design document — 2026-03-26
-- [ ] Audit codebase for target files and public surface
+- [x] Audit codebase for target files and public surface — 2026-03-26
 - [x] Add `TypedActionId<T>` and `Factory.CreateAction<T>` — 2026-03-26
 - [x] Add unit tests for typed-action helpers — 2026-03-26
-- [ ] Implement `ISnapshotStore`, `InMemorySnapshotStore`, `ThrowingSnapshotStore`, `PersistMiddleware`
+- [x] Implement `ISnapshotStore`, `InMemorySnapshotStore`, `ThrowingSnapshotStore` — 2026-03-26
+- [ ] Implement `PersistMiddleware` and tests
 - [ ] Add `StoreSnapshotHelper` and `CreateSeededStore`
 - [ ] Add `MiddlewareHelpers` and `DispatchAsync`/`Enqueue` helpers
 - [ ] Add `IStoreMetrics` and `NoOpStoreMetrics` and wire into `Factory.CreateStore`
@@ -20,10 +21,12 @@ Status:
 
 Notes:
 
-- The `TypedActionId<T>` helper and matching factory overload were implemented and unit-tested. Tests passed.
-- Next step: perform a focused audit of the codebase to locate insertion points for persistence, helpers, and telemetry.
+The `TypedActionId<T>` helper and matching factory overload were implemented and unit-tested. Tests passed. Next step:
+implement `PersistMiddleware` and add tests.
 
 Next actions (short):
 
-1. Audit the repository for `Factory`, `IDispatchContext`, `IAction`, and existing middleware locations.
-2. Implement `ISnapshotStore` and test doubles under `src/AtomicState/Persistence/`.
+1. Implement `PersistMiddleware` and unit tests (in `src/AtomicState/Persistence/` and `tests/AtomicState`).
+2. Add `StoreSnapshotHelper` and `CreateSeededStore`.
+3. Add `MiddlewareHelpers` and async dispatch helpers.
+4. Add `IStoreMetrics` and telemetry wiring.
