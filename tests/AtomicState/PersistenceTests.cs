@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using SC.AtomicState.Persistence;
 
 namespace SC.AtomicState.Tests

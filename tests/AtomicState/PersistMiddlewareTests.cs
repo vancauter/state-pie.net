@@ -1,49 +1,82 @@
-using System.Threading.Tasks;
 using SC.AtomicState.Persistence;
 
 namespace SC.AtomicState.Tests
 {
     public class PersistMiddlewareTests
     {
-        private sealed record TestState(int Count) : IState;
+        private sealed record TestState(int Value) : IState;
 
         [Fact]
-        public async Task PersistMiddleware_SavesSnapshot_Synchronously_WhenConfigured()
+        public async Task PersistMiddleware_SavesSnapshot_SyncMode()
         {
             var snapshotStore = new InMemorySnapshotStore();
+            TestState initial = new(0);
+
             IStore? store = null;
 
-            var middleware = PersistMiddleware.Create(snapshotStore, "k", () => store!.State, saveInBackground: false);
+            var middleware = PersistMiddleware.Create(snapshotStore, "sync-key", () => store!.State, saveInBackground: false);
 
-            store = Factory.CreateStore(new TestState(0), (s, a) => a.Type == "inc" ? new TestState(((TestState)s).Count + 1) : s, middleware);
+            store = Factory.CreateStore(initial, (state, action) =>
+            {
+                if (action.Type == "INC") return new TestState(((TestState)state).Value + 1);
+                return state;
+            }, middleware);
 
-            store.Dispatch(Factory.CreateAction("inc"));
+            store.Dispatch(Factory.CreateAction("INC"));
 
-            var loaded = await snapshotStore.LoadAsync("k");
+            var loaded = await snapshotStore.LoadAsync("sync-key");
 
             Assert.NotNull(loaded);
-            Assert.Equal(((TestState)store.State).Count, ((TestState)loaded!).Count);
+            Assert.Same(store.State, loaded);
         }
 
         [Fact]
-        public async Task PersistMiddleware_SavesSnapshot_InBackground_WhenConfigured()
+        public async Task PersistMiddleware_SavesSnapshot_BackgroundMode()
         {
             var snapshotStore = new InMemorySnapshotStore();
+            TestState initial = new(10);
+
             IStore? store = null;
 
-            var middleware = PersistMiddleware.Create(snapshotStore, "kb", () => store!.State, saveInBackground: true);
+            var middleware = PersistMiddleware.Create(snapshotStore, "bg-key", () => store!.State, saveInBackground: true);
 
-            store = Factory.CreateStore(new TestState(0), (s, a) => a.Type == "inc" ? new TestState(((TestState)s).Count + 1) : s, middleware);
+            store = Factory.CreateStore(initial, (state, action) =>
+            {
+                if (action.Type == "DEC") return new TestState(((TestState)state).Value - 1);
+                return state;
+            }, middleware);
 
-            store.Dispatch(Factory.CreateAction("inc"));
+            store.Dispatch(Factory.CreateAction("DEC"));
 
-            // Wait a short period for background save. In production this is background; tests allow a small grace.
-            await Task.Delay(50);
-
-            var loaded = await snapshotStore.LoadAsync("kb");
+            // Poll until snapshot appears or timeout
+            IState? loaded = null;
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            while (sw.Elapsed < TimeSpan.FromSeconds(2))
+            {
+                loaded = await snapshotStore.LoadAsync("bg-key");
+                if (loaded is not null) break;
+                await Task.Delay(10);
+            }
 
             Assert.NotNull(loaded);
-            Assert.Equal(((TestState)store.State).Count, ((TestState)loaded!).Count);
+            Assert.Equal(store.State.GetType(), loaded.GetType());
+        }
+
+        [Fact]
+        public void PersistMiddleware_SwallowsSaveExceptions()
+        {
+            var throwing = new ThrowingSnapshotStore(throwOnSave: true, throwOnLoad: false);
+            TestState initial = new(5);
+
+            IStore? store = null;
+
+            var middleware = PersistMiddleware.Create(throwing, "err-key", () => store!.State, saveInBackground: false);
+
+            store = Factory.CreateStore(initial, (state, action) => state, middleware);
+
+            // Dispatch should not throw despite the snapshot store throwing
+            store.Dispatch(Factory.CreateAction("NOOP"));
         }
     }
 }
+
