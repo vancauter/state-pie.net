@@ -47,8 +47,9 @@ Follow the following steps rigorously!
 7. Finalize: When CODING_PLAN is completely implemented, do the following:
 
 - Update design document with the final implementation details and any deviations from the original design.
-- Update the `<design-document-name>-status.md` with the completion of the implementation and set "Next Steps" to
-  "None".
+- Update the `<design-document-name>-status.md` with the completion of the implementation and set "Next Steps" to "None
+  left".
+- Update .csproj with version of the design document.
 
 ## Rules
 
