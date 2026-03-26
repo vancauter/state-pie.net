@@ -12,6 +12,7 @@ namespace SC.AtomicState.Internal
         private IState _state;
         private bool _isDisposed;
         private readonly Reducer _rootReducer;
+        private readonly Telemetry.IStoreMetrics _metrics;
 
         /// <summary>
         /// Initializes a new store.
@@ -20,7 +21,13 @@ namespace SC.AtomicState.Internal
         /// <param name="rootReducer">The root reducer that computes committed state transitions.</param>
         /// <param name="middleware">Optional middleware applied around the serialized dispatch core.</param>
         internal Store(IState initialState, Reducer rootReducer, params Middleware[] middleware)
+            : this(initialState, rootReducer, new Telemetry.NoOpStoreMetrics(), middleware)
         {
+        }
+
+        internal Store(IState initialState, Reducer rootReducer, Telemetry.IStoreMetrics metrics, params Middleware[] middleware)
+        {
+            _metrics = metrics ?? new Telemetry.NoOpStoreMetrics();
             _rootReducer = rootReducer;
             _stateStream = new StateStream(initialState);
             _state = initialState;
@@ -32,8 +39,26 @@ namespace SC.AtomicState.Internal
                 var current = (Dispatch)DispatchCore;
                 for (var index = middleware.Length - 1; index >= 0; index--)
                 {
-                    // Compose from the tail so the first registered middleware becomes the outermost dispatch layer.
-                    current = middleware[index](middlewareContext, current);
+                    var mw = middleware[index];
+                    var next = current;
+
+                    // Create middleware pipeline entry and wrap the resulting Dispatch so we can measure middleware latency.
+                    var entry = mw(middlewareContext, next);
+                    var id = $"middleware[{index}]";
+                    current = action =>
+                    {
+                        _metrics.OnMiddlewareStart(id);
+                        var sw = System.Diagnostics.Stopwatch.StartNew();
+                        try
+                        {
+                            entry(action);
+                        }
+                        finally
+                        {
+                            sw.Stop();
+                            _metrics.OnMiddlewareEnd(id, sw.Elapsed);
+                        }
+                    };
                 }
 
                 _dispatch = current;
@@ -84,9 +109,13 @@ namespace SC.AtomicState.Internal
         {
             IState? stateToPublish = null;
 
+            var swDispatch = System.Diagnostics.Stopwatch.StartNew();
+
             lock (_dispatchLock)
             {
                 ObjectDisposedException.ThrowIf(_isDisposed, nameof(Store));
+
+                _metrics.OnDispatchStart();
 
                 var currentState = _state;
                 var nextState = _rootReducer(currentState, action);
@@ -98,6 +127,9 @@ namespace SC.AtomicState.Internal
                     stateToPublish = nextState;
                 }
             }
+
+            swDispatch.Stop();
+            _metrics.OnDispatchEnd(swDispatch.Elapsed);
 
             // Publish outside the reducer lock so observer callbacks cannot block future dispatches.
             if (stateToPublish is not null)

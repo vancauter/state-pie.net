@@ -57,7 +57,7 @@ namespace SC.AtomicState
             if (string.IsNullOrWhiteSpace(id.Type))
                 throw new ArgumentException("Action type must be a non-empty string.", nameof(id));
 
-            return CreateAction<TPayload>(id.Type, payload);
+            return CreateAction(id.Type, payload);
         }
 
         /// <summary>
@@ -131,6 +131,22 @@ namespace SC.AtomicState
             ArgumentNullException.ThrowIfNull(rootReducer);
 
             return new Store(initialState, rootReducer, middleware);
+        }
+
+        /// <summary>
+        /// Creates a root <see cref="IStore"/> with optional middleware and telemetry metrics.
+        /// </summary>
+        /// <param name="initialState">Initial root state.</param>
+        /// <param name="rootReducer">Root reducer.</param>
+        /// <param name="metrics">Optional metrics collector; when null a no-op implementation is used.</param>
+        /// <param name="middleware">Optional middleware pipeline applied in order.</param>
+        /// <returns>An <see cref="IStore"/> instance with middleware applied.</returns>
+        public static IStore CreateStore(IState initialState, Reducer rootReducer, Telemetry.IStoreMetrics? metrics, params Middleware[] middleware)
+        {
+            ArgumentNullException.ThrowIfNull(initialState);
+            ArgumentNullException.ThrowIfNull(rootReducer);
+
+            return new Store(initialState, rootReducer, metrics ?? new Telemetry.NoOpStoreMetrics(), middleware);
         }
 
         // Logging removed: stores no longer accept ILogger or ILoggerFactory. Use CreateStore overloads without logging.
