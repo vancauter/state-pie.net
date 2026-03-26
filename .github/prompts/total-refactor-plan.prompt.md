@@ -5,7 +5,7 @@ agent: deep-research.agent
 model: GPT-5 mini
 ---
 
-This prompt instructs an implementation agent to design and plan a full refactor of a .NET library or codebase.
+This prompt instructs the agent to design and plan a full refactor of a .NET library or codebase.
 
 Goals
 
