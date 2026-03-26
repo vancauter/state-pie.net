@@ -26,6 +26,22 @@ namespace SC.AtomicState
         /// </summary>
         /// <param name="action">The action to dispatch.</param>
         void Dispatch(IAction action);
+
+        /// <summary>
+        /// Asynchronously dispatches an action to the store. Implementations may perform the dispatch synchronously
+        /// and return a completed <see cref="ValueTask"/>, or schedule it to run asynchronously.
+        /// </summary>
+        /// <param name="action">The action to dispatch.</param>
+        /// <param name="ct">Cancellation token for enqueue-style dispatches.</param>
+        ValueTask DispatchAsync(IAction action, CancellationToken ct = default);
+
+        /// <summary>
+        /// Enqueues an action to be dispatched from a background context. This method guarantees the caller will
+        /// not block waiting for the dispatch to complete.
+        /// </summary>
+        /// <param name="action">The action to dispatch.</param>
+        /// <param name="ct">Cancellation token for the background enqueue operation.</param>
+        Task Enqueue(IAction action, CancellationToken ct = default);
     }
 
     /// <summary>

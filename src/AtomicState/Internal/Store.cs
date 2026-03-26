@@ -1,5 +1,3 @@
-
-
 namespace SC.AtomicState.Internal
 {
     /// <summary>
@@ -126,6 +124,21 @@ namespace SC.AtomicState.Internal
 
             public void Dispatch(IAction action)
                 => _owner.Dispatch(action);
+
+            public ValueTask DispatchAsync(IAction action, CancellationToken ct = default)
+            {
+                // Default implementation performs a synchronous dispatch and returns a completed ValueTask.
+                // This preserves the store's serialized semantics for callers that expect immediate completion.
+                _owner.Dispatch(action);
+                return ValueTask.CompletedTask;
+            }
+
+            public Task Enqueue(IAction action, CancellationToken ct = default)
+            {
+                // Schedule the dispatch on the thread-pool so the caller is not blocked. The store's internal
+                // serialization still applies because Dispatch will acquire the dispatch lock when running.
+                return Task.Run(() => _owner.Dispatch(action), ct);
+            }
         }
     }
 }
