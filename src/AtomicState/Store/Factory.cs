@@ -149,6 +149,30 @@ namespace SC.AtomicState
             return new Store(initialState, rootReducer, metrics ?? new Telemetry.NoOpStoreMetrics(), middleware);
         }
 
+        /// <summary>
+        /// Creates a root <see cref="IStore"/> with optional middleware and debug options for development guards.
+        /// This helper is distinct from the main CreateStore overloads to avoid overload ambiguity with the params middleware array.
+        /// </summary>
+        public static IStore CreateStoreWithOptions(IState initialState, Reducer rootReducer, StoreOptions? options, params Middleware[] middleware)
+        {
+            ArgumentNullException.ThrowIfNull(initialState);
+            ArgumentNullException.ThrowIfNull(rootReducer);
+
+            return new Store(initialState, rootReducer, new Telemetry.NoOpStoreMetrics(), options ?? new StoreOptions(), middleware);
+        }
+
+        /// <summary>
+        /// Creates a root <see cref="IStore"/> with optional middleware, telemetry metrics and debug options.
+        /// This helper is distinct from the main CreateStore overloads to avoid overload ambiguity with the params middleware array.
+        /// </summary>
+        public static IStore CreateStoreWithMetricsAndOptions(IState initialState, Reducer rootReducer, Telemetry.IStoreMetrics? metrics, StoreOptions? options, params Middleware[] middleware)
+        {
+            ArgumentNullException.ThrowIfNull(initialState);
+            ArgumentNullException.ThrowIfNull(rootReducer);
+
+            return new Store(initialState, rootReducer, metrics ?? new Telemetry.NoOpStoreMetrics(), options ?? new StoreOptions(), middleware);
+        }
+
         // Logging removed: stores no longer accept ILogger or ILoggerFactory. Use CreateStore overloads without logging.
 
         /// <summary>

@@ -13,6 +13,7 @@ namespace SC.AtomicState.Internal
         private bool _isDisposed;
         private readonly Reducer _rootReducer;
         private readonly Telemetry.IStoreMetrics _metrics;
+        private readonly StoreOptions _options;
 
         /// <summary>
         /// Initializes a new store.
@@ -21,13 +22,18 @@ namespace SC.AtomicState.Internal
         /// <param name="rootReducer">The root reducer that computes committed state transitions.</param>
         /// <param name="middleware">Optional middleware applied around the serialized dispatch core.</param>
         internal Store(IState initialState, Reducer rootReducer, params Middleware[] middleware)
-            : this(initialState, rootReducer, new Telemetry.NoOpStoreMetrics(), middleware)
+            : this(initialState, rootReducer, new Telemetry.NoOpStoreMetrics(), new StoreOptions(), middleware)
+        {
+        }
+        internal Store(IState initialState, Reducer rootReducer, Telemetry.IStoreMetrics metrics, params Middleware[] middleware)
+            : this(initialState, rootReducer, metrics, new StoreOptions(), middleware)
         {
         }
 
-        internal Store(IState initialState, Reducer rootReducer, Telemetry.IStoreMetrics metrics, params Middleware[] middleware)
+        internal Store(IState initialState, Reducer rootReducer, Telemetry.IStoreMetrics metrics, StoreOptions options, params Middleware[] middleware)
         {
             _metrics = metrics ?? new Telemetry.NoOpStoreMetrics();
+            _options = options ?? new StoreOptions();
             _rootReducer = rootReducer;
             _stateStream = new StateStream(initialState);
             _state = initialState;
@@ -57,6 +63,17 @@ namespace SC.AtomicState.Internal
                         {
                             sw.Stop();
                             _metrics.OnMiddlewareEnd(id, sw.Elapsed);
+                            // Debug guard: warn on long synchronous middleware/dispatch pipeline
+                            if (_options.DebugGuards.HasFlag(DebugGuards.WarnOnLongDispatch) && _options.DispatchGuardThreshold > TimeSpan.Zero && sw.Elapsed > _options.DispatchGuardThreshold)
+                            {
+                                try
+                                {
+                                    _options.OnDebugWarning?.Invoke($"Long dispatch detected in middleware {id}: {sw.Elapsed}");
+                                }
+                                catch
+                                {
+                                }
+                            }
                         }
                     };
                 }
@@ -130,6 +147,16 @@ namespace SC.AtomicState.Internal
 
             swDispatch.Stop();
             _metrics.OnDispatchEnd(swDispatch.Elapsed);
+            if (_options.DebugGuards.HasFlag(DebugGuards.WarnOnLongDispatch) && _options.DispatchGuardThreshold > TimeSpan.Zero && swDispatch.Elapsed > _options.DispatchGuardThreshold)
+            {
+                try
+                {
+                    _options.OnDebugWarning?.Invoke($"Long dispatch detected in reducer core: {swDispatch.Elapsed}");
+                }
+                catch
+                {
+                }
+            }
 
             // Publish outside the reducer lock so observer callbacks cannot block future dispatches.
             if (stateToPublish is not null)
