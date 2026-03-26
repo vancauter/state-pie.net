@@ -20,6 +20,9 @@
 
 - Always use VSCode IDE tools first when possible, then copilot agents', and only use external scripts as a last resort.
 - Do not use Python, Shell or other external scripts unless absolutely necessary.
+- Always check for relevant instructions before responding. If instructions exist, follow them rigorously.
+- When code is newly written, always check line length (120 characters max) and prefer breaking up long statements or
+  expressions into multiple lines to improve readability.
 
 ## Validation
 

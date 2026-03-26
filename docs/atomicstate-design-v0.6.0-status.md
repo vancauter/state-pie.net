@@ -14,6 +14,9 @@ Status:
 - [ ] Implement `PersistMiddleware` and tests
 - [ ] Add `StoreSnapshotHelper` and `CreateSeededStore`
 - [ ] Add `MiddlewareHelpers` and `DispatchAsync`/`Enqueue` helpers
+- [x] Implement `PersistMiddleware` and tests — 2026-03-26
+- [x] Add `StoreSnapshotHelper` and `CreateSeededStore` — 2026-03-26
+- [ ] Add `MiddlewareHelpers` and `DispatchAsync`/`Enqueue` helpers
 - [ ] Add `IStoreMetrics` and `NoOpStoreMetrics` and wire into `Factory.CreateStore`
 - [x] Implement `TimetravelMiddleware` skeleton and controller — 2026-03-26
 - [ ] Add example projects and docs (`reducer-guidelines`, `async-middleware`, `persistence`)
@@ -26,13 +29,17 @@ implement `PersistMiddleware` and add tests.
 
 Next actions (short):
 
-1. Expand `TimetravelMiddleware` to capture snapshots/actions, implement undo/redo/replay behavior, and add the full
+1. Implement `MiddlewareHelpers` and `DispatchContext.SafeDispatchAsync` helpers, plus unit tests demonstrating safe
+   background dispatch patterns.
+2. Expand `TimetravelMiddleware` to capture snapshots/actions, implement undo/redo/replay behavior, and add the full
    suite of timetravel tests.
-2. Add example projects and `docs/reducer-guidelines.md`, `docs/async-middleware.md`, and `docs/persistence.md`.
-3. Finalize status file with test results and mark v0.6.0 implementation complete when all acceptance criteria are met.
+3. Add example projects and `docs/reducer-guidelines.md`, `docs/async-middleware.md`, and `docs/persistence.md`.
+4. Finalize status file with test results and mark v0.6.0 implementation complete when all acceptance criteria are met.
 
 Notes (recent):
 
 - Minimal `TimetravelMiddleware` and `TimetravelController` implemented under `src/AtomicState/Middleware/` (namespace
   `SC.AtomicState.MiddlewareEx`) and a basic unit test added at `tests/AtomicState/TimetravelTests.cs`.
-- Test run: non-performance test suite passed locally (68/68) on 2026-03-26.
+- Persist middleware and tests added; background and synchronous save modes covered. `StoreSnapshotHelper` gains
+  `SeedStoreAsync` and `CaptureSnapshotAsync` helpers.
+- Test run: non-performance test suite passed locally (69/69) on 2026-03-26.
