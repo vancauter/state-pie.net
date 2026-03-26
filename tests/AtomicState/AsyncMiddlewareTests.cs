@@ -8,7 +8,7 @@ namespace SC.AtomicState.Tests
         private sealed record TestState(int Value) : IState;
 
         [Fact]
-        public async Task UnsafeMiddleware_BlocksDispatch()
+        public void UnsafeMiddleware_BlocksDispatch()
         {
             Dispatch badMw(IDispatchContext ctx, Dispatch next) => action =>
             {
@@ -89,7 +89,7 @@ namespace SC.AtomicState.Tests
             }
 
             Assert.NotNull(final);
-            Assert.Equal(11, final!.Value);
+            Assert.Equal(11, final.Value);
         }
     }
 }

@@ -1,9 +1,8 @@
 using System.Collections.Immutable;
-using SC.AtomicState.Persistence;
 
 namespace SC.AtomicState.MiddlewareEx
 {
-    public interface ITimetravelController
+    public interface ITimeTravelController
     {
         Task UndoAsync();
         Task RedoAsync();
@@ -12,17 +11,12 @@ namespace SC.AtomicState.MiddlewareEx
         void Clear();
     }
 
-    internal sealed class TimetravelController : ITimetravelController
+    internal sealed class TimeTravelController(Func<IState, Task> applyStateAsync) : ITimeTravelController
     {
-        private readonly List<IState> _history = new();
-        private readonly List<IAction> _actions = new();
+        private readonly List<IState> _history = [];
+        private readonly List<IAction> _actions = [];
         private int _cursor = -1;
-        private readonly Func<IState, Task> _applyStateAsync;
-
-        public TimetravelController(Func<IState, Task> applyStateAsync)
-        {
-            _applyStateAsync = applyStateAsync;
-        }
+        private readonly Func<IState, Task> _applyStateAsync = applyStateAsync;
 
         public Task UndoAsync()
         {
@@ -38,11 +32,9 @@ namespace SC.AtomicState.MiddlewareEx
             return _applyStateAsync(_history[_cursor]);
         }
 
-        public Task ReplayAsync(IEnumerable<IAction> actions)
-        {
+        public Task ReplayAsync(IEnumerable<IAction> actions) =>
             // Replay is implemented by consumers via CreateSeededStore; here we simply expose the action list.
-            return Task.CompletedTask;
-        }
+            Task.CompletedTask;
 
         public IReadOnlyList<IState> GetHistory() => _history.ToImmutableArray();
 

@@ -165,12 +165,10 @@ namespace SC.AtomicState.Internal
                 return ValueTask.CompletedTask;
             }
 
-            public Task Enqueue(IAction action, CancellationToken ct = default)
-            {
+            public Task Enqueue(IAction action, CancellationToken ct = default) =>
                 // Schedule the dispatch on the thread-pool so the caller is not blocked. The store's internal
                 // serialization still applies because Dispatch will acquire the dispatch lock when running.
-                return Task.Run(() => _owner.Dispatch(action), ct);
-            }
+                Task.Run(() => _owner.Dispatch(action), ct);
         }
     }
 }
