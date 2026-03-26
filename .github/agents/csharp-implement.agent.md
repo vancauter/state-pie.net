@@ -19,7 +19,7 @@ design and project goals.
 
 Follow the following steps rigorously!
 
-# Pre-requisites (only once per task)
+# Pre-requisites
 
 - Understand the task by reading the included design document.
 - Read code involved and look at surrounding code files to understand the current state of the code, design and
@@ -35,18 +35,19 @@ Follow the following steps rigorously!
 # Repeat the following steps until the CODING_PLAN is completely implemented:
 
 1. Read `<design-document-name>-status.md` to get the current implementation state.
-2. Decide on the next logical step(s) from the CODING_PLAN yourself and prompt user with the next step(s) you want to
-   implement; and wait for approval.
+2. Independently select the next logical step(s) from the CODING_PLAN, propose those step(s) to the user, and wait for
+   their approval. Make updating `<design-document-name>-status.md` (recording the current state and the remaining next
+   steps) the final subtask of whatever step(s) you propose.
 3. Build an internal context of the current state and the desired end state after the change.
 4. Implement the code and add corresponding test. Task is complete when project builds, and tests complete successfully.
-   Update `<design-document-name>-status.md` with the completion of the step and optional changes to the design, if any.
 5. If CODING_PLAN is not completely implemented yet, Goto step 1 otherwise, if CODING_PLAN is completely implemented,
    Goto step 6.
 
 6. Finalize: When CODING_PLAN is completely implemented, do the following:
 
 - Update design document with the final implementation details and any deviations from the original design.
-- Update the `<design-document-name>-status.md` with the completion of the implementation.
+- Update the `<design-document-name>-status.md` with the completion of the implementation and set "Next Steps" to
+  "None".
 
 ## Rules
 
