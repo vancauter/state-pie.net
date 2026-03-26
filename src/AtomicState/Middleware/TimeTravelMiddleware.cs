@@ -8,7 +8,7 @@ namespace SC.AtomicState.MiddlewareEx
             ArgumentNullException.ThrowIfNull(getState);
             ArgumentNullException.ThrowIfNull(applyStateAsync);
 
-            var ctl = new TimeTravelController(applyStateAsync);
+            var ctl = new TimeTravelController(options, applyStateAsync);
             controller = ctl;
 
             // Initial snapshot will be recorded on first dispatch to avoid requiring the store instance
