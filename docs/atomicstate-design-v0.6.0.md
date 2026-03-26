@@ -326,6 +326,15 @@ API sketch
     - For dev harnesses (dev/\*), prefer the .NET Generic Host pattern (`Host.CreateDefaultBuilder`) to expose lifetime,
       logging, and DI in a standard way (see ASP.NET Core fundamentals guidance).
 
+    - Remove `SimpleLog` usage: replace the repository's `SimpleLog` project reference and any direct logging calls
+      with the industry-standard `Microsoft.Extensions.Logging` abstractions. Migration guidance:
+      - Add references to `Microsoft.Extensions.Logging.Abstractions` (and consumers may add `Microsoft.Extensions.Logging`
+        or provider packages as needed).
+      - Replace direct `SimpleLog` usages with `ILogger<T>` injected via DI (add `IServiceCollection.AddLogging()` in
+        host examples and `IServiceCollection.AddAtomicState()` extension).
+      - Remove the `SimpleLog` project reference from `AtomicState.sln` and update developer docs/README to note the
+        change and recommended logging providers (Console, EventSource, or structured providers used by consumers).
+
 - Testing and packaging
     - Keep `InternalsVisibleTo` to tests for internal contract testing (already used in csproj).
     - Use `Directory.Packages.props` for central package versions if multiple projects are added.

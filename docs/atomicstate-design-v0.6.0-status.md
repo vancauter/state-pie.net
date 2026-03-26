@@ -15,7 +15,7 @@ Status:
 - [ ] Add `StoreSnapshotHelper` and `CreateSeededStore`
 - [ ] Add `MiddlewareHelpers` and `DispatchAsync`/`Enqueue` helpers
 - [ ] Add `IStoreMetrics` and `NoOpStoreMetrics` and wire into `Factory.CreateStore`
-- [ ] Implement `TimetravelMiddleware` skeleton and controller
+- [x] Implement `TimetravelMiddleware` skeleton and controller — 2026-03-26
 - [ ] Add example projects and docs (`reducer-guidelines`, `async-middleware`, `persistence`)
 - [ ] Run build and tests (full verification)
 
@@ -26,7 +26,13 @@ implement `PersistMiddleware` and add tests.
 
 Next actions (short):
 
-1. Implement `PersistMiddleware` and unit tests (in `src/AtomicState/Persistence/` and `tests/AtomicState`).
-2. Add `StoreSnapshotHelper` and `CreateSeededStore`.
-3. Add `MiddlewareHelpers` and async dispatch helpers.
-4. Add `IStoreMetrics` and telemetry wiring.
+1. Expand `TimetravelMiddleware` to capture snapshots/actions, implement undo/redo/replay behavior, and add the full
+   suite of timetravel tests.
+2. Add example projects and `docs/reducer-guidelines.md`, `docs/async-middleware.md`, and `docs/persistence.md`.
+3. Finalize status file with test results and mark v0.6.0 implementation complete when all acceptance criteria are met.
+
+Notes (recent):
+
+- Minimal `TimetravelMiddleware` and `TimetravelController` implemented under `src/AtomicState/Middleware/` (namespace
+  `SC.AtomicState.MiddlewareEx`) and a basic unit test added at `tests/AtomicState/TimetravelTests.cs`.
+- Test run: non-performance test suite passed locally (68/68) on 2026-03-26.
