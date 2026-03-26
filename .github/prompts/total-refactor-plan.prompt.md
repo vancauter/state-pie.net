@@ -14,8 +14,6 @@ Goals
 - Improve testability, observability, maintainability, and (where sensible) runtime characteristics.
 - Ensure the repository's primary build and test commands run successfully after the refactor.
 
-Use:
-
 Required scope
 
 - Analyze the current public surface and internal implementation (commonly under `src/` or the repository root).
