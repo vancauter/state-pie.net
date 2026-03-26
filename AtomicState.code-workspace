@@ -6,7 +6,6 @@
     ],
     "settings": {
         // "dotnet.defaultSolution": ".sln",
-        "dotnet.automaticallyCreateSolutionInWorkspace": true,
         "explorer.compactFolders": false,
 
         // --- GitHub Copilot Settings ---
