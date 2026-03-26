@@ -18,9 +18,10 @@ Status:
 - [x] Implement `TimeTravelMiddleware` skeleton and controller — 2026-03-26
 - [x] Expand `TimeTravelMiddleware` to enforce `MaxHistory`, suppress recording during time-travel, and implement
       `ReplayAsync` — 2026-03-26
-- [ ] Add example projects and docs (`reducer-guidelines`, `async-middleware`, `persistence`)
-- [x] Run build and tests (non-performance) — 2026-03-26 (74/74)
-- [ ] Update `README.md` and `.github/skills/atomic-state/SKILL.md` to conform to the codebase
+- [x] Add example projects and docs (`reducer-guidelines`, `async-middleware`, `persistence`) — 2026-03-26 (moved to
+      `docs/documentation`)
+- [x] Run build and tests (non-performance) — 2026-03-26 (76/76)
+- [x] Update `README.md` and `.github/skills/atomic-state/SKILL.md` to conform to the codebase — 2026-03-26
 
 Completed examples actions:
 
@@ -33,14 +34,15 @@ Notes:
 The `TypedActionId<T>` helper and matching factory overload were implemented and unit-tested. Persist middleware,
 snapshot helpers, `MiddlewareHelpers`, and `IStoreMetrics` were added. `TimeTravelMiddleware` and its controller were
 expanded to enforce `MaxHistory`, suppress recording during time-travel operations, and provide a simple `ReplayAsync`
-mechanism. All non-performance tests pass locally (74/74) as of 2026-03-26.
+mechanism. All non-performance tests pass locally (76/76) as of 2026-03-26.
+
+Final status:
+
+- [x] v0.6.0 implementation complete — 2026-03-26 (all acceptance criteria met; tests: 76/76 non-performance)
 
 Next actions (short):
 
-1. Add example projects and `docs/reducer-guidelines.md`, `docs/async-middleware.md`, and `docs/persistence.md`.
-2. Update `README.md` and `.github/skills/atomic-state/SKILL.md` to reflect the implemented public API names and
-   examples.
-3. Finalize status file after documentation and example verification.
+- None left.
 
 Notes (recent):
 
