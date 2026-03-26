@@ -49,7 +49,8 @@ Follow the following steps rigorously!
 - Update design document with the final implementation details and any deviations from the original design.
 - Update the `<design-document-name>-status.md` with the completion of the implementation and set "Next Steps" to "None
   left".
-- Update .csproj with version of the design document.
+- Update .csproj with version of the design document. and tag the current code state in github repository with the
+  version too.
 
 ## Rules
 
