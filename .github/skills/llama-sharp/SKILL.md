@@ -17,14 +17,14 @@ copy-paste example, and links to focused topic SKILLs below. Avoid duplicating l
 
 - Topic SKILLs (pick one)
 
-- [llama-sharp.architecture](../llama-sharp.architecture/SKILL.md)
-- [llama-sharp.chat-session](../llama-sharp.chat-session/SKILL.md)
-- [llama-sharp.context](../llama-sharp.context/SKILL.md)
-- [llama-sharp.prompt-builder](../llama-sharp.prompt-builder/SKILL.md)
-- [llama-sharp.executors](../llama-sharp.executors/SKILL.md)
-- [llama-sharp.snapshot](../llama-sharp.snapshot/SKILL.md)
-- [llama-sharp.embeddings](../llama-sharp.embeddings/SKILL.md)
-- [llama-sharp.quantization](../llama-sharp.quantization/SKILL.md)
+- [llama-sharp-architecture](../llama-sharp-architecture/SKILL.md)
+- [llama-sharp-chat-session](../llama-sharp-chat-session/SKILL.md)
+- [llama-sharp-context](../llama-sharp-context/SKILL.md)
+- [llama-sharp-prompt-builder](../llama-sharp-prompt-builder/SKILL.md)
+- [llama-sharp-executors](../llama-sharp-executors/SKILL.md)
+- [llama-sharp-snapshot](../llama-sharp-snapshot/SKILL.md)
+- [llama-sharp-embeddings](../llama-sharp-embeddings/SKILL.md)
+- [llama-sharp-quantization](../llama-sharp-quantization/SKILL.md)
 
 # Guidance
 

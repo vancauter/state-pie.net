@@ -1,5 +1,5 @@
 ---
-name: llama-sharp.context
+name: llama-sharp-context
 description: Context parameters and best practices for LlamaSharp executors and sessions.
 ---
 

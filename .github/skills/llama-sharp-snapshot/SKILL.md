@@ -1,5 +1,5 @@
 ---
-name: llama-sharp.snapshot
+name: llama-sharp-snapshot
 description: Save/load patterns and safe snapshot handling for LLamaSharp ChatSession and executor state.
 ---
 

@@ -1,25 +1,23 @@
 # Workspace Guidance
 
-## Project Facts
-
-- Status: Pre-release, early development. Breaking changes are expected and tolerated.
-- This project is not meant for open-source. Ignore any "public API" or "external contribution" considerations. Focus on
-  internal consistency, clarity, and maintainability.
-
 ## Structure and Conventions
 
-- `src/` contains the library
-- `tests/` contains xUnit coverage
 - `dev/` contains the runnable dev harness
 - `docs/` contains supporting notes, design docs, and code review records.
+- `examples/` contains example code and usage patterns.
 - `scripts/` contains build and validation scripts.
+- `src/` contains the source code for the library/app, organized by feature area.
+- `tests/` contains xUnit coverage
 - `third_party/` contains vendored dependencies that are not available via NuGet.
-- `third_party/ggufs/` contains the GGUF files for the LLMs used in development and testing.
+
+## Tips
+
+- Replacing a file with new file, is often way faster than patching one. So if it's a better option, do that instead.
 
 ## Rules
 
-- Always use VSCode IDE tools first when possible, then copilot agents', and only use external scripts as a last resort.
-- Do not use Python, Shell or other external scripts unless absolutely necessary.
+- Always use VSCode IDE tools first when possible.
+- Do not use Python, shell, or other external scripts unless necessary or for small, quick updates.
 - Always check for relevant instructions before responding. If instructions exist, follow them rigorously.
 
 ## Validation

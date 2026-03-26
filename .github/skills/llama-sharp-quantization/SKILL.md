@@ -1,5 +1,5 @@
 ---
-name: llama-sharp.quantization
+name: llama-sharp-quantization
 description: Key concepts and trade-offs for model quantization in LlamaSharp-style stacks.
 ---
 

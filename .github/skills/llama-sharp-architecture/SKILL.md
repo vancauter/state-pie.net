@@ -1,5 +1,5 @@
 ---
-name: llama-sharp.architecture
+name: llama-sharp-architecture
 description: Essentials about LlamaSharp architecture for implementers and integrators.
 ---
 

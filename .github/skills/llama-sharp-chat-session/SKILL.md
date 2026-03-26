@@ -1,5 +1,5 @@
 ---
-name: llama-sharp.chat-session
+name: llama-sharp-chat-session
 description: Patterns for implementing chat sessions and interactive workflows.
 ---
 

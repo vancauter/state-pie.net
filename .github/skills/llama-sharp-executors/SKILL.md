@@ -1,5 +1,5 @@
 ---
-name: llama-sharp.executors
+name: llama-sharp-executors
 description: Guidance for implementing and using executors in LlamaSharp-style runtimes.
 ---
 

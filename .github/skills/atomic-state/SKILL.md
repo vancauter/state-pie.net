@@ -1,187 +1,130 @@
 ---
 name: atomic-state
-description:
-    Reference and integration guide for the AtomicState reactive state container (actions, reducers, slices, stores,
-    middleware).
+description: Reference and integration guide for the AtomicState reactive state container.
 ---
 
 ** Ignore this skill if you are working in the AtomicState workspace itself. Use existing source code instead **
 
-# Purpose
+s# Purpose
 
-Capture the design, contracts, and recommended usage patterns for AtomicState so Cortex contributors can consult this
-note instead of re-reading the library sources.
-
-This SKILL documents the important APIs, concurrency and identity rules, middleware and composition patterns, and
-practical integration points for using AtomicState alongside Cortex runtime components (snapshot stores, host/agent
-orchestration, dashboard/state registry).
+Concise reference for integrators and automation that need authoritative, copy-paste examples and the public contracts
+of the AtomicState library. This SKILL is intended to help agents and humans integrate, test, and extend AtomicState
+without reading the entire source tree.
 
 # When to use
 
-- When you need a small, deterministic, observable application-state container for dashboards, session registries, or
-  orchestration state.
-- When you prefer reducer-driven deterministic updates that are simple to unit test and replay.
-- When you need serialized dispatch ordering and immediate replay of the latest state to new subscribers.
+- Integrating deterministic application-level state (dashboards, orchestrators, registries).
+- Writing reducers, middleware, persistence adapters, or testing harnesses for AtomicState.
+- Generating examples, docs, or automation that control or observe AtomicState stores.
 
-Do not use AtomicState for hot inner loops or native model/LLama context state (keep model weights and per-token loops
-in native paths for performance).
+# Capabilities
 
-# Key Concepts & Contracts
+- Deterministic reducer-driven state container with reference-based change detection.
+- Composable slice model and `CombineReducers` to build a flat root snapshot.
+- Serialized dispatch with middleware support and nested dispatch semantics.
+- Persist adapters (pluggable `ISnapshotStore`) and optional time-travel middleware for undo/redo and replay.
+- Lightweight telemetry hooks via `IStoreMetrics`.
 
-- IAction / IAction<TPayload>
-    - Immutable-by-convention message objects dispatched to stores. Action `Type` strings are the primary discriminant.
+# Public Contracts (summary)
 
-- Reducer / Reducer<TState>
-    - Pure function that computes the next state for a slice or root from the current state and an `IAction`.
-    - Must return the same instance when nothing changed. AtomicState uses reference identity to detect changes and
-      avoid unnecessary publication.
+- `IAction` / `IAction<TPayload>`: immutable message contract with `string Type` and optional `Payload`.
 
-- SliceHandle<TState>
-    - Typed handle returned by `Factory.CreateSlice(...)`. Use handles when composing slices and later reading slice
-      state via `StateAccess`.
+- `IState`: marker interface for state snapshot nodes used by slices and combined root state.
 
-- IStore
-    - The root store interface exposing `IState State` and `IObservable<IState> StateChanged`.
-    - `Dispatch(IAction)` is serialized: nested dispatches (from middleware) participate in the same serialized order.
-    - `StateChanged` is replaying (subscribers immediately receive the latest state) and serialized per store stream.
+- `Reducer` / `Reducer<TState>`: delegate `(IState state, IAction action) => IState` (typed `TState` variant available).
 
-- Factory helpers
-    - `Factory.CreateAction(...)`, `Factory.CreateSlice(...)`, `Factory.CombineReducers(...)`,
-      `Factory.CreateStore(...)`.
-    - `CombineReducers` returns a combined root state and a root reducer for the produced shape.
+- `SliceHandle<TState>`: typed handle returned by `Factory.CreateSlice` used for composition and state access.
 
-- Middleware
-    - Composed around dispatch in registration order. Middleware receives an `IDispatchContext` allowing nested
-      `Dispatch` calls.
-    - Suitable for logging, side-effects, and integration hooks (e.g., persisting snapshots or invoking external
-      services).
-        - `TimeTravel` middleware: bounded history, undo/redo, and a programmatic control surface exposed via
-          `ITimeTravelController` for replay/stepping scenarios.
+- `Factory` (static): helpers including `CreateAction`, `CreateAction<T>`, `CreateSlice`, `CombineReducers`,
+  `CreateStore` and overloads with middleware, metrics and options.
 
-# Concurrency & Ordering Guarantees
+- `IStore`: main runtime surface exposing `IState State`, `IObservable<IState> StateChanged`, and
+  `void Dispatch(IAction)`.
 
-- Dispatch execution is serialized by the `IStore` implementation. Reducers run under that serialization.
-- `IStore.State` is intended to provide strong cross-thread visibility of the latest committed root snapshot.
-- `StateChanged` preserves a strict linearized ordering across subscription replay, live updates, completion, and
-  disposal.
-- Observer callbacks are serialized per store stream and run on the calling thread; there is no implicit scheduler.
+- `Middleware` / `IDispatchContext`: dispatch pipeline building blocks. Middleware is invoked in provided order and
+  receives an `IDispatchContext` which allows nested `Dispatch` during a dispatch transaction.
 
-# Identity-Based Change Detection (Important)
+- `ISnapshotStore`, `PersistMiddleware`, `InMemorySnapshotStore`, and `StoreSnapshotHelper`: persistence adapters and
+  helpers for saving/restoring snapshots.
 
-- AtomicState relies on reducers returning the same instance for no-op actions. If a reducer allocates an equal-but-new
-  object for no-op, the store will treat it as a change and publish it.
-- Design reducers to return `state` when no meaningful change occurs.
-- When composing slices, each slice must preserve the same instance for no-op; `Factory.CombineReducers(...)` preserves
-  root-state identity when every slice returns the same instance.
+- `Telemetry.IStoreMetrics` / `Telemetry.NoOpStoreMetrics`: optional metrics hooks wired into store creation.
 
-# Typical Usage Patterns
+- `MiddlewareEx.TimeTravelMiddleware` / `ITimeTravelController`: optional time-travel support (history, undo/redo,
+  replay controller).
 
-1. Single-root state (simple app):
+- Helpers: `TypedActionId<T>`, `MiddlewareHelpers` (Safe async dispatch helpers), test seed helpers like
+  `CreateSeededStore`.
+
+# Short Examples
+
+Basic store creation and dispatch:
 
 ```csharp
-var store = Factory.CreateStore(initialRootState, rootReducer);
-store.Dispatch(Factory.CreateAction("MY/DO_THING"));
-var current = store.State;
+// rootState must implement IState
+var (rootState, rootReducer) = Factory.CombineReducers(counterSlice, settingsSlice);
+using var store = Factory.CreateStore(rootState, rootReducer);
+
+store.Dispatch(Factory.CreateAction("APP/INIT"));
+var snapshot = store.State; // latest committed IState
 ```
 
-2. Slice composition (recommended for multi-part state):
+Typed action with payload:
+
+```csharp
+var action = Factory.CreateAction("USER/SET_NAME", new SetNamePayload("Alice"));
+store.Dispatch(action);
+```
+
+Creating and combining slices:
 
 ```csharp
 var counterSlice = Factory.CreateSlice("counter", new CounterState(0), CounterReducer);
-var personSlice = Factory.CreateSlice("person", new PersonState("Guest",30), PersonReducer);
-var (rootState, rootReducer) = Factory.CombineReducers(counterSlice, personSlice);
-using var store = Factory.CreateStore(rootState, rootReducer);
+var settingsSlice = Factory.CreateSlice("settings", new SettingsState(false), SettingsReducer);
+var (initialRoot, rootReducer) = Factory.CombineReducers(counterSlice, settingsSlice);
 ```
 
-3. Observing state:
+Middleware example (persistence hook sketch):
 
 ```csharp
-using var sub = store.StateChanged.Subscribe(new Observer()); // gets immediate current state
+Middleware persist = new PersistMiddleware(new MySnapshotStore());
+using var store = Factory.CreateStore(initialRoot, rootReducer, persist);
 ```
 
-4. Middleware for side-effects (e.g., persist snapshot): create middleware that intercepts actions and calls
-   `ISnapshotStore.SaveAsync` as a side-effect, dispatching follow-up success/failure actions.
+Subscribe to state changes (replay immediate):
 
-# Practical Integration Points with Cortex
+```csharp
+using var sub = store.StateChanged.Subscribe(state => Console.WriteLine("state changed"));
+```
 
-- Dashboard / UI state
-    - Use AtomicState to hold sessions, available snapshots, host/engine health, and UI selection state. New UI
-      subscribers get the current state immediately.
+# Identity & Reducer Rules (critical)
 
-- Snapshot registry
-    - Implement a `SnapshotSlice` that stores snapshot metadata (id, timestamp, model checksum, n_ctx, size) and actions
-      `SNAPSHOT/SAVE`, `SNAPSHOT/DELETE`, `SNAPSHOT/RESTORE`.
-    - Middleware persist side-effect: on `SNAPSHOT/SAVE`, middleware triggers `ISnapshotStore.SaveAsync` and dispatches
-      `SNAPSHOT/SAVED` or `SNAPSHOT/FAILED`.
+- Reducers must return the same instance when nothing changed. AtomicState uses reference equality to decide when to
+  publish a new root snapshot. Returning an equal-but-new instance causes an unnecessary publication.
 
-- Multi-agent orchestration
-    - Model agents and their status can be represented as slices for deterministic orchestration tests and replay.
-    - Actors or TPL Dataflow mailboxes can own executors and publish outcome events to AtomicState (separation of
-      concerns: actors own runtime state; AtomicState owns global app/coordination state).
+- `CombineReducers` preserves root identity when every slice returns the same instance.
 
-- Testing & deterministic replay
-    - Capture action sequences in tests and replay them to reproduce scenarios: helpful for orchestration regression
-      tests.
+# Integration patterns & testing
 
-# Pitfalls & Best Practices
+- Keep binary/large native resources out of state; store ids/metadata and manage heavy resources elsewhere.
+- Use middleware for side-effects (persistence, logging, network calls). Surface side-effect results as actions.
+- For tests, create a seeded store via `CreateSeededStore` or `InMemorySnapshotStore`, dispatch recorded sequences, and
+  assert final `store.State` and emitted actions.
 
-- Follow the identity rule strictly for reducers. Prefer `return state;` for no-op branches rather than returning new
-  instances with equal values.
-- Keep heavy native resources (LLama weights, contexts) out of the store; store only metadata and references/ids
-  pointing to native resources managed elsewhere.
-- Avoid using `StateChanged` callbacks for heavy synchronous work — dispatch asynchronous work from middleware or
-  schedule it off-thread.
-- Use middleware for side-effects and ensure side-effect failures are surfaced as actions so state remains the single
-  source of truth for outcomes.
+# When Not to Use
 
-# Testing patterns
-
-- Unit test reducers directly using inputs and expected state references/values.
-- Integration tests: create a store with slices/middleware, dispatch an action sequence, assert final `store.State` and
-  emitted actions/events.
-- When testing middleware side-effects that call `ISnapshotStore`, use the `InMemorySnapshotStore` or a test double and
-  assert that `SaveAsync` was invoked and follow-up actions were dispatched.
-
-# When NOT to use AtomicState
-
-- Do not use AtomicState to manage per-token generation state or LLama native contexts — those are performance-sensitive
-  and should remain in native/adapter-managed objects (executors owned by hosts or actors).
-- Avoid storing large binary blobs in the store; store metadata and let `ISnapshotStore` implementations persist binary
-  payloads externally.
+- High-frequency inner-loop native state (per-token model internals) — keep those in native/host-managed contexts.
+- Storing large binary blobs; prefer external snapshot storage via `ISnapshotStore`.
 
 # References (source locations)
 
-- Factory & Store implementation: src/AtomicState/Store/Factory.cs and src/AtomicState/Store/Store.cs
-- Store interface: src/AtomicState/Store/IStore.cs
-- Slice & reducer helpers: src/AtomicState/State/\*.cs
-- Middleware: src/AtomicState/Middleware/\*
-- Example usage and README: README.md in the AtomicState repo root
+- `src/AtomicState/Store/Factory.cs` — factory helpers and overloads
+- `src/AtomicState/Store/IStore.cs` — runtime store surface
+- `src/AtomicState/Actions/IAction.cs` — action contracts
+- `src/AtomicState/State` — slice and combine helpers
+- `src/AtomicState/Persistence` — snapshot and persistence helpers
+- `src/AtomicState/Middleware` — bundled middleware like logging and time-travel
 
-# Quick integration checklist for Cortex
+# Maintenance
 
-- [ ] Add `AtomicState` project reference to `src/Cortex.Dashboard` or other control plane projects that require
-      observable state.
-- [ ] Model `Snapshot` metadata as a slice and write middleware that calls `ISnapshotStore` implementations already
-      present in Cortex.
-- [ ] Keep native model/context instances inside `IModelHost`/executors; publish only ids/metadata into the store.
-- [ ] Add unit tests that replay action sequences to verify orchestrator behavior.
-
-# Contact / maintenance notes
-
-- This SKILL is a living summary. If `AtomicState` source changes significantly (API rename, identity semantics
-  changes), update this SKILL to reflect those changes so Cortex contributors can rely on it for integration guidance.
-
-## Recent Additions
-
-- `SC.AtomicState.Helpers.TypedActionId<T>` and `Factory.CreateAction<T>` — strongly-typed action ids and payload
-  helpers.
-- `SC.AtomicState.Helpers.MiddlewareHelpers` — `ScheduleBackground` and `SafeDispatchAsync` helpers for safe async
-  middleware dispatch patterns.
-- `SC.AtomicState.Persistence.PersistMiddleware` and `ISnapshotStore` adapters — opt-in persistence with in-memory and
-  throwing test doubles.
-- `SC.AtomicState.Persistence.StoreSnapshotHelper` and `CreateSeededStore` — deterministic seeding and snapshot capture
-  helpers for tests and replay harnesses.
-- `SC.AtomicState.Telemetry.IStoreMetrics` and `NoOpStoreMetrics` — lightweight metrics hooks wired into
-  `Factory.CreateStore`.
-- `SC.AtomicState.MiddlewareEx.TimeTravelMiddleware` and `ITimeTravelController` — optional time-travel middleware with
-  undo/redo and replay support.
+Keep this SKILL updated when public API names, overloads, or identity semantics change so agents can rely on it for
+integration and example generation.

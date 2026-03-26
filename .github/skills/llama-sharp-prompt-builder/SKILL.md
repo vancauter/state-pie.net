@@ -1,5 +1,5 @@
 ---
-name: llama-sharp.prompt-builder
+name: llama-sharp-prompt-builder
 description: Patterns and examples for composing and trimming prompts for LLamaSharp ChatSession and executors.
 ---
 

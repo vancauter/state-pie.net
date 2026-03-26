@@ -1,5 +1,5 @@
 ---
-name: llama-sharp.embeddings
+name: llama-sharp-embeddings
 description: Guidance for generating and using embeddings with LlamaSharp-style tools.
 ---
 
