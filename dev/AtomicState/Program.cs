@@ -1,14 +1,10 @@
-using SC.SimpleLog;
+using Microsoft.Extensions.Logging;
 
 namespace SC.AtomicState.Dev
 {
     public class Program
     {
-        private static readonly SimpleLogger s_log = new(new LogOptions()
-        {
-            SourceName = "Dev",
-            Template = "[{Timestamp}] <{SourceName}> {Message}"
-        });
+        private static readonly ILogger s_log = new SC.AtomicState.Logging.ConsoleLogger("Dev");
 
         public static void Main()
         {
@@ -29,8 +25,8 @@ namespace SC.AtomicState.Dev
             var counter = StateAccess.GetSliceState(store.State, ExampleStore.CounterSlice);
             var person = StateAccess.GetSliceState(store.State, ExampleStore.PersonSlice);
 
-            s_log.Debug($"Counter: {counter.Count}");
-            s_log.Debug($"Person: {person.Name} ({person.Age})");
+            s_log.LogDebug("Counter: {Count}", counter.Count);
+            s_log.LogDebug("Person: {Name} ({Age})", person.Name, person.Age);
 
             // Disposing the store will call OnCompleted on the internal subject which
             // in turn invokes the observer's OnCompleted. The observer's completion
@@ -43,10 +39,9 @@ namespace SC.AtomicState.Dev
         {
             private readonly Action? _unsubscribe = unsubscribe;
 
-            // Fix: serialize state to JSON for more readable output in the console. (Custom ToString implementations?)
-            public void OnNext(IState state) => s_log.Debug($"State changed: {state}");
-            public void OnError(Exception error) { _unsubscribe?.Invoke(); s_log.Error($"Error: {error}"); }
-            public void OnCompleted() { _unsubscribe?.Invoke(); s_log.Debug("Unsubscribed and completed."); }
+            public void OnNext(IState state) => s_log.LogDebug("State changed: {State}", state);
+            public void OnError(Exception error) { _unsubscribe?.Invoke(); s_log.LogError(error, "Error"); }
+            public void OnCompleted() { _unsubscribe?.Invoke(); s_log.LogDebug("Unsubscribed and completed."); }
         }
     }
 }

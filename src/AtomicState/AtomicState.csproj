@@ -9,7 +9,8 @@
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>AtomicState.Tests</_Parameter1>
     </AssemblyAttribute>
-    <ProjectReference Include="../../../SimpleLog/src/SimpleLog/SimpleLog.csproj" />
+    <!-- SimpleLog removed; use Microsoft.Extensions.Logging abstractions instead -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
   </ItemGroup>
   <!-- Logging abstractions removed: not used by the library anymore -->
 </Project>
