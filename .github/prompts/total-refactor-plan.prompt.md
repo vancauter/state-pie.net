@@ -1,31 +1,45 @@
 ---
 name: total-refactor-plan
-description: Plan and execute a complete, modern refactor of a .NET library or codebase.
+description: Architect and plan a modern .NET codebase transformation using deep research.
 agent: deep-research.agent
 model: GPT-5 mini
 ---
 
-This prompt instructs the agent to design and plan a full refactor of a .NET library or codebase.
+### Instructions
 
-Goals
+You are tasked with designing a comprehensive structural and architectural refactor for a .NET repository. Conduct
+online research into modern .NET best practices and the specific library domain before finalizing the plan.
 
-- Produce a modern, modular, well-named, SOLID-aligned project structure appropriate to the repository's size.
-- Breaking changes are permitted; NO need to document breaking API changes or provide migration guidance.
-- Improve testability, observability, maintainability, and (where sensible) runtime characteristics.
-- Ensure the repository's primary build and test commands run successfully after the refactor.
+#### 1. Analysis & Strategy
 
-Required scope
+- **Research:** Perform deep research on the current repository size, public API surface, and internal implementation.
+- **Modernization:** Define a modular, SOLID-aligned architecture. Prioritize testability, maintainability, and
+  observability.
+- **Logic:** Favor pure, static functions for deterministic helpers and apply Dependency Inversion to decouple
+  components.
 
-- Analyze the current public surface and internal implementation (commonly under `src/` or the repository root).
-- Propose a new project/module layout (split into logical projects or folders where helpful).
-- Rename, split, and reorganize files and folders to industry-standard names; group related interfaces by subject.
-- Reduce coupling: create small, focused interfaces and apply Dependency Inversion where appropriate.
-- Prefer pure/static functions for deterministic helpers when it improves clarity and testability.
-- Update tests, examples, and developer harnesses to reflect the new structure.
-- Update documentation and any `SKILL.md` or repository-guidance files that reference public API names.
-- Include rationale for major decisions and a comprehensive list of all files renamed, moved, or deleted.
+#### 2. Structural Reorganization
 
-Deliverables
+- **Project Layout:** Propose a new project/folder hierarchy (e.g., splitting monolithic blocks into logical modules).
+- **Refactor Mapping:** Rename, split, and move files/folders to meet industry standards. Group interfaces by subject
+  matter.
+- **Test Alignment:** Ensure all tests, examples, and developer harnesses are updated to match the new structure.
+- **Breaking Changes:** You are authorized to make breaking changes. **Do not** spend effort documenting API migration
+  guides or breaking change lists.
 
-- `docs/design/<name-project>-design-v<version>.md` — full design plan and change list. Use existing design document
-  formats in the repository as a template if available, an normalize filename accordingly.
+#### 3. Documentation & Integrity
+
+- **Guidance:** Update all `SKILL.md` files, repository-level documentation, and public API references.
+- **Validation:** The plan must ensure that primary build and test commands remain functional post-refactor.
+- **Rationale:** Provide clear technical justification for major architectural shifts.
+
+---
+
+### Deliverables
+
+**Version Convention:** Select the next logical semantic version (e.g., `v0.3.0`) and use it consistently.
+
+- **Design Document:** Create `docs/design/*-design-v<version>.md`.
+    - **Format:** Mirror the structure and naming convention of existing repository design docs.
+    - **Content:** Include the full architectural plan and a definitive manifest of all moved, renamed, or deleted
+      files.
