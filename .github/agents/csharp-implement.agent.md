@@ -41,9 +41,10 @@ Follow the following steps rigorously!
 4. Implement the code and add corresponding tests. Before marking the step complete run `dotnet build` and the non-
    performance test suite (`dotnet test tests/*/*.Tests.csproj --filter "Category!=Perf"`) and record the outcome in the
    status file.
-5. If `CODING_PLAN` is not completely implemented yet, goto step 1; otherwise goto step 6.
+5. Fix any warnings that your implementation introduced.
+6. If `CODING_PLAN` is not completely implemented yet, goto step 1; otherwise goto step 6.
 
-6. Finalize: When CODING_PLAN is completely implemented, do the following:
+7. Finalize: When CODING_PLAN is completely implemented, do the following:
 
 - Update design document with the final implementation details and any deviations from the original design.
 - Update the `<design-document-name>-status.md` with the completion of the implementation and set "Next Steps" to
