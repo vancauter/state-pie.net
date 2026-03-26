@@ -79,6 +79,20 @@ Design the desired end-state architecture.
 - Rename files, classes, and directories to **industry-standard terminology**
 - Remove or replace poor abstractions
 
+## Project Boundaries & Constraints
+
+- Minimize the number of new projects in the solution.
+- Do **not** introduce new projects unless there is a clear architectural boundary that cannot be achieved within the
+  existing structure.s
+- Prefer **modularization within a project** (folders, namespaces, internal boundaries) over splitting into multiple
+  projects.
+- Only introduce a new project when it provides clear benefits in:
+    - Independent deployment or versioning
+    - Strong isolation of infrastructure concerns
+    - Compile-time boundary enforcement that cannot be achieved otherwise
+- Consider the **size and complexity of the codebase** before proposing additional projects.
+- Avoid over-engineering through premature decomposition.
+
 You are allowed to make **breaking changes** without constraints.
 
 ---
