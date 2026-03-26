@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using SC.AtomicState.Internal;
+using SC.AtomicState.Helpers;
 
 namespace SC.AtomicState
 {
@@ -42,6 +43,21 @@ namespace SC.AtomicState
                 throw new ArgumentException("Action type must be a non-empty string.", nameof(type));
 
             return new StoreAction<TPayload>(type, payload);
+        }
+
+        /// <summary>
+        /// Creates an <see cref="IAction{TPayload}"/> from a <see cref="TypedActionId{TPayload}"/> and payload.
+        /// </summary>
+        /// <typeparam name="TPayload">Payload type.</typeparam>
+        /// <param name="id">Typed action identifier.</param>
+        /// <param name="payload">Payload instance.</param>
+        /// <returns>An <see cref="IAction{TPayload}"/> instance.</returns>
+        public static IAction<TPayload> CreateAction<TPayload>(TypedActionId<TPayload> id, TPayload payload)
+        {
+            if (string.IsNullOrWhiteSpace(id.Type))
+                throw new ArgumentException("Action type must be a non-empty string.", nameof(id));
+
+            return CreateAction<TPayload>(id.Type, payload);
         }
 
         /// <summary>
