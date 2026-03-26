@@ -11,48 +11,42 @@ Status:
 - [x] Add `TypedActionId<T>` and `Factory.CreateAction<T>` — 2026-03-26
 - [x] Add unit tests for typed-action helpers — 2026-03-26
 - [x] Implement `ISnapshotStore`, `InMemorySnapshotStore`, `ThrowingSnapshotStore` — 2026-03-26
-- [ ] Implement `PersistMiddleware` and tests
-- [ ] Add `StoreSnapshotHelper` and `CreateSeededStore`
-- [ ] Add `MiddlewareHelpers` and `DispatchAsync`/`Enqueue` helpers
 - [x] Implement `PersistMiddleware` and tests — 2026-03-26
 - [x] Add `StoreSnapshotHelper` and `CreateSeededStore` — 2026-03-26
-- [ ] Add `MiddlewareHelpers` and `DispatchAsync`/`Enqueue` helpers
-- [ ] Add `IStoreMetrics` and `NoOpStoreMetrics` and wire into `Factory.CreateStore`
 - [x] Add `MiddlewareHelpers` and `DispatchAsync`/`Enqueue` helpers — 2026-03-26
 - [x] Add `IStoreMetrics` and `NoOpStoreMetrics` and wire into `Factory.CreateStore` — 2026-03-26
-- [x] Implement `TimetravelMiddleware` skeleton and controller — 2026-03-26
+- [x] Implement `TimeTravelMiddleware` skeleton and controller — 2026-03-26
+- [x] Expand `TimeTravelMiddleware` to enforce `MaxHistory`, suppress recording during time-travel, and implement
+      `ReplayAsync` — 2026-03-26
 - [ ] Add example projects and docs (`reducer-guidelines`, `async-middleware`, `persistence`)
-- [ ] Run build and tests (full verification)
+- [x] Run build and tests (non-performance) — 2026-03-26 (74/74)
+- [ ] Update `README.md` and `.github/skills/atomic-state/SKILL.md` to conform to the codebase
 
 Completed examples actions:
 
-- [x] Created top-level `examples/` snippets (basic, persistence, middleware, timetravel, metrics) — 2026-03-26
+- [x] Created top-level `examples/` snippets (basic, persistence, middleware, time-travel, metrics) — 2026-03-26
 - [x] Removed ad-hoc `dev/Examples` project and moved examples to `examples/` — 2026-03-26
 - [x] Added slice usage examples (flat + nested guidance) and reordered examples with basic → advanced — 2026-03-26
 
 Notes:
 
-The `TypedActionId<T>` helper and matching factory overload were implemented and unit-tested. Tests passed. Next step:
-implement `PersistMiddleware` and add tests.
+The `TypedActionId<T>` helper and matching factory overload were implemented and unit-tested. Persist middleware,
+snapshot helpers, `MiddlewareHelpers`, and `IStoreMetrics` were added. `TimeTravelMiddleware` and its controller were
+expanded to enforce `MaxHistory`, suppress recording during time-travel operations, and provide a simple `ReplayAsync`
+mechanism. All non-performance tests pass locally (74/74) as of 2026-03-26.
 
 Next actions (short):
 
-1. Implement `MiddlewareHelpers` and `DispatchContext.SafeDispatchAsync` helpers, plus unit tests demonstrating safe
-   background dispatch patterns.
-2. Expand `TimeTravelMiddleware` to capture snapshots/actions, implement undo/redo/replay behavior, and add the full
-   suite of timetravel tests.
-3. Expand `TimetravelMiddleware` tests and implement undo/redo/replay behavior.
-4. Add example projects and `docs/reducer-guidelines.md`, `docs/async-middleware.md`, and `docs/persistence.md`.
-5. Finalize status file with test results and mark v0.6.0 implementation complete when all acceptance criteria are met.
+1. Add example projects and `docs/reducer-guidelines.md`, `docs/async-middleware.md`, and `docs/persistence.md`.
+2. Update `README.md` and `.github/skills/atomic-state/SKILL.md` to reflect the implemented public API names and
+   examples.
+3. Finalize status file after documentation and example verification.
 
 Notes (recent):
 
-- Minimal `TimeTravelMiddleware` and `TimeTravelController` implemented under `src/AtomicState/Middleware/` (namespace
-  `SC.AtomicState.MiddlewareEx`) and expanded tests added at `tests/AtomicState/TimetravelTests.cs` covering
-  record/undo/redo.
-- Persist middleware and tests added; background and synchronous save modes covered. `StoreSnapshotHelper` gains
-  `SeedStoreAsync` and `CaptureSnapshotAsync` helpers. -- Test run: non-performance test suite passed locally (72/72) on
-  2026-03-26.
-
-- Examples: created `examples/` snippets demonstrating basic usage, middleware scheduling, persistence, timetravel
-  usage, and a metrics example. These are top-level `.cs` snippets for documentation and quick copy/paste.
+- `TimeTravelMiddleware` and `TimeTravelController` implemented and expanded under `src/AtomicState/Middleware/`
+  (`SC.AtomicState.MiddlewareEx`) with tests at `tests/AtomicState/TimeTravelTests.cs` covering record/undo/redo.
+- Persist middleware and tests added; background and synchronous save modes covered. `StoreSnapshotHelper` provides
+  `SeedStoreAsync` and `CaptureSnapshotAsync` helpers.
+- Examples: top-level `examples/` snippets created demonstrating basic usage, middleware scheduling, persistence,
+  time-travel usage, and a metrics example.

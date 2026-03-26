@@ -17,7 +17,7 @@ Status: Draft — pre-release (breaking changes allowed)
 - [Open questions / trade-offs](#open-questions-trade-offs)
 - [Acceptance criteria (for v0.6.0)](#acceptance-criteria-for-v060)
 - [Architecture & project structure recommendations](#architecture-and-project-structure-recommendations)
-- [Timetravel middleware](#timetravel-middleware)
+- [TimeTravel middleware](#timetravel-middleware)
 - [References](#references)
 
 ## Purpose
@@ -32,15 +32,19 @@ and a curated set of runnable examples:
 - Async-middleware patterns and guidance for safe nested dispatches, plus an explicit async-dispatch API and helpers
   (e.g., `DispatchAsync`, `Enqueue`, `MiddlewareHelpers.ScheduleBackground`, `DispatchContext.SafeDispatchAsync`) and
   debug-time guards to detect common misuse.
-- Timetravel middleware: bounded history, undo/redo, replay harnesses, and a control surface for devtools and tests.
+- TimeTravel middleware: bounded history, undo/redo, replay harnesses, and a control surface for devtools and tests.
 - Metrics hooks (dispatch throughput, middleware latency) and a small store snapshot/seed helper for deterministic
   integration tests and deterministic replay harnesses.
 - Examples: create an `./examples` directory at the repository root with subdirectories containing concrete, runnable
-  examples (usage, middleware, persistence, timetravel, async-middleware, metrics) and README guides.
+  examples (usage, middleware, persistence, TimeTravel, async-middleware, metrics) and README guides.
+
+- Documentation alignment: update `README.md` and `.github/skills/atomic-state/SKILL.md` so public-facing docs and
+  integration guidance match the implemented public API names (for example, `TimeTravel` middleware naming and
+  control-surface types). This is a final documentation task performed after implementation changes.
 
 Note: The repository now contains a top-level `examples/` directory with `.cs` snippets demonstrating basic usage,
 typed-actions, reducer identity guidance, flat slices vs nested slices (with guidance), middleware scheduling,
-persistence, timetravel, and a metrics example. The earlier ad-hoc `dev/Examples` project was removed in favor of these
+persistence, time-travel, and a metrics example. The earlier ad-hoc `dev/Examples` project was removed in favor of these
 top-level snippets; examples are numbered 01 (basic) → 09 (advanced) for easy discovery.
 
 ## Design principles
@@ -227,12 +231,6 @@ API sketch
   preserving identity rules. If that internal helper is not available, provide a test-only factory that constructs a
   store pre-seeded via `Factory.CreateStore(seedState, rootReducer, ...)`.
 
-### Backwards compatibility & migration
-
-- All changes are opt-in. The default `Factory.CreateStore(...)` and reducer contracts remain unchanged.
-- New types live under `SC.AtomicState.Experimental` or `SC.AtomicState.Helpers` until vetted. After adoption they may
-  be moved into the main namespace.
-
 ### Tests & verification
 
 - Add unit tests:
@@ -284,6 +282,12 @@ API sketch
 - `StoreSnapshotHelper` and `CreateSeededStore` available for deterministic integration tests.
 - Async-middleware guidance documented and tested (no deadlocks in sample tests).
 - `IStoreMetrics` API present and wired through `Factory.CreateStore`.
+- `README.md` and `.github/skills/atomic-state/SKILL.md` updated to reflect implemented public API names (for example
+  `TimeTravel` middleware) and usage guidance.
+- Examples: curated `examples/` snippets for basic, middleware, persistence, time-travel, async-middleware, and metrics
+  exist and are runnable via the provided `csproj`s.
+- Status alignment: the implementation status document (`docs/design/atomicstate-design-v0.6.0-status.md`) is updated to
+  reflect the current progress against these acceptance criteria.
 
 ## Implementation notes for maintainers
 
@@ -305,7 +309,7 @@ API sketch
 #### Projects and folders
 
     - `src/AtomicState/` (core runtime) — keep core surface small: `Factory`, `IStore`, `Store`, `Reducer` wiring.
-    - `src/AtomicState.Middleware/` — middleware implementations (Logging, Persist, Timetravel) and middleware factory
+    - `src/AtomicState.Middleware/` — middleware implementations (Logging, Persist, TimeTravel) and middleware factory
       helpers.
     - `src/AtomicState.Persistence/` — `ISnapshotStore`, `InMemorySnapshotStore`, persistence adapters.
     - `src/AtomicState.Helpers/` — `TypedActionId<T>`, `MiddlewareHelpers`, `StoreSnapshotHelper`, `DispatchContext`
@@ -319,7 +323,7 @@ API sketch
 - Namespaces and naming
     - Use `SC.AtomicState` as the root public namespace. Sub-namespaces mirror folders: `.Middleware`, `.Persistence`,
       `.Helpers`, `.Telemetry`, `.Experimental`.
-    - Public API naming: `TypedActionId<T>`, `ITimetravelController`, `TimetravelMiddleware`, `ISnapshotStore`,
+    - Public API naming: `TypedActionId<T>`, `ITimeTravelController`, `TimeTravelMiddleware`, `ISnapshotStore`,
       `MiddlewareHelpers`, `StoreSnapshotHelper`, `IStoreMetrics`.
     - Dispatch API: extend `IDispatchContext` (or an adapter) with
       `ValueTask DispatchAsync(IAction action, CancellationToken ct = default)` and
@@ -353,7 +357,7 @@ examples/
 - basic/ # minimal create-store/dispatch example
 - middleware/ # examples showing persist, logging middleware
 - async-middleware/ # safe vs unsafe patterns, DispatchAsync usage
-- timetravel/ # demo harness showing undo/redo + replay
+- TimeTravel/ # demo harness showing undo/redo + replay
 - persistence/ # snapshot store examples and usage
 - metrics/ # metrics wiring and sample consumer
 
@@ -372,7 +376,7 @@ Each example folder should include a short README and a simple `Program.cs` demo
 - Public API shape should remain stable; only introduce new overloads and opt-in helpers. Mark experimental types with
   an `Experimental` remark in XML docs.
 
-## Timetravel middleware
+## TimeTravel middleware
 
 ### Purpose
 
@@ -390,14 +394,14 @@ Design goals
 API sketches
 
 - `public record TimeTravelOptions(int MaxHistory = 100, bool StoreActions = true, bool StoreSnapshots = false, bool UseDiffs = true);`
-- `public interface ITimetravelController` — programmatic control surface:
+- `public interface ITimeTravelController` — programmatic control surface:
     - `Task UndoAsync()`
     - `Task RedoAsync()`
     - `Task ReplayAsync(IEnumerable<IAction> actions)`
     - `IReadOnlyList<IState> GetHistory()`
     - `void Clear()`
 
-- Middleware creator: `TimetravelMiddleware.Create(TimeTravelOptions options, out ITimetravelController controller)`
+- Middleware creator: `TimeTravelMiddleware.Create(TimeTravelOptions options, out ITimeTravelController controller)`
   returns a `Middleware` delegate and an attached controller instance.
 
 Behavior notes
@@ -419,7 +423,7 @@ Integration points
 - Metrics: middleware should call `IStoreMetrics.OnMiddlewareStart/End` with an id like `"timetravel"`.
 - Persistence: optionally persist history via `ISnapshotStore` or consumer-provided store for longer retention across
   runs.
-- UI/Devtools: `ITimetravelController` can be exposed to debugging UIs to present a timeline and allow stepping.
+- UI/Devtools: `ITimeTravelController` can be exposed to debugging UIs to present a timeline and allow stepping.
 
 Safety & identity rules
 
@@ -431,20 +435,20 @@ Safety & identity rules
 Testing
 
 - Unit tests:
-    - `Timetravel_RecordsActionsAndSnapshots` — verifies history entries after dispatches.
-    - `Timetravel_UndoRestoresPreviousStateReference` — verifies identity preservation after undo.
-    - `Timetravel_RedoRestoresForwardState` — verifies redo behavior.
-    - `Timetravel_ReplayProducesDeterministicState` — seeds a fresh store and replays recorded actions, verifying final
+    - `TimeTravel_RecordsActionsAndSnapshots` — verifies history entries after dispatches.
+    - `TimeTravel_UndoRestoresPreviousStateReference` — verifies identity preservation after undo.
+    - `TimeTravel_RedoRestoresForwardState` — verifies redo behavior.
+    - `TimeTravel_ReplayProducesDeterministicState` — seeds a fresh store and replays recorded actions, verifying final
       state matches original.
-    - `Timetravel_BoundedHistoryEvictsOldEntries` — verifies `MaxHistory` enforcement.
+    - `TimeTravel_BoundedHistoryEvictsOldEntries` — verifies `MaxHistory` enforcement.
 
 - Integration tests:
-    - Combine `TimetravelMiddleware` with `PersistMiddleware` and `InMemorySnapshotStore` to validate persistence and
+    - Combine `TimeTravelMiddleware` with `PersistMiddleware` and `InMemorySnapshotStore` to validate persistence and
       replay across lifecycles.
 
 Acceptance criteria
 
-- `TimetravelMiddleware.Create(...)` exists and returns a `Middleware` plus `ITimetravelController`.
+- `TimeTravelMiddleware.Create(...)` exists and returns a `Middleware` plus `ITimeTravelController`.
 - Undo/redo operations restore exact state instances (or logically equal reconstructed instances) and preserve reducer
   identity semantics.
 - Replay harness produces deterministic state matches when replaying recorded actions into a seeded store.

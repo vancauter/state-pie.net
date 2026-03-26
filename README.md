@@ -30,6 +30,11 @@ AtomicState provides:
 - Reducers for single-root or slice-composed state.
 - A root store with immediate replay of the latest state to new subscribers.
 - Logging middleware.
+- TimeTravel middleware (undo/redo, bounded history, replay controller).
+- Persistence middleware and `ISnapshotStore` adapters (in-memory test doubles).
+- Typed action helpers (`TypedActionId<T>` and `Factory.CreateAction<T>`).
+- Middleware helpers (`MiddlewareHelpers.ScheduleBackground` and `MiddlewareHelpers.SafeDispatchAsync`).
+- Snapshot helpers (`StoreSnapshotHelper` and `CreateSeededStore`) for deterministic tests and replay.
 
 ## Requirements
 
