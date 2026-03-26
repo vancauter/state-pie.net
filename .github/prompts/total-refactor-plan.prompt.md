@@ -1,6 +1,7 @@
 ---
 name: total-refactor-plan
 description: Plan and execute a complete, modern refactor of a .NET library or codebase.
+agent: deep-research.agent
 model: GPT-5 mini
 ---
 
@@ -12,6 +13,8 @@ Goals
 - Breaking changes are permitted; NO need to document breaking API changes or provide migration guidance.
 - Improve testability, observability, maintainability, and (where sensible) runtime characteristics.
 - Ensure the repository's primary build and test commands run successfully after the refactor.
+
+Use:
 
 Required scope
 
