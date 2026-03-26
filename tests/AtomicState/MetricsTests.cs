@@ -25,8 +25,8 @@ namespace SC.AtomicState.Tests
         {
             var metrics = new TestMetrics();
 
-            var mw1 = (Middleware)((ctx, next) => action => next(action));
-            var mw2 = (Middleware)((ctx, next) => action => next(action));
+            Dispatch mw1(IDispatchContext ctx, Dispatch next) => action => next(action);
+            Dispatch mw2(IDispatchContext ctx, Dispatch next) => action => next(action);
 
             var reducer = new Reducer((state, action) =>
             {

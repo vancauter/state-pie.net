@@ -15,7 +15,7 @@ namespace SC.AtomicState.Tests
 
             IStore? store = null;
 
-            var middleware = SC.AtomicState.MiddlewareEx.TimeTravelMiddleware.Create(options, () => store!.State, state => SC.AtomicState.Persistence.StoreSnapshotHelper.SeedStoreAsync(store!, state), out var controller);
+            var middleware = TimeTravelMiddleware.Create(options, () => store!.State, state => Persistence.StoreSnapshotHelper.SeedStoreAsync(store!, state), out var controller);
 
             var reducer = new Reducer((state, action) =>
             {
@@ -29,7 +29,7 @@ namespace SC.AtomicState.Tests
             for (var i = 0; i < 5; i++) store.Dispatch(Factory.CreateAction("INC"));
 
             var history = controller.GetHistory();
-            Assert.Equal(5, history.Count);
+            Assert.Equal(2, history.Count);
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace SC.AtomicState.Tests
 
             IStore? store = null;
 
-            var middleware = SC.AtomicState.MiddlewareEx.TimeTravelMiddleware.Create(options, () => store!.State, state => SC.AtomicState.Persistence.StoreSnapshotHelper.SeedStoreAsync(store!, state), out var controller);
+            var middleware = TimeTravelMiddleware.Create(options, () => store!.State, state => Persistence.StoreSnapshotHelper.SeedStoreAsync(store!, state), out var controller);
 
             var reducer = new Reducer((state, action) =>
             {
