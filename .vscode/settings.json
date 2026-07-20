@@ -1,0 +1,32 @@
+// VSCode Settings for C# Project
+{
+    // --- Editor Basics ---
+
+    // Use Prettier as the default formatter for all file types
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    // Ensure Prettier respects your .editorconfig rules
+    "prettier.useEditorConfig": true,
+
+    // --- Formatting Settings ---
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "modifications",
+    "editor.formatOnPaste": true,
+    "editor.formatOnType": false,
+    "editor.rulers": [120],
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "always"
+    },
+
+    // --- OmniSharp C# Extension Settings ---
+
+    // "omnisharp.useModernNet": true,
+    // "omnisharp.enableRoslynAnalyzers": true,
+    // "omnisharp.enableEditorConfigSupport": true,
+    // "omnisharp.organizeImportsOnFormat": true,
+
+    // --- Specific Language Settings ---
+
+    "[csharp]": {
+        "editor.defaultFormatter": "ms-dotnettools.csharp"
+    }
+}
