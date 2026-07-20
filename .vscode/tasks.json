@@ -4,7 +4,7 @@
         {
             "label": "Build Solution",
             "type": "shell",
-            "command": "dotnet build *.sln",
+            "command": "dotnet build *.slnx",
             "group": "build",
             "problemMatcher": "$msCompile",
             "presentation": { "reveal": "always", "panel": "shared" }

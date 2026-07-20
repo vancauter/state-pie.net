@@ -2,9 +2,9 @@ using Microsoft.Extensions.Logging;
 
 namespace SC.AtomicState.Dev
 {
-    public class Program
+    public class Programs
     {
-        private static readonly ILogger s_log = new SC.AtomicState.Logging.ConsoleLogger("Dev");
+        private static readonly ILogger s_log = new Logging.ConsoleLogger("Dev");
 
         public static void Main()
         {
