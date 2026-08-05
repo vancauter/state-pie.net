@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/dev/" />
+  <Folder Name="/dev/AtomicState/">
+    <Project Path="c:/Develop/CSharp/atomic-state.net/dev/AtomicState/AtomicState.Dev.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="c:/Develop/CSharp/atomic-state.net/src/AtomicState/AtomicState.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/AtomicState/">
+    <Project Path="c:/Develop/CSharp/atomic-state.net/tests/AtomicState/AtomicState.Tests.csproj" />
+  </Folder>
+</Solution>

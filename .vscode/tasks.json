@@ -4,7 +4,7 @@
         {
             "label": "Build Solution",
             "type": "shell",
-            "command": "dotnet build *.slnx",
+            "command": "dotnet build atomic-state.net.slnx",
             "group": "build",
             "problemMatcher": "$msCompile",
             "presentation": { "reveal": "always", "panel": "shared" }
@@ -12,22 +12,14 @@
         {
             "label": "Run Dev Project",
             "type": "shell",
-            "command": "dotnet run --verbosity q --project dev/*/*.Dev.csproj",
+            "command": "dotnet run --verbosity q --project dev/AtomicState/AtomicState.Dev.csproj",
             "group": "none",
-            "presentation": { "reveal": "always", "panel": "shared" }
-        },
-        {
-            "label": "Run Dev Project (watch)",
-            "type": "shell",
-            "command": "dotnet watch run --verbosity q --project dev/*/*.Dev.csproj",
-            "isBackground": true,
-            "problemMatcher": [],
             "presentation": { "reveal": "always", "panel": "shared" }
         },
         {
             "label": "Run Tests",
             "type": "shell",
-            "command": "dotnet test tests/AtomicState/*.Tests.csproj --filter \"Category!=Perf\"",
+            "command": "dotnet test tests/AtomicState/AtomicState.Tests.csproj --filter \"Category!=Perf\"",
             "group": "test",
             "problemMatcher": "$msCompile",
             "presentation": { "reveal": "always", "panel": "shared" }
@@ -35,17 +27,9 @@
         {
             "label": "Run Performance Tests",
             "type": "shell",
-            "command": "dotnet test tests/AtomicState/*.Tests.csproj --filter \"Category=Perf\"",
+            "command": "dotnet test tests/AtomicState/AtomicState.Tests.csproj --filter \"Category=Perf\"",
             "group": "test",
             "problemMatcher": "$msCompile",
-            "presentation": { "reveal": "always", "panel": "shared" }
-        },
-        {
-            "label": "Proper Clean",
-            "type": "shell",
-            "command": "../Scripts/proper_clean.sh",
-            "group": "none",
-            "problemMatcher": [],
             "presentation": { "reveal": "always", "panel": "shared" }
         }
     ]

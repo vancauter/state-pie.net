@@ -1,47 +1,64 @@
-using Microsoft.Extensions.Logging;
+using AtomicState;
 
 namespace SC.AtomicState.Dev
 {
     public class Programs
     {
-        private static readonly ILogger s_log = new Logging.ConsoleLogger("Dev");
-
         public static void Main()
         {
-            // Create the example store with logging middleware applied.
-            using var store = ExampleStore.Create(LoggingMiddleware.Create());
+            const string counterIncrement = "@COUNTER/INCREMENT";
+            const string counterDecrement = "@COUNTER/DECREMENT";
+            const string profileSetName = "@PROFILE/SET_NAME";
 
-            IDisposable? subscription = null;
-            var observer = new ConsoleObserver(() => subscription?.Dispose());
-            subscription = store.StateChanged.Subscribe(observer);
+            var counterSlice = StateFactory.CreateSlice(
+                name: "counter",
+                initialState: new CounterState { Count = 0 },
+                reducer: (state, action) => action.Type switch
+                {
+                    counterIncrement => new CounterState { Count = state.Count + 1 },
+                    counterDecrement => new CounterState { Count = state.Count - 1 },
+                    _ => state
+                });
 
-            // Counter slice
-            store.Dispatch(Factory.CreateAction(ExampleStore.Increment));
+            var profileSlice = StateFactory.CreateSlice(
+                name: "profile",
+                initialState: new ProfileState { Name = "Guest" },
+                reducer: (state, action) => action.Type switch
+                {
+                    profileSetName when action is IAction<string> nameAction
+                        => new ProfileState { Name = nameAction.Payload },
+                    _ => state
+                });
 
-            // Person slice
-            store.Dispatch(Factory.CreateAction(ExampleStore.PersonAddAge));
-            store.Dispatch(Factory.CreateAction(ExampleStore.PersonSetName, "Lee-Lee"));
+            using var store = StateFactory.CreateStore(counterSlice, profileSlice);
 
-            var counter = StateAccess.GetSliceState(store.State, ExampleStore.CounterSlice);
-            var person = StateAccess.GetSliceState(store.State, ExampleStore.PersonSlice);
+            store.OnStateChanged += PrintState;
 
-            s_log.LogDebug("Counter: {Count}", counter.Count);
-            s_log.LogDebug("Person: {Name} ({Age})", person.Name, person.Age);
+            Console.WriteLine("Initial:");
+            PrintState(store.State);
 
-            // Disposing the store will call OnCompleted on the internal subject which
-            // in turn invokes the observer's OnCompleted. The observer's completion
-            // handler runs the provided callback, disposing the subscription.
-            store.Dispose();
+            store.Dispatch(StateFactory.CreateAction(counterIncrement));
+            store.Dispatch(StateFactory.CreateAction(counterIncrement));
+            store.Dispatch(StateFactory.CreateAction(profileSetName, "Ada"));
+            store.Dispatch(StateFactory.CreateAction(counterDecrement));
         }
 
-        // Simple console observer that prints state changes and errors.
-        private sealed class ConsoleObserver(Action? unsubscribe = null) : IObserver<IState>
+        private static void PrintState(IReadOnlyDictionary<string, IState> rootState)
         {
-            private readonly Action? _unsubscribe = unsubscribe;
+            var counter = (CounterState)rootState["counter"];
+            var profile = (ProfileState)rootState["profile"];
 
-            public void OnNext(IState state) => s_log.LogDebug("State changed: {State}", state);
-            public void OnError(Exception error) { _unsubscribe?.Invoke(); s_log.LogError(error, "Error"); }
-            public void OnCompleted() { _unsubscribe?.Invoke(); s_log.LogDebug("Unsubscribed and completed."); }
+            Console.WriteLine($"Counter={counter.Count}, Name={profile.Name}");
+        }
+
+        private sealed class CounterState : IState
+        {
+            public int Count { get; init; }
+        }
+
+        private sealed class ProfileState : IState
+        {
+            public string Name { get; init; } = string.Empty;
         }
     }
 }
