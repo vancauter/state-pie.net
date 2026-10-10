@@ -1,4 +1,4 @@
-namespace AtomicState
+namespace SnapshotStore
 {
     public interface ISlice
     {

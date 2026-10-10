@@ -1,4 +1,5 @@
-// VSCode Settings for C# Project
+// --- VSCode Settings for C# Project ---
+
 {
     // --- Editor Basics ---
 
@@ -17,16 +18,10 @@
         "source.fixAll": "always"
     },
 
-    // --- OmniSharp C# Extension Settings ---
-
-    // "omnisharp.useModernNet": true,
-    // "omnisharp.enableRoslynAnalyzers": true,
-    // "omnisharp.enableEditorConfigSupport": true,
-    // "omnisharp.organizeImportsOnFormat": true,
-
     // --- Specific Language Settings ---
 
     "[csharp]": {
         "editor.defaultFormatter": "ms-dotnettools.csharp"
-    }
+    },
+    "dotnet.defaultSolution": "atomic-state.sln"
 }

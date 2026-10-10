@@ -1,10 +1,10 @@
-namespace AtomicState
+namespace SnapshotStore
 {
     internal sealed class Slice<T> : ISlice where T : IState
     {
-        public Slice(string name, T initialState, Reducer<T> reducer)
+        public Slice(string sliceName, T initialState, Reducer<T> reducer)
         {
-            Name = name;
+            Name = sliceName;
             InitialState = initialState;
             Reducer = (state, action) => reducer((T)state, action);
         }

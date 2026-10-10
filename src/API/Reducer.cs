@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Reflection;
 
-namespace AtomicState
+namespace SnapshotStore
 {
     /// <summary>
     /// A delegate that defines the signature of a reducer function.

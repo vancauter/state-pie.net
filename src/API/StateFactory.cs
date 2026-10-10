@@ -1,9 +1,8 @@
-
 using System.Collections.ObjectModel;
 
-namespace AtomicState
+namespace SnapshotStore
 {
-    public static class StateFactory
+    public static class SnapshotStoreFactory
     {
         public static IAction CreateAction(string type)
         {
@@ -59,7 +58,7 @@ namespace AtomicState
 
             IReadOnlyDictionary<string, IState> rootReducerCore(IReadOnlyDictionary<string, IState> state, IAction action)
             {
-                Dictionary<string, IState> nextSliceStates = null;
+                Dictionary<string, IState>? nextSliceStates = null;
 
                 foreach (var pair in reducerDictionary)
                 {

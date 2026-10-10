@@ -1,4 +1,4 @@
-namespace AtomicState
+namespace SnapshotStore
 {
     /// <summary>
     /// Internal implementation of IAction.

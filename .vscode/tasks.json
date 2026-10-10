@@ -4,30 +4,15 @@
         {
             "label": "Build Solution",
             "type": "shell",
-            "command": "dotnet build atomic-state.net.slnx",
+            "command": "dotnet build snapshot-store.sln",
             "group": "build",
             "problemMatcher": "$msCompile",
             "presentation": { "reveal": "always", "panel": "shared" }
         },
         {
-            "label": "Run Dev Project",
-            "type": "shell",
-            "command": "dotnet run --verbosity q --project dev/AtomicState/AtomicState.Dev.csproj",
-            "group": "none",
-            "presentation": { "reveal": "always", "panel": "shared" }
-        },
-        {
             "label": "Run Tests",
             "type": "shell",
-            "command": "dotnet test tests/AtomicState/AtomicState.Tests.csproj --filter \"Category!=Perf\"",
-            "group": "test",
-            "problemMatcher": "$msCompile",
-            "presentation": { "reveal": "always", "panel": "shared" }
-        },
-        {
-            "label": "Run Performance Tests",
-            "type": "shell",
-            "command": "dotnet test tests/AtomicState/AtomicState.Tests.csproj --filter \"Category=Perf\"",
+            "command": "dotnet test tests/snapshot-store.Tests.csproj",
             "group": "test",
             "problemMatcher": "$msCompile",
             "presentation": { "reveal": "always", "panel": "shared" }

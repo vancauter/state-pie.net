@@ -1,13 +1,9 @@
-using System.Collections.Generic;
-using System;
-using System.Threading;
-
-namespace AtomicState
+namespace SnapshotStore
 {
     internal sealed class Store : IStore
     {
         private bool _isDisposed;
-        private readonly object _lock = new object();
+        private readonly object _lock = new();
         private readonly RootReducer _reducer;
         private IReadOnlyDictionary<string, IState> _state;
 
@@ -23,7 +19,7 @@ namespace AtomicState
             _reducer = reducer;
         }
 
-        public event System.Action<IReadOnlyDictionary<string, IState>> OnStateChanged;
+        public event System.Action<IReadOnlyDictionary<string, IState>> OnStateChanged = delegate { };
 
         public IReadOnlyDictionary<string, IState> State => Volatile.Read(ref _state);
 
@@ -32,7 +28,7 @@ namespace AtomicState
             if (action is null)
                 throw new ArgumentNullException(nameof(action));
 
-            System.Action<IReadOnlyDictionary<string, IState>> handlers = null;
+            System.Action<IReadOnlyDictionary<string, IState>> handlers;
             IReadOnlyDictionary<string, IState> nextState;
 
             lock (_lock)
@@ -49,7 +45,7 @@ namespace AtomicState
                 handlers = OnStateChanged;
             }
 
-            handlers?.Invoke(nextState);
+            handlers(nextState);
         }
 
         public void Dispose()
@@ -60,7 +56,6 @@ namespace AtomicState
                     return;
 
                 _isDisposed = true;
-                OnStateChanged = null;
             }
         }
     }

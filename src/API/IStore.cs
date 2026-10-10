@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-
-namespace AtomicState
+namespace SnapshotStore
 {
-    public interface IStore : System.IDisposable
+    public interface IStore : IDisposable
     {
         IReadOnlyDictionary<string, IState> State { get; }
 

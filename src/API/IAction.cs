@@ -1,4 +1,4 @@
-namespace AtomicState
+namespace SnapshotStore
 {
     /// <summary>
     /// Represents an action that can be dispatched to the store to trigger state changes.

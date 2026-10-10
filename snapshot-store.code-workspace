@@ -5,7 +5,7 @@
         },
     ],
     "settings": {
-        // "dotnet.defaultSolution": ".sln",
+        "dotnet.defaultSolution": "snapshot-store.sln",
         "explorer.compactFolders": false,
 
         // --- GitHub Copilot Settings ---
@@ -30,9 +30,9 @@
             "**/.vscode": false,
 
             // Configuration files
-            "**/*config": true,
-            "**/*ignore": true,
-            "**/.*rc": true,
+            // "**/*config": true,
+            // "**/*ignore": true,
+            // "**/.*rc": true,
 
             // Documentation files
             "**/LICENSE*": true,
@@ -42,12 +42,6 @@
             "**/*.code-workspace": false,
             "**/*.csproj": false,
             "**/*.sln": false,
-
-            // Focus directories
-            "**/dev": false,
-            "**/docs": false,
-            "**/src": false,
-            "**/tests": false,
         },
     },
 }
