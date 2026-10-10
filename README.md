@@ -1,6 +1,6 @@
 # Snapshot Store
 
-Snapshot Store is a lightweight C# state management library for predictable, immutable application state updates using
+Snapshot Store is a lightweight .NET state management library for predictable, immutable application state updates using
 actions, reducers, and slices.
 
 ## Simple Example
