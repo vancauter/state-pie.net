@@ -1,22 +1,19 @@
 using Xunit;
 
+#pragma warning disable CA1707
+
 namespace SnapshotStore.Tests
 {
     public class StoreFactoryTests
     {
         [Fact]
-        public void CreateStoreDispatchesStronglyTypedActionsAndUpdatesState()
+        public void GivenStoreWithOneSlice_WhenDispatchingMatchingActions_ThenStateIsUpdatedAndNotificationsAreRaised()
         {
-            // Why define a dedicated action family interface:
-            // It gives the store a compile-time bounded action universe and prevents unrelated actions
-            // from being dispatched accidentally.
             var counterSlice = StoreFactory.CreateSlice<CounterState, ICounterAction>(
                 name: "counter",
                 initialState: new CounterState(0),
                 reducer: static (state, action) => action switch
                 {
-                    // Why pattern matching:
-                    // Routing by runtime action type removes string keys and invalid payload pairings.
                     IncrementCounterAction => state with { Count = state.Count + 1 },
                     SetCounterAction set => state with { Count = set.Value },
                     _ => state
@@ -36,7 +33,7 @@ namespace SnapshotStore.Tests
         }
 
         [Fact]
-        public void CreateStoreThrowsWhenSliceNamesAreDuplicated()
+        public void GivenTwoSlicesWithSameName_WhenCreatingStore_ThenArgumentExceptionIsThrown()
         {
             var first = StoreFactory.CreateSlice<CounterState, ICounterAction>(
                 name: "counter",
@@ -52,8 +49,67 @@ namespace SnapshotStore.Tests
             Assert.Contains("Duplicate slice name", exception.Message);
         }
 
-        // Why records:
-        // Immutable action and state records make reducer transitions explicit and side-effect resistant.
+        [Fact]
+        public void GivenNullSliceArray_WhenCreatingStore_ThenArgumentExceptionIsThrown()
+        {
+            var exception = Assert.Throws<ArgumentException>(() => StoreFactory.CreateStore<ICounterAction>(null!));
+            Assert.Contains("at least one slice", exception.Message);
+        }
+
+        [Fact]
+        public void GivenStoreWithNoOpReducer_WhenDispatchingAction_ThenSnapshotReferenceAndNotificationCountStayUnchanged()
+        {
+            var slice = StoreFactory.CreateSlice<CounterState, ICounterAction>(
+                name: "counter",
+                initialState: new CounterState(5),
+                reducer: static (state, _) => state);
+
+            using var store = StoreFactory.CreateStore(slice);
+
+            var before = store.State;
+            var notifications = 0;
+            store.OnStateChanged += _ => notifications++;
+
+            store.Dispatch(new IncrementCounterAction());
+
+            Assert.Same(before, store.State);
+            Assert.Equal(0, notifications);
+        }
+
+        [Fact]
+        public void GivenDisposedStore_WhenDispatchingAction_ThenObjectDisposedExceptionIsThrown()
+        {
+            var slice = StoreFactory.CreateSlice<CounterState, ICounterAction>(
+                name: "counter",
+                initialState: new CounterState(0),
+                reducer: static (state, _) => state);
+
+            using var store = StoreFactory.CreateStore(slice);
+            store.Dispose();
+
+            _ = Assert.Throws<ObjectDisposedException>(() => store.Dispatch(new IncrementCounterAction()));
+        }
+
+        [Fact]
+        public void GivenEmptySliceName_WhenCreatingSlice_ThenArgumentExceptionIsThrown()
+        {
+            var exception = Assert.Throws<ArgumentException>(() =>
+                StoreFactory.CreateSlice<CounterState, ICounterAction>(
+                    name: "  ",
+                    initialState: new CounterState(0),
+                    reducer: static (state, _) => state));
+
+            Assert.Contains("Slice name", exception.Message);
+        }
+
+        [Fact]
+        public void GivenNullReducer_WhenCreatingSlice_ThenArgumentNullExceptionIsThrown() =>
+            _ = Assert.Throws<ArgumentNullException>(() =>
+                StoreFactory.CreateSlice<CounterState, ICounterAction>(
+                    name: "counter",
+                    initialState: new CounterState(0),
+                    reducer: null!));
+
         private sealed record CounterState(int Count) : IState;
 
         private interface ICounterAction : IAction;
@@ -63,3 +119,5 @@ namespace SnapshotStore.Tests
         private sealed record SetCounterAction(int Value) : ICounterAction;
     }
 }
+
+#pragma warning restore CA1707
