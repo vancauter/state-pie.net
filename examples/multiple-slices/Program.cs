@@ -34,13 +34,13 @@ namespace SnapshotStore.Examples.MultipleSlices
 
             using var store = StoreFactory.CreateStore(counterSlice, todosSlice);
 
-            store.OnStateChanged += static snapshot =>
+            using var subscription = store.Subscribe(static snapshot =>
             {
                 var counter = (CounterState)snapshot["counter"];
                 var todos = (TodosState)snapshot["todos"];
 
                 Console.WriteLine($"Count: {counter.Count} | Todos: {todos.Items.Count}");
-            };
+            });
 
             store.Dispatch(new IncrementCounterAction());
             store.Dispatch(new AddTodoAction("Review pull request"));

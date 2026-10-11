@@ -22,7 +22,7 @@ namespace SnapshotStore.Tests
             using var store = StoreFactory.CreateStore(counterSlice);
 
             var notifications = 0;
-            store.OnStateChanged += _ => notifications++;
+            using var subscription = store.Subscribe(_ => notifications++);
 
             store.Dispatch(new IncrementCounterAction());
             store.Dispatch(new SetCounterAction(10));
@@ -68,7 +68,7 @@ namespace SnapshotStore.Tests
 
             var before = store.State;
             var notifications = 0;
-            store.OnStateChanged += _ => notifications++;
+            using var subscription = store.Subscribe(_ => notifications++);
 
             store.Dispatch(new IncrementCounterAction());
 

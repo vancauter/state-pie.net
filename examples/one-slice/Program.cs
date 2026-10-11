@@ -27,11 +27,11 @@ public static class Program
 
         using var store = StoreFactory.CreateStore<ICounterAction>(counterSlice);
 
-        store.OnStateChanged += static snapshot =>
+        using var subscription = store.Subscribe(static snapshot =>
         {
             var counter = (CounterState)snapshot["counter"];
             Console.WriteLine($"Count: {counter.Count}");
-        };
+        });
 
         store.Dispatch(new IncrementCounterAction());
         store.Dispatch(new SetCounterAction(10));

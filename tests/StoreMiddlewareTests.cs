@@ -25,7 +25,7 @@ namespace SnapshotStore.Tests
             }
 
             using var store = StoreFactory.CreateStore([slice], first, second);
-            store.OnStateChanged += _ => calls.Add("state-changed");
+            using var subscription = store.Subscribe(_ => calls.Add("state-changed"));
 
             store.Dispatch(new IncrementCounterAction());
 
@@ -43,7 +43,7 @@ namespace SnapshotStore.Tests
             using var store = StoreFactory.CreateStore([slice], middleware);
             var initialSnapshot = store.State;
             var notifications = 0;
-            store.OnStateChanged += _ => notifications++;
+            using var subscription = store.Subscribe(_ => notifications++);
 
             store.Dispatch(new IncrementCounterAction());
 
@@ -62,7 +62,7 @@ namespace SnapshotStore.Tests
             }
             using var store = StoreFactory.CreateStore([slice], middleware);
             var notifications = 0;
-            store.OnStateChanged += _ => notifications++;
+            using var subscription = store.Subscribe(_ => notifications++);
 
             var exception = Assert.Throws<InvalidOperationException>(() => store.Dispatch(new IncrementCounterAction()));
 

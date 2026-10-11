@@ -41,13 +41,13 @@ namespace SnapshotStore.Examples.NestedSlices
 
             using var store = StoreFactory.CreateStore(uiSlice, userSlice);
 
-            store.OnStateChanged += static snapshot =>
+            using var subscription = store.Subscribe(static snapshot =>
             {
                 var ui = (UiState)snapshot["app/ui"];
                 var user = (UserState)snapshot["app/user"];
 
                 Console.WriteLine($"Theme: {ui.Theme} | User: {user.Profile.DisplayName}");
-            };
+            });
 
             store.Dispatch(new SetThemeAction("dark"));
             store.Dispatch(new SetDisplayNameAction("FooBar"));

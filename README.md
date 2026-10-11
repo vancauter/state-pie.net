@@ -14,7 +14,7 @@ something actually changed.
 - Enforces one action family per store through generic typing.
 - Runs all slice reducers for each dispatch and builds a new root snapshot only when needed.
 - Uses reference equality to treat unchanged reducer outputs as no-op updates.
-- Publishes state changes through a single OnStateChanged event.
+- Publishes root or selected state changes through disposable subscriptions.
 - Includes StateMerger for pragmatic immutable updates via cached reflection-based property overlay.
 
 ## Design Philosophy
