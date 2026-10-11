@@ -52,7 +52,7 @@ namespace SnapshotStore.Tests
         [Fact]
         public void GivenNullSliceArray_WhenCreatingStore_ThenArgumentExceptionIsThrown()
         {
-            var exception = Assert.Throws<ArgumentException>(() => StoreFactory.CreateStore<ICounterAction>(null!));
+            var exception = Assert.Throws<ArgumentException>(() => StoreFactory.CreateStore((ISlice<ICounterAction>[])null!));
             Assert.Contains("at least one slice", exception.Message);
         }
 

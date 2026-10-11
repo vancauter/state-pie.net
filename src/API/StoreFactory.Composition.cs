@@ -2,10 +2,7 @@ using System.Collections.ObjectModel;
 
 namespace SnapshotStore
 {
-    /// <summary>
-    /// Builds validated slices and store so composition invariants are enforced once and runtime behavior stays consistent.
-    /// </summary>
-    public static class StoreFactory
+    public static partial class StoreFactory
     {
         /// <summary>
         /// Factory method for creating a slice.
@@ -34,21 +31,47 @@ namespace SnapshotStore
         /// Factory method for creating a store from one or more slices.
         /// </summary>
         public static IStore<TAction> CreateStore<TAction>(params ISlice<TAction>[] slices)
+            where TAction : class, IAction => CreateStoreCore(slices, Array.Empty<DispatchMiddleware<TAction>>());
+
+        /// <summary>
+        /// Creates a store whose typed dispatch is wrapped by synchronous middleware in registration order; middleware may short-circuit, exceptions propagate, and each middleware may invoke its next stage at most once.
+        /// </summary>
+        public static IStore<TAction> CreateStore<TAction>(
+            IReadOnlyList<ISlice<TAction>> slices,
+            params DispatchMiddleware<TAction>[] middleware)
+            where TAction : class, IAction
+        {
+            if (middleware is null)
+                throw new ArgumentNullException(nameof(middleware));
+
+            if (middleware.Any(static item => item is null))
+                throw new ArgumentException("Middleware cannot contain null entries.", nameof(middleware));
+
+            return CreateStoreCore(slices, middleware);
+        }
+
+        private static IStore<TAction> CreateStoreCore<TAction>(
+            IEnumerable<ISlice<TAction>>? slices,
+            IReadOnlyList<DispatchMiddleware<TAction>> middleware)
             where TAction : class, IAction
         {
             // A store without slices has no meaningful behavior and usually indicates setup error.
-            if (slices is null || slices.Length == 0)
+            if (slices is null)
+                throw new ArgumentException("Must provide at least one slice to create a store.", nameof(slices));
+
+            var sliceArray = slices.ToArray();
+            if (sliceArray.Length == 0)
                 throw new ArgumentException("Must provide at least one slice to create a store.", nameof(slices));
 
             // Null slice entries hide bugs in composition call sites, so fail fast.
-            if (slices.Any(static slice => slice is null))
+            if (sliceArray.Any(static slice => slice is null))
                 throw new ArgumentException("Slices cannot contain null entries.", nameof(slices));
 
             // Ordinal keying avoids culture-sensitive dictionary behavior for slice identifiers.
             var reducerDictionary = new Dictionary<string, Reducer<TAction>>(StringComparer.Ordinal);
             var initialSliceStates = new Dictionary<string, IState>(StringComparer.Ordinal);
 
-            foreach (var slice in slices)
+            foreach (var slice in sliceArray)
             {
                 // Duplicate names would make state and reducer routing ambiguous.
                 if (reducerDictionary.ContainsKey(slice.Name))
@@ -95,7 +118,7 @@ namespace SnapshotStore
             }
 
             // Return a new store instance initialized with the composed root state and reducer.
-            return new Store<TAction>(initialRootState, rootReducerCore);
+            return new Store<TAction>(initialRootState, rootReducerCore, middleware);
         }
     }
 }
