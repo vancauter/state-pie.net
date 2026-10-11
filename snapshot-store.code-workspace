@@ -30,9 +30,9 @@
             "**/.vscode": false,
 
             // Configuration files
-            // "**/*config": true,
-            // "**/*ignore": true,
-            // "**/.*rc": true,
+            "**/*config": true,
+            "**/*ignore": true,
+            "**/.*rc": true,
 
             // Documentation files
             "**/LICENSE*": true,
