@@ -5,12 +5,6 @@ every item.
 
 ## Next Candidates
 
-### Selective Subscriptions
-
-- Let consumers subscribe to a slice or selector result instead of every root-state change.
-- Support an equality comparer so notifications occur only when the selected value changes.
-- Preserve current synchronous notification ordering and define how subscriber exceptions are handled.
-
 ### Async Effects
 
 - Define how asynchronous work is started outside reducers and how its result returns as a typed action.
