@@ -3,12 +3,12 @@ using System.Collections.ObjectModel;
 namespace SnapshotStore
 {
     /// <summary>
-    /// Builds validated slices and stores so composition invariants are enforced once and runtime behavior stays consistent.
+    /// Builds validated slices and store so composition invariants are enforced once and runtime behavior stays consistent.
     /// </summary>
     public static class StoreFactory
     {
         /// <summary>
-        /// Creates a typed slice wrapper that validates inputs and hides the internal adapter implementation.
+        /// Factory method for creating a slice.
         /// </summary>
         public static ISlice<TAction> CreateSlice<TState, TAction>(string name, TState initialState, Reducer<TState, TAction> reducer)
             where TState : IState
@@ -26,11 +26,12 @@ namespace SnapshotStore
             if (reducer is null)
                 throw new ArgumentNullException(nameof(reducer));
 
+            // Creates a typed slice wrapper
             return new StoreSlice<TState, TAction>(name, initialState, reducer);
         }
 
         /// <summary>
-        /// Creates a store from one or more slices that share the same action family while preserving compile-time type consistency.
+        /// Factory method for creating a store from one or more slices.
         /// </summary>
         public static IStore<TAction> CreateStore<TAction>(params ISlice<TAction>[] slices)
             where TAction : class, IAction
@@ -93,6 +94,7 @@ namespace SnapshotStore
                 return nextSliceStates is null ? state : new ReadOnlyDictionary<string, IState>(nextSliceStates);
             }
 
+            // Return a new store instance initialized with the composed root state and reducer.
             return new Store<TAction>(initialRootState, rootReducerCore);
         }
     }

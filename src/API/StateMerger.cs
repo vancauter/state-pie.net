@@ -4,7 +4,8 @@ using System.Reflection;
 namespace SnapshotStore
 {
     /// <summary>
-    /// Creates immutable state snapshots by overlaying compatible public properties from a current state and an updates object, using cached reflection maps to keep repeated merges practical.
+    /// Creates immutable state snapshots by overlaying compatible public properties from a current state and an updates object,
+    /// using cached reflection maps to keep repeated merges practical.
     /// </summary>
     public static class StateMerger
     {
@@ -13,7 +14,8 @@ namespace SnapshotStore
         private static readonly ConcurrentDictionary<(Type sourceType, Type targetType), IReadOnlyList<PropertyMap>> s_propertyMaps = new();
 
         /// <summary>
-        /// Creates a new state snapshot by copying current values first and then applying matching update values to produce deterministic immutable transitions.
+        /// Creates a new state snapshot by copying current values first and then applying matching update values to
+        /// produce deterministic immutable transitions.
         /// </summary>
         public static TState Merge<TState>(TState state, object updates)
             where TState : class, IState, new()
@@ -62,7 +64,7 @@ namespace SnapshotStore
             foreach (var property in targetType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
                 // Indexers are excluded because they need parameters and are not state-snapshot fields.
-                // Writeability is required since merge assigns into target.
+                // Write access is required since merge assigns into the target.
                 if (!property.CanWrite || property.GetIndexParameters().Length > 0)
                     continue;
 
@@ -73,8 +75,7 @@ namespace SnapshotStore
 
             foreach (var property in sourceType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
-                // Readability is required to pull source values; indexers are excluded for same reason
-                // as above.
+                // Read access is required to pull source values; indexers are excluded for same reason as above.
                 if (!property.CanRead || property.GetIndexParameters().Length > 0)
                     continue;
 
