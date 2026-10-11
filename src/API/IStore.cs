@@ -1,11 +1,14 @@
 namespace SnapshotStore
 {
-    public interface IStore : IDisposable
+    /// <summary>
+    /// Represents a typed immutable store where dispatch accepts only one action family and publishes the latest state snapshot.
+    /// </summary>
+    public interface IStore<TAction> : IDisposable where TAction : class, IAction
     {
-        IReadOnlyDictionary<string, IState> State { get; }
+        StateSnapshot State { get; }
 
-        event System.Action<IReadOnlyDictionary<string, IState>> OnStateChanged;
+        event Action<StateSnapshot> OnStateChanged;
 
-        void Dispatch(IAction action);
+        void Dispatch(TAction action);
     }
 }
