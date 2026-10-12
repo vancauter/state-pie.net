@@ -1,7 +1,5 @@
 using Xunit;
 
-#pragma warning disable CA1707
-
 namespace SnapshotStore.Tests
 {
     public class StoreSubscriptionTests
@@ -32,7 +30,7 @@ namespace SnapshotStore.Tests
                 reducer: static (state, action) => action is SetStatusAction set
                     ? state with { Value = set.Value }
                     : state);
-            using var twoSliceStore = StoreFactory.CreateStore<IAppAction>(counterSlice, statusSlice);
+            using var twoSliceStore = StoreFactory.CreateStore(counterSlice, statusSlice);
             var selectedValues = new List<int>();
             using var subscription = twoSliceStore.Subscribe(
                 StoreFactory.CreateSliceSelector<CounterState>("counter"),
@@ -87,8 +85,8 @@ namespace SnapshotStore.Tests
         public void GivenNullSelectorOrListener_WhenSubscribing_ThenArgumentNullExceptionIsThrown()
         {
             using var store = CreateCounterStore();
-            Func<IReadOnlyDictionary<string, IState>, CounterState> selector = StoreFactory.CreateSliceSelector<CounterState>("counter");
-            Action<CounterState> listener = static _ => { };
+            var selector = StoreFactory.CreateSliceSelector<CounterState>("counter");
+            static void listener(CounterState _) { }
 
             _ = Assert.Throws<ArgumentNullException>(() => store.Subscribe<CounterState>(null!, listener));
             _ = Assert.Throws<ArgumentNullException>(() => store.Subscribe(selector, null!));
@@ -98,14 +96,14 @@ namespace SnapshotStore.Tests
         public void GivenSelectorThrowsForCandidateState_WhenDispatching_ThenStateAndSubscriptionBaselineRemainUnchanged()
         {
             using var store = CreateCounterStore();
-            Func<IReadOnlyDictionary<string, IState>, int> selector = snapshot =>
+            static int selector(IReadOnlyDictionary<string, IState> snapshot)
             {
                 var state = (CounterState)snapshot["counter"];
                 if (state.Count == 1)
                     throw new InvalidOperationException("Selector failed.");
 
                 return state.Count;
-            };
+            }
             var receivedValues = new List<int>();
             using var subscription = store.Subscribe(selector, receivedValues.Add);
             var before = store.State;
@@ -177,5 +175,3 @@ namespace SnapshotStore.Tests
         private sealed record SetThemeAction(string Value) : IThemeAction;
     }
 }
-
-#pragma warning restore CA1707

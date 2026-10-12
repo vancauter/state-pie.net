@@ -1,38 +1,37 @@
-using SnapshotStore;
-
-namespace SnapshotStore.Examples.Middleware;
-
-public interface ICounterAction : IAction;
-
-public sealed record IncrementCounterAction : ICounterAction;
-
-public sealed record CounterState(int Count) : IState;
-
-public static class Program
+namespace SnapshotStore.Examples.Middleware
 {
-    public static void Main()
+    public interface ICounterAction : IAction;
+
+    public sealed record IncrementCounterAction : ICounterAction;
+
+    public sealed record CounterState(int Count) : IState;
+
+    public static class Program
     {
-        var counterSlice = StoreFactory.CreateSlice<CounterState, ICounterAction>(
-            name: "counter",
-            initialState: new CounterState(0),
-            reducer: static (state, action) => action is IncrementCounterAction
-                ? state with { Count = state.Count + 1 }
-                : state);
-
-        DispatchMiddleware<ICounterAction> traceDispatch = (action, next) =>
+        public static void Main()
         {
-            Console.WriteLine($"Before: {action.GetType().Name}");
-            next(action);
-            Console.WriteLine($"After: {action.GetType().Name}");
-        };
+            var counterSlice = StoreFactory.CreateSlice<CounterState, ICounterAction>(
+                name: "counter",
+                initialState: new CounterState(0),
+                reducer: static (state, action) => action is IncrementCounterAction
+                    ? state with { Count = state.Count + 1 }
+                    : state);
 
-        using var store = StoreFactory.CreateStore<ICounterAction>([counterSlice], traceDispatch);
-        using var subscription = store.Subscribe(static snapshot =>
-        {
-            var counter = (CounterState)snapshot["counter"];
-            Console.WriteLine($"Count: {counter.Count}");
-        });
+            static void traceDispatch(ICounterAction action, Action<ICounterAction> next)
+            {
+                Console.WriteLine($"Before: {action.GetType().Name}");
+                next(action);
+                Console.WriteLine($"After: {action.GetType().Name}");
+            }
 
-        store.Dispatch(new IncrementCounterAction());
+            using var store = StoreFactory.CreateStore([counterSlice], traceDispatch);
+            using var subscription = store.Subscribe(static snapshot =>
+            {
+                var counter = (CounterState)snapshot["counter"];
+                Console.WriteLine($"Count: {counter.Count}");
+            });
+
+            store.Dispatch(new IncrementCounterAction());
+        }
     }
 }

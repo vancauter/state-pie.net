@@ -51,7 +51,7 @@ namespace SnapshotStore
         }
 
         private static IStore<TAction> CreateStoreCore<TAction>(
-            IEnumerable<ISlice<TAction>>? slices,
+            IEnumerable<ISlice<TAction>> slices,
             IReadOnlyList<DispatchMiddleware<TAction>> middleware)
             where TAction : class, IAction
         {
