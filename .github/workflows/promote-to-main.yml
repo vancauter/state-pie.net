@@ -1,4 +1,4 @@
-name: Promote Develop to Main
+name: Promote to Main
 
 on:
     workflow_dispatch:
@@ -30,6 +30,7 @@ jobs:
                   git rm -f --ignore-unmatch *.code-workspace
                   git rm -f --ignore-unmatch .editorconfig
                   git rm -f --ignore-unmatch .prettier*
+                  git rm -f --ignore-unmatch .gitignore
                   git rm -f --ignore-unmatch ROADMAP.md
 
             - name: Test filtered solution
@@ -41,7 +42,7 @@ jobs:
                   token: ${{ github.token }}
                   base: main
                   branch: promotion/develop-to-main
-                  delete-branch: false
+                  delete-branch: true
                   commit-message: "chore: promote develop to main"
                   title: "Promote develop to main"
                   body: |
