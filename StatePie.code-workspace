@@ -5,7 +5,7 @@
         },
     ],
     "settings": {
-        // "dotnet.defaultSolution": ".sln",
+        "dotnet.defaultSolution": "StatePie.sln",
         "explorer.compactFolders": false,
 
         // --- GitHub Copilot Settings ---
@@ -13,7 +13,6 @@
         "editor.inlineSuggest.syntaxHighlightingEnabled": false,
 
         "github.copilot.chat.switchAgent.enabled": true,
-        "github.copilot.chat.copilotMemory.enabled": true,
 
         // --- File Exclusions ---
         "files.exclude": {
@@ -31,7 +30,7 @@
 
             // Configuration files
             "**/*config": true,
-            "**/*ignore": true,
+            // "**/*ignore": true,
             "**/.*rc": true,
 
             // Documentation files
