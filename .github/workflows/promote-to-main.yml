@@ -30,6 +30,7 @@ jobs:
                   git rm -f --ignore-unmatch *.code-workspace
                   git rm -f --ignore-unmatch .editorconfig
                   git rm -f --ignore-unmatch .prettier*
+                  git rm -f --ignore-unmatch .gitignore
                   git rm -f --ignore-unmatch ROADMAP.md
 
             - name: Test filtered solution
