@@ -1,6 +1,6 @@
 # Examples
 
-This folder contains practical setup examples for Snapshot Store.
+This folder contains practical setup examples for StatePie.
 
 - one-slice: minimal store with a single slice.
 - multiple-slices: one store composed from multiple slices sharing one action family.

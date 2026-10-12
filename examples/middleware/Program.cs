@@ -1,4 +1,4 @@
-namespace SnapshotStore.Examples.Middleware
+namespace StatePie.Examples.Middleware
 {
     public interface ICounterAction : IAction;
 

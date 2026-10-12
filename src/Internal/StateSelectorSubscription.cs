@@ -1,4 +1,4 @@
-namespace SnapshotStore
+namespace StatePie
 {
     internal interface IStateSelectorSubscription
     {

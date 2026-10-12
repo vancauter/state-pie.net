@@ -1,4 +1,4 @@
-namespace SnapshotStore
+namespace StatePie
 {
     /// <summary>
     /// Defines the reducer shape used by store composition when state is handled through the shared IState surface and actions remain strongly typed.

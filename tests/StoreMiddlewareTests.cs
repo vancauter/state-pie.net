@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace SnapshotStore.Tests
+namespace StatePie.Tests
 {
     public class StoreMiddlewareTests
     {

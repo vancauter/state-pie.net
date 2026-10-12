@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace SnapshotStore
+namespace StatePie
 {
     /// <summary>
     /// Creates immutable state snapshots by overlaying compatible public properties from a current state and an updates object,

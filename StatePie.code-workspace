@@ -5,7 +5,7 @@
         },
     ],
     "settings": {
-        "dotnet.defaultSolution": "snapshot-store.sln",
+        // "dotnet.defaultSolution": ".sln",
         "explorer.compactFolders": false,
 
         // --- GitHub Copilot Settings ---

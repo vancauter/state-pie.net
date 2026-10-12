@@ -1,4 +1,4 @@
-namespace SnapshotStore.Examples.SelectiveSubscriptions
+namespace StatePie.Examples.SelectiveSubscriptions
 {
     public interface IAppAction : IAction;
 

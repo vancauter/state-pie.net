@@ -1,4 +1,4 @@
-namespace SnapshotStore
+namespace StatePie
 {
     /// <summary>
     /// Represents a typed immutable store where dispatch accepts only one action family and publishes the latest state snapshot.

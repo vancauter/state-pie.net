@@ -1,4 +1,4 @@
-namespace SnapshotStore
+namespace StatePie
 {
     /// <summary>
     /// Adapts concrete typed slice reducers to the store's shared IState composition surface without losing action-type safety.

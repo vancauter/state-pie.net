@@ -1,4 +1,4 @@
-namespace SnapshotStore
+namespace StatePie
 {
     /// <summary>
     /// Represents one named state partition with a typed reducer, ensuring all slice behavior is bound to a single action family.

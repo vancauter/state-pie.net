@@ -1,4 +1,4 @@
-# Snapshot Store Roadmap
+# StatePie Roadmap
 
 Internal planning notes for capabilities not yet implemented. This is a set of candidates, not a commitment to implement
 every item.

@@ -1,4 +1,4 @@
-namespace SnapshotStore
+namespace StatePie
 {
     /// <summary>
     /// Intercepts a typed action before forwarding it to the next dispatch stage; middleware executes synchronously in registration order, may stop dispatch by not calling next, must call next at most once, and exceptions propagate to the caller.

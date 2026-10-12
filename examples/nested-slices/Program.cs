@@ -1,4 +1,4 @@
-namespace SnapshotStore.Examples.NestedSlices
+namespace StatePie.Examples.NestedSlices
 {
     public interface IFeatureAction : IAction;
 

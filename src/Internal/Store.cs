@@ -1,4 +1,4 @@
-namespace SnapshotStore
+namespace StatePie
 {
     /// <summary>
     /// Implements typed store runtime behavior for serialized dispatch, immutable state publication,

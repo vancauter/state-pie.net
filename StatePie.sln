@@ -7,9 +7,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{91E6BCE2-29E5-4E19-A072-07B89D735B78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "snapshot-store", "src\snapshot-store.csproj", "{48855B4E-4F5D-EBCF-8F22-8A100EC52699}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatePie", "src\StatePie.csproj", "{48855B4E-4F5D-EBCF-8F22-8A100EC52699}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "snapshot-store.Tests", "tests\snapshot-store.Tests.csproj", "{A7C5F495-8B0D-4E85-9A94-6BD725CCF42A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatePie.Tests", "tests\StatePie.Tests.csproj", "{A7C5F495-8B0D-4E85-9A94-6BD725CCF42A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{B36A84DF-456D-A817-6EDD-3EC3E7F6E11F}"
 EndProject

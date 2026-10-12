@@ -1,4 +1,4 @@
-namespace SnapshotStore.Examples.OneSlice
+namespace StatePie.Examples.OneSlice
 {
     // One action family per store keeps dispatch strongly typed.
     public interface ICounterAction : IAction;

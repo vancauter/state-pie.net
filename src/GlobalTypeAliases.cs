@@ -1,1 +1,1 @@
-global using StateSnapshot = System.Collections.Generic.IReadOnlyDictionary<string, SnapshotStore.IState>;
+global using StateSnapshot = System.Collections.Generic.IReadOnlyDictionary<string, StatePie.IState>;

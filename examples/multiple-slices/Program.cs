@@ -1,4 +1,4 @@
-namespace SnapshotStore.Examples.MultipleSlices
+namespace StatePie.Examples.MultipleSlices
 {
     public interface IAppAction : IAction;
 

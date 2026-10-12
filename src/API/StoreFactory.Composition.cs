@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 
-namespace SnapshotStore
+namespace StatePie
 {
     public static partial class StoreFactory
     {
