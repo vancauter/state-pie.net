@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>10.0</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>SC.StatePie.Net</PackageId>
+    <Version>0.1.0-preview.1</Version>
+    <Authors>S. van Cauter</Authors>
+    <Description>A strongly typed .NET state management library for immutable state snapshots, reducers, and slices.</Description>
+    <PackageTags>state-management;immutable-state;reducers;dotnet</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/vancauter/state-pie.net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/vancauter/state-pie.net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" Link="README.md" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>
