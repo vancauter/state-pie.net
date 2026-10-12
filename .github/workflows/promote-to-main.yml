@@ -33,11 +33,8 @@ jobs:
                   git rm -f --ignore-unmatch .gitignore
                   git rm -f --ignore-unmatch ROADMAP.md
 
-                        - name: Test filtered solution
-                            run: dotnet test StatePie.sln --configuration Release
-
-                        - name: Remove generated build outputs
-                            run: git clean -fdx
+            - name: Test filtered solution
+              run: dotnet test StatePie.sln --configuration Release
 
             - name: Open promotion pull request
               uses: peter-evans/create-pull-request@v7
