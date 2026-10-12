@@ -1,7 +1,5 @@
 using Xunit;
 
-#pragma warning disable CA1707
-
 namespace SnapshotStore.Tests
 {
     public class StoreSelectorFactoryTests
@@ -71,5 +69,3 @@ namespace SnapshotStore.Tests
         private sealed record UserState(string Name) : IState;
     }
 }
-
-#pragma warning restore CA1707

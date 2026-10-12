@@ -1,7 +1,5 @@
 using Xunit;
 
-#pragma warning disable CA1707
-
 namespace SnapshotStore.Tests
 {
     public class StoreMiddlewareTests
@@ -135,5 +133,3 @@ namespace SnapshotStore.Tests
         private sealed record IncrementCounterAction : ICounterAction;
     }
 }
-
-#pragma warning restore CA1707
