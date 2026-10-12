@@ -1,4 +1,4 @@
-name: Promote Develop to Main
+name: Promote to Main
 
 on:
     workflow_dispatch:
@@ -41,7 +41,7 @@ jobs:
                   token: ${{ github.token }}
                   base: main
                   branch: promotion/develop-to-main
-                  delete-branch: false
+                  delete-branch: true
                   commit-message: "chore: promote develop to main"
                   title: "Promote develop to main"
                   body: |
