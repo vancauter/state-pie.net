@@ -11,7 +11,7 @@ transitions, and immutable state snapshots. Instead of mutating state directly, 
 reducer decides whether its part of state changes, and the store publishes a new root snapshot only when something
 actually changed.
 
-## What This Library Actually Does
+## Features
 
 - Composes app state from named slices keyed in a single state snapshot dictionary.
 - Enforces one action family per store through generic typing.
@@ -45,7 +45,7 @@ actually changed.
 - Teams that prefer direct mutable models and do not want reducer discipline.
 - Scenarios requiring fine-grained reactive graph propagation per field instead of snapshot-based store updates.
 
-## Tradeoffs To Know Up Front
+## Tradeoffs
 
 - You gain predictable transitions and safer refactors, but you write more boilerplate than ad-hoc mutable state.
 - You gain clear test seams around reducers, but you must design action types intentionally.
