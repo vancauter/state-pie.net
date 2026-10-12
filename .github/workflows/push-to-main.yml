@@ -1,47 +1,30 @@
-name: Push Develop to Main
+name: Promote Develop to Main
 
 on:
-    push:
-        branches: [develop]
+    workflow_dispatch:
 
 permissions:
     contents: read
 
 jobs:
-    test:
+    promote:
+        if: github.ref == 'refs/heads/develop'
         runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            pull-requests: write
         steps:
             - uses: actions/checkout@v4
+              with:
+                  ref: develop
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
               with:
                   dotnet-version: "10.0.x"
 
-            - name: Test solution
-              run: dotnet test StatePie.sln --configuration Release
-
-    sync:
-        needs: test
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-        steps:
-            - uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-
-            - name: Configure Git User
+            - name: Filter development-only files
               run: |
-                  git config --global user.name "github-actions[bot]"
-                  git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-            - name: Merge and Filter
-              run: |
-                  git checkout main
-                  git merge develop --no-ff --no-commit
-
-                  # Remove files/directories you never want on main
                   git rm -rf --ignore-unmatch .vscode/
                   git rm -rf --ignore-unmatch .github/agents/
                   git rm -f --ignore-unmatch *.code-workspace
@@ -49,6 +32,18 @@ jobs:
                   git rm -f --ignore-unmatch .prettier*
                   git rm -f --ignore-unmatch ROADMAP.md
 
-                  # Commit and push if there are changes
-                  git commit -m "chore: develop to main (filtered)" || echo "No changes to sync"
-                  git push origin main
+            - name: Test filtered solution
+              run: dotnet test StatePie.sln --configuration Release
+
+            - name: Open promotion pull request
+              uses: peter-evans/create-pull-request@v7
+              with:
+                  token: ${{ github.token }}
+                  base: main
+                  branch: promotion/develop-to-main
+                  delete-branch: false
+                  commit-message: "chore: promote develop to main"
+                  title: "Promote develop to main"
+                  body: |
+                      Automated promotion of the tested develop tree.
+                      Development-only files were applied before the tests ran.
