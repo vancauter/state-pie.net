@@ -3,7 +3,7 @@
 Internal planning notes for capabilities not yet implemented. This is a set of candidates, not a commitment to implement
 every item.
 
-## Next Candidates
+## Remaining Candidates
 
 ### Async Effects
 
@@ -13,13 +13,6 @@ every item.
   mechanism.
 
 ## Later Candidates
-
-### Diagnostics and Traceability
-
-- Provide optional hooks for action and state-transition observation, including reducer or middleware timing.
-- Keep logging and telemetry integrations optional and avoid allowing diagnostics failures to alter dispatch behavior.
-- Decide whether action descriptions come from a caller-supplied formatter or typed action metadata; do not reintroduce
-  string-based action routing.
 
 ### StateMerger Performance Options
 
@@ -37,6 +30,13 @@ every item.
 - Consider opt-in runtime checks for invalid reducer outputs or inconsistent slice state.
 - Keep default behavior small and predictable; add a mode only where it catches errors the type system and current
   validation cannot.
+
+## Recommended Next Step
+
+Complete a release-readiness pass before adding another core feature: validate the public API through the runnable
+examples, review package metadata and documentation, and run the Release build and full test suite. The current
+synchronous store, typed middleware, selectors, and disposable subscriptions form a coherent core; async effects add
+cancellation, failure, and lifetime policy that should wait for a concrete user need.
 
 ## Out Of Scope For Core
 

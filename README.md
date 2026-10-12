@@ -3,6 +3,9 @@
 Snapshot Store is a lightweight .NET state management library for predictable, immutable application state updates using
 actions, reducers, and slices.
 
+[![.NET](https://img.shields.io/badge/target-netstandard2.0-512BD4)](https://dotnet.microsoft.com/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
+
 Snapshot Store is intentionally opinionated: it enforces unidirectional state updates through typed actions,
 reducer-driven transitions, and immutable state snapshots. Instead of mutating state directly, you dispatch an action,
 each slice reducer decides whether its part of state changes, and the store publishes a new root snapshot only when
