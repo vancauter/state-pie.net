@@ -4,7 +4,7 @@
         {
             "label": "Format Solution",
             "type": "shell",
-            "command": "dotnet format whitespace StatePie.sln",
+            "command": "dotnet format whitespace StatePie.sln --include src tests examples",
             "group": "build",
             "problemMatcher": "$msCompile",
             "presentation": { "reveal": "always", "panel": "shared" }
@@ -12,7 +12,7 @@
         {
             "label": "Lint Solution",
             "type": "shell",
-            "command": "dotnet format style StatePie.sln --verify-no-changes --no-restore --severity warn",
+            "command": "dotnet format style StatePie.sln --include src tests examples --verify-no-changes --no-restore --severity warn",
             "group": "test",
             "problemMatcher": "$msCompile",
             "presentation": { "reveal": "always", "panel": "shared" }
@@ -20,7 +20,7 @@
         {
             "label": "Lint Fix Solution",
             "type": "shell",
-            "command": "dotnet format style StatePie.sln --no-restore --severity warn",
+            "command": "dotnet format style StatePie.sln --include src tests examples --no-restore --severity warn",
             "group": "build",
             "problemMatcher": "$msCompile",
             "presentation": { "reveal": "always", "panel": "shared" }

@@ -9,11 +9,11 @@ trim_trailing_whitespace = true
 
 # JSON and JSONC
 [*.{json,jsonc}]
-indent_size = 2
+indent_size = 4
 
 # YAML
 [*.{yaml,yml}]
-indent_size = 2
+indent_size = 4
 
 [*.cs]
 indent_size = 4

@@ -32,10 +32,10 @@ jobs:
               run: dotnet restore StatePie.sln
 
             - name: Check formatting
-              run: dotnet format whitespace StatePie.sln --verify-no-changes --no-restore
+              run: dotnet format whitespace StatePie.sln --include src tests examples --verify-no-changes --no-restore
 
             - name: Lint
-              run: dotnet format style StatePie.sln --verify-no-changes --no-restore --severity warn
+              run: dotnet format style StatePie.sln --include src tests examples --verify-no-changes --no-restore --severity warn
 
             - name: Build solution
               run: dotnet build StatePie.sln --configuration Release --no-restore
