@@ -23,6 +23,7 @@
         {
             "files": ["*.yml", "*.yaml"],
             "options": {
+                "tabWidth": 2,
                 "singleQuote": false
             }
         }

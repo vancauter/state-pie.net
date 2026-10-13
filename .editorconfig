@@ -13,7 +13,7 @@ indent_size = 4
 
 # YAML
 [*.{yaml,yml}]
-indent_size = 4
+indent_size = 2
 
 [*.cs]
 indent_size = 4

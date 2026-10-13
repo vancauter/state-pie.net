@@ -23,5 +23,12 @@
     "[csharp]": {
         "editor.defaultFormatter": "ms-dotnettools.csharp"
     },
-    "dotnet.defaultSolution": "atomic-state.sln"
+    "[yaml]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnPaste": false
+    },
+    "[github-actions-workflow]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnPaste": false
+    }
 }
