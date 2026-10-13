@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
     release:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-24.04
         steps:
             - name: Create or update release PR
               uses: googleapis/release-please-action@v5
