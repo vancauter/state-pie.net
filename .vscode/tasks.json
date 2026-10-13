@@ -16,6 +16,30 @@
             "group": "test",
             "problemMatcher": "$msCompile",
             "presentation": { "reveal": "always", "panel": "shared" }
+        },
+        {
+            "label": "Format Solution",
+            "type": "shell",
+            "command": "dotnet format whitespace StatePie.sln",
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "presentation": { "reveal": "always", "panel": "shared" }
+        },
+        {
+            "label": "Check Formatting",
+            "type": "shell",
+            "command": "dotnet format whitespace StatePie.sln --verify-no-changes --no-restore",
+            "group": "test",
+            "problemMatcher": "$msCompile",
+            "presentation": { "reveal": "always", "panel": "shared" }
+        },
+        {
+            "label": "Lint Solution",
+            "type": "shell",
+            "command": "dotnet format style StatePie.sln --verify-no-changes --no-restore --severity warn",
+            "group": "test",
+            "problemMatcher": "$msCompile",
+            "presentation": { "reveal": "always", "panel": "shared" }
         }
     ]
 }
