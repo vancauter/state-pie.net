@@ -4,9 +4,6 @@ StatePie is an opinionated .NET state management library for predictable, immuta
 strongly typed actions, reducers, and slices. It enforces unidirectional state updates through typed actions,
 reducer-driven transitions, and immutable state snapshots.
 
-[![.NET](https://img.shields.io/badge/target-netstandard2.0-512BD4)](https://dotnet.microsoft.com/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
-
 ## Features
 
 - Composes app state from named slices keyed in a single state snapshot dictionary.

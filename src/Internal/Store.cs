@@ -173,7 +173,7 @@ namespace StatePie
             lock (_lock)
             {
                 subscription.Deactivate();
-                _subscriptions.Remove(subscription);
+                _ = _subscriptions.Remove(subscription);
             }
         }
 

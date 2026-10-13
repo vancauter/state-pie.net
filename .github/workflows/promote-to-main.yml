@@ -1,50 +1,54 @@
 name: Promote to Main
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
 
 permissions:
-    contents: read
+  contents: read
 
 jobs:
-    promote:
-        if: github.ref == 'refs/heads/develop'
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-            pull-requests: write
-        steps:
-            - uses: actions/checkout@v7
-              with:
-                  ref: develop
+  promote:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
 
-            - name: Setup .NET
-              uses: actions/setup-dotnet@v6
-              with:
-                  dotnet-version: "10.0.x"
+      - name: Overlay develop tree
+        run: |
+          git fetch origin develop
+          git rm -rf --ignore-unmatch -- .
+          git checkout FETCH_HEAD -- .
 
-            - name: Filter development-only files
-              run: |
-                  git rm -rf --ignore-unmatch .vscode/
-                  git rm -rf --ignore-unmatch .github/agents/
-                  git rm -f --ignore-unmatch *.code-workspace
-                  git rm -f --ignore-unmatch .editorconfig
-                  git rm -f --ignore-unmatch .prettier*
-                  git rm -f --ignore-unmatch .gitignore
-                  git rm -f --ignore-unmatch ROADMAP.md
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
 
-            - name: Test filtered solution
-              run: dotnet test StatePie.sln --configuration Release
+      - name: Filter development-only files
+        run: |
+          git rm -rf --ignore-unmatch .github/agents/
+          git rm -f --ignore-unmatch .vscode/settings.json
+          git rm -f --ignore-unmatch *.code-workspace
+          git rm -f --ignore-unmatch CI-CD-CHECKLIST.md
+          git rm -f --ignore-unmatch ROADMAP.md
 
-            - name: Open promotion pull request
-              uses: peter-evans/create-pull-request@v7
-              with:
-                  token: ${{ github.token }}
-                  base: main
-                  branch: promotion/develop-to-main
-                  delete-branch: true
-                  commit-message: "chore: promote develop to main"
-                  title: "Promote develop to main"
-                  body: |
-                      Automated promotion of the tested develop tree.
-                      Development-only files were applied before the tests ran.
+      - name: Test filtered solution
+        run: dotnet test StatePie.sln --configuration Release
+
+      - name: Open promotion pull request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.PROMOTION_TOKEN }}
+          base: main
+          branch: promotion/develop-to-main
+          delete-branch: true
+          commit-message: "chore: promote develop to main"
+          title: "Promote develop to main"
+          body: |
+            Automated promotion of the tested develop tree.
+            Development-only files were applied before the tests ran.
