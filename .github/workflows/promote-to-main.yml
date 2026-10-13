@@ -28,6 +28,7 @@ jobs:
                   git rm -rf --ignore-unmatch .github/agents/
                   git rm -f --ignore-unmatch .vscode/settings.json
                   git rm -f --ignore-unmatch *.code-workspace
+                  git rm -f --ignore-unmatch CI-CD-CHECKLIST.md
                   git rm -f --ignore-unmatch ROADMAP.md
 
             - name: Test filtered solution
@@ -36,7 +37,7 @@ jobs:
             - name: Open promotion pull request
               uses: peter-evans/create-pull-request@v7
               with:
-                  token: ${{ github.token }}
+                  token: ${{ secrets.PROMOTION_TOKEN }}
                   base: main
                   branch: promotion/develop-to-main
                   delete-branch: true
