@@ -1,0 +1,20 @@
+{
+    "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+    "bootstrap-sha": "104224b1bc93af56ef21525441a03cdd0f596a4b",
+    "packages": {
+        ".": {
+            "release-type": "simple",
+            "package-name": "SC.StatePie",
+            "version-file": "version.txt",
+            "include-v-in-tag": true,
+            "include-component-in-tag": false,
+            "extra-files": [
+                {
+                    "type": "xml",
+                    "path": "src/StatePie.csproj",
+                    "xpath": "/Project/PropertyGroup/Version"
+                }
+            ]
+        }
+    }
+}

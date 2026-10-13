@@ -1,0 +1,27 @@
+name: Release Please
+
+on:
+    push:
+        branches:
+            - "release/**"
+
+permissions:
+    contents: write
+    issues: write
+    pull-requests: write
+
+concurrency:
+    group: release-please-${{ github.ref }}
+    cancel-in-progress: false
+
+jobs:
+    release:
+        runs-on: ubuntu-24.04
+        steps:
+            - name: Create or update release PR
+              uses: googleapis/release-please-action@v5
+              with:
+                  token: ${{ secrets.PROMOTION_TOKEN }}
+                  config-file: release-please-config.json
+                  manifest-file: .release-please-manifest.json
+                  target-branch: ${{ github.ref_name }}

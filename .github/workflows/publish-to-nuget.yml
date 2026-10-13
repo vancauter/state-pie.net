@@ -1,12 +1,8 @@
 name: Publish to NuGet
 
 on:
-    workflow_dispatch:
-        inputs:
-            version:
-                description: "New NuGet version to publish, for example 1.2.3 or 1.2.3-rc.1"
-                required: true
-                type: string
+    release:
+        types: [published]
 
 permissions:
     contents: read
@@ -16,27 +12,54 @@ concurrency:
     cancel-in-progress: false
 
 jobs:
-    publish:
-        if: github.ref == 'refs/heads/main'
-        runs-on: ubuntu-latest
+    validate-release:
+        runs-on: ubuntu-24.04
         permissions:
             contents: read
-            id-token: write
         steps:
             - uses: actions/checkout@v7
+              with:
+                  ref: ${{ github.event.release.tag_name }}
+                  fetch-depth: 0
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v6
               with:
                   dotnet-version: "10.0.x"
 
+            - name: Verify tag matches project version
+              env:
+                  RELEASE_TAG: ${{ github.event.release.tag_name }}
+              shell: bash
+              run: |
+                  tag_version="${RELEASE_TAG#v}"
+                  project_version="$(dotnet msbuild src/StatePie.csproj -getProperty:Version)"
+                  if [[ "$tag_version" != "$project_version" ]]; then
+                    echo "Tag version $tag_version does not match project version $project_version"
+                    exit 1
+                  fi
+
             - name: Test solution
               run: dotnet test StatePie.sln --configuration Release
 
+    publish:
+        needs: validate-release
+        runs-on: ubuntu-24.04
+        permissions:
+            contents: read
+            id-token: write
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                  ref: ${{ github.event.release.tag_name }}
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v6
+              with:
+                  dotnet-version: "10.0.x"
+
             - name: Pack library
-              env:
-                  PACKAGE_VERSION: ${{ inputs.version }}
-              run: dotnet pack src/StatePie.csproj --configuration Release --output ./artifacts -p:PackageVersion="$PACKAGE_VERSION"
+              run: dotnet pack src/StatePie.csproj --configuration Release --output ./artifacts
 
             - name: Authenticate to NuGet with OIDC
               id: nuget-login
