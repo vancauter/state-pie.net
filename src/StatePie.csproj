@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>SC.StatePie</PackageId>
-    <Version>0.1.0-preview.1</Version>
+    <Version>0.1.1-preview.1</Version>
     <Authors>S. van Cauter</Authors>
     <Description>A strongly typed .NET state management library for immutable state snapshots, reducers, and slices.</Description>
     <PackageTags>state-management;immutable-state;reducers;dotnet</PackageTags>
@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\README.md" Pack="true" PackagePath="\" Link="README.md" />
-    <None Include="..\LICENSE" Pack="true" PackagePath="\" />
+    <None Include="..\README.md" Pack="true" PackagePath="\" Link="README.md"/>
+    <None Include="..\LICENSE" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>
