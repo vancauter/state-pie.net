@@ -72,6 +72,9 @@ bld/
 # Packaging output
 artifacts/
 
+# Test results
+**/TestResults/
+
 # Development environment specific files
 *.code-workspace
 .github/agents/
