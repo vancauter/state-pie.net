@@ -40,18 +40,6 @@
             "group": "test",
             "problemMatcher": "$msCompile",
             "presentation": { "reveal": "always", "panel": "shared" }
-        },
-        {
-            "label": "Sync develop with main",
-            "type": "process",
-            "command": "powershell.exe",
-            "args": [
-                "-NoProfile",
-                "-Command",
-                "$changes = @(git status --porcelain); if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; $unexpectedChanges = @($changes | Where-Object { $_ -notmatch '^.{3}\\.vscode/tasks\\.json$' }); if ($unexpectedChanges.Count -gt 0) { Write-Error 'Commit or stash changes other than .vscode/tasks.json before syncing develop.'; exit 1 }; git fetch origin; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git switch develop; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git merge --ff-only origin/main; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git push origin develop; exit $LASTEXITCODE"
-            ],
-            "problemMatcher": [],
-            "presentation": { "reveal": "always", "panel": "shared" }
         }
     ]
 }
