@@ -1,4 +1,5 @@
-// --- VSCode Settings for C# Project ---
+// --- VSCode Settings for C# Project
+// --- Updated: 2026-10-14
 
 {
     // --- Editor Basics ---
@@ -10,9 +11,9 @@
     "prettier.endOfLine": "lf",
 
     // --- Formatting Settings ---
+    "editor.formatOnPaste": true,
     "editor.formatOnSave": true,
     "editor.formatOnSaveMode": "modifications",
-    "editor.formatOnPaste": true,
     "editor.formatOnType": false,
     "editor.rulers": [120],
     "editor.codeActionsOnSave": {
@@ -24,10 +25,12 @@
     "[csharp]": {
         "editor.defaultFormatter": "ms-dotnettools.csharp"
     },
+
     "[yaml]": {
         "editor.formatOnSave": false,
         "editor.formatOnPaste": false
     },
+
     "[github-actions-workflow]": {
         "editor.formatOnSave": false,
         "editor.formatOnPaste": false

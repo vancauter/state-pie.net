@@ -69,7 +69,5 @@ bld/
 # but keep track of directories ending in .cache
 !?*.[Cc]ache/
 
-
-
-
-artifacts/
+# Development environment specific files
+*.code-workspace
