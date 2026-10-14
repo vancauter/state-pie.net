@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <PackageId>SC.StatePie</PackageId>
     <Authors>S. van Cauter</Authors>
-    <Description>A lightweight, opinionated .NET state management library for immutable application state.</Description>
+    <Description>A lightweight .NET state-management library for immutable application state, built around a compact reducer-based store for predictable state transitions.</Description>
     <PackageTags>state-management;state;reducer;immutable;flux;store;dotnet</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/vancauter/state-pie.net</PackageProjectUrl>
