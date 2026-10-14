@@ -13,7 +13,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -45,14 +44,7 @@ jobs:
         run: dotnet build StatePie.sln --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test tests/StatePie.Tests.csproj --configuration Release --no-build --collect:"XPlat Code Coverage"
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v7
-        with:
-          use_oidc: true
-          directory: ./tests/TestResults
-          fail_ci_if_error: true
+        run: dotnet test tests/StatePie.Tests.csproj --configuration Release --no-build
 
       - name: Verify package can be packed
         run: dotnet pack src/StatePie.csproj --configuration Release --no-build --no-restore --output ./artifacts

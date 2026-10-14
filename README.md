@@ -2,7 +2,6 @@
 
 [![CI](https://github.com/vancauter/state-pie.net/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/vancauter/state-pie.net/actions/workflows/ci.yml)
 [![NuGet](https://img.shields.io/nuget/v/SC.StatePie)](https://www.nuget.org/packages/SC.StatePie)
-[![Coverage](https://codecov.io/gh/vancauter/state-pie.net/branch/main/graph/badge.svg)](https://codecov.io/gh/vancauter/state-pie.net)
 [![Target framework](https://img.shields.io/badge/TFM-netstandard2.0-blue)](src/StatePie.csproj)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
