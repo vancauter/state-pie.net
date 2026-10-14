@@ -6,12 +6,6 @@
 StatePie is a lightweight .NET state-management library for immutable application state, built around a compact
 reducer-based (sliced) store for predictable state transitions.
 
-## Installation
-
-```bash
-dotnet add package SC.StatePie
-```
-
 ## Quick start
 
 ```csharp
