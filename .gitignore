@@ -69,5 +69,12 @@ bld/
 # but keep track of directories ending in .cache
 !?*.[Cc]ache/
 
+# Packaging output
+artifacts/
+
 # Development environment specific files
 *.code-workspace
+.vscode/settings.json
+.github/agents/
+ROADMAP.md
+CI-CD-CHECKLIST.md
