@@ -74,7 +74,5 @@ artifacts/
 
 # Development environment specific files
 *.code-workspace
-.vscode/settings.json
 .github/agents/
-ROADMAP.md
-CI-CD-CHECKLIST.md
+
