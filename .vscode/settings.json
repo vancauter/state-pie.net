@@ -7,6 +7,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     // Ensure Prettier respects your .editorconfig rules
     "prettier.useEditorConfig": true,
+    "prettier.endOfLine": "lf",
 
     // --- Formatting Settings ---
     "editor.formatOnSave": true,
