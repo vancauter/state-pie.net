@@ -6,10 +6,16 @@ namespace StatePie
 {
     /// <summary>
     /// Creates immutable state snapshots efficiently using compiled expression delegates and shallow cloning.
+    /// Tradeoff: Offers high developer ergonomics and dynamic partial property merging via anonymous objects,
+    /// but incurs a small runtime overhead from expression compilation and late-bound property mapping
+    /// compared to direct manual record 'with' expressions or compile-time initializers.
     /// </summary>
     public static class StateMerger
     {
+        // Keyed by (sourceType, targetType) because compatibility is directional (A -> B != B -> A).
         private static readonly ConcurrentDictionary<(Type sourceType, Type targetType), IReadOnlyList<Action<object, object>>> s_copierCache = new();
+
+        // Cached per target state type to avoid regenerating the MemberwiseClone lambda expression.
         private static readonly ConcurrentDictionary<Type, Func<object, object>> s_cloneCache = new();
 
         /// <summary>
@@ -23,19 +29,21 @@ namespace StatePie
             if (updates is null)
                 throw new ArgumentNullException(nameof(updates));
 
-            // 1. Fast shallow clone of the existing state
+            // 1. Fast shallow clone of existing state (avoids full reflection copy of all unmodified fields).
             var cloneFunc = s_cloneCache.GetOrAdd(typeof(TState), static type =>
             {
                 var param = Expression.Parameter(typeof(object), "obj");
                 var cast = Expression.Convert(param, type);
-                var method = typeof(object).GetMethod("MemberwiseClone", BindingFlags.Instance | BindingFlags.NonPublic)!;
+
+                // MemberwiseClone is protected on object; reflection gives us direct low-level instance duplication.
+                var method = typeof(object).GetMethod("MemberwiseClone", BindingFlags.Instance | BindingFlags.NonPublic);
                 var call = Expression.Call(cast, method);
                 return Expression.Lambda<Func<object, object>>(Expression.Convert(call, typeof(object)), param).Compile();
             });
 
             var nextState = (TState)cloneFunc(state);
 
-            // 2. Apply only the update properties using compiled delegates
+            // 2. Apply only the update properties using compiled delegates (cached for thread-safe hot-path reuse).
             var copiers = s_copierCache.GetOrAdd(
                 (updates.GetType(), typeof(TState)),
                 static key => BuildCopiers(key.sourceType, key.targetType));
@@ -50,6 +58,7 @@ namespace StatePie
 
         private static IReadOnlyList<Action<object, object>> BuildCopiers(Type sourceType, Type targetType)
         {
+            // Indexing target properties prevents O(n^2) nested scans when source types contain many members.
             var targetProperties = new Dictionary<string, PropertyInfo>(StringComparer.Ordinal);
             foreach (var property in targetType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
             {
@@ -72,6 +81,7 @@ namespace StatePie
                 if (!targetProperty.PropertyType.IsAssignableFrom(property.PropertyType))
                     continue;
 
+                // Compile dynamic getter/setter actions to bypass slow reflection GetValue/SetValue calls during execution.
                 var sourceParam = Expression.Parameter(typeof(object), "source");
                 var targetParam = Expression.Parameter(typeof(object), "target");
 
@@ -79,7 +89,7 @@ namespace StatePie
                 var castTarget = Expression.Convert(targetParam, targetType);
 
                 var getExpr = Expression.Property(castSource, property);
-                var setExpr = Expression.Call(castTarget, targetProperty.GetSetMethod()!, getExpr);
+                var setExpr = Expression.Call(castTarget, targetProperty.GetSetMethod(), getExpr);
 
                 var copier = Expression.Lambda<Action<object, object>>(setExpr, sourceParam, targetParam).Compile();
                 copiers.Add(copier);
@@ -89,4 +99,3 @@ namespace StatePie
         }
     }
 }
-
