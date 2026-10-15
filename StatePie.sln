@@ -25,8 +25,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "one-slice", "examples\one-s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "selective-subscriptions", "examples\selective-subscriptions\selective-subscriptions.csproj", "{E89C0AB9-ABC9-4143-A5E7-7C51B2A0FE59}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatePie.Benchmarks", "tests\StatePie.Benchmarks\StatePie.Benchmarks.csproj", "{99B9E1C9-9869-4CA4-9F60-B5DDAF3D17A6}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -133,18 +131,6 @@ Global
 		{E89C0AB9-ABC9-4143-A5E7-7C51B2A0FE59}.Release|x64.Build.0 = Release|Any CPU
 		{E89C0AB9-ABC9-4143-A5E7-7C51B2A0FE59}.Release|x86.ActiveCfg = Release|Any CPU
 		{E89C0AB9-ABC9-4143-A5E7-7C51B2A0FE59}.Release|x86.Build.0 = Release|Any CPU
-		{99B9E1C9-9869-4CA4-9F60-B5DDAF3D17A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{99B9E1C9-9869-4CA4-9F60-B5DDAF3D17A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{99B9E1C9-9869-4CA4-9F60-B5DDAF3D17A6}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{99B9E1C9-9869-4CA4-9F60-B5DDAF3D17A6}.Debug|x64.Build.0 = Debug|Any CPU
-		{99B9E1C9-9869-4CA4-9F60-B5DDAF3D17A6}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{99B9E1C9-9869-4CA4-9F60-B5DDAF3D17A6}.Debug|x86.Build.0 = Debug|Any CPU
-		{99B9E1C9-9869-4CA4-9F60-B5DDAF3D17A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{99B9E1C9-9869-4CA4-9F60-B5DDAF3D17A6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{99B9E1C9-9869-4CA4-9F60-B5DDAF3D17A6}.Release|x64.ActiveCfg = Release|Any CPU
-		{99B9E1C9-9869-4CA4-9F60-B5DDAF3D17A6}.Release|x64.Build.0 = Release|Any CPU
-		{99B9E1C9-9869-4CA4-9F60-B5DDAF3D17A6}.Release|x86.ActiveCfg = Release|Any CPU
-		{99B9E1C9-9869-4CA4-9F60-B5DDAF3D17A6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -158,6 +144,5 @@ Global
 		{A94550FC-CC3B-4210-B482-422E6BB37037} = {B36A84DF-456D-A817-6EDD-3EC3E7F6E11F}
 		{EE59B199-FC6F-417F-BA97-1E3473713656} = {B36A84DF-456D-A817-6EDD-3EC3E7F6E11F}
 		{E89C0AB9-ABC9-4143-A5E7-7C51B2A0FE59} = {B36A84DF-456D-A817-6EDD-3EC3E7F6E11F}
-		{99B9E1C9-9869-4CA4-9F60-B5DDAF3D17A6} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal
