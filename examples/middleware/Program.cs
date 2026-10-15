@@ -1,9 +1,7 @@
 namespace StatePie.Examples.Middleware
 {
     public interface ICounterAction : IAction;
-
     public sealed record IncrementCounterAction : ICounterAction;
-
     public sealed record CounterState(int Count) : IState;
 
     public static class Program

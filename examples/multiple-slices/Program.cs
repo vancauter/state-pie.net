@@ -1,13 +1,9 @@
 namespace StatePie.Examples.MultipleSlices
 {
     public interface IAppAction : IAction;
-
     public sealed record IncrementCounterAction : IAppAction;
-
     public sealed record AddTodoAction(string Text) : IAppAction;
-
     public sealed record CounterState(int Count) : IState;
-
     public sealed record TodosState(IReadOnlyList<string> Items) : IState;
 
     public static class Program

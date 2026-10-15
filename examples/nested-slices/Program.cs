@@ -1,15 +1,10 @@
 namespace StatePie.Examples.NestedSlices
 {
     public interface IFeatureAction : IAction;
-
     public sealed record SetThemeAction(string Theme) : IFeatureAction;
-
     public sealed record SetDisplayNameAction(string DisplayName) : IFeatureAction;
-
     public sealed record UiState(string Theme) : IState;
-
     public sealed record ProfileState(string DisplayName, string TimeZone) : IState;
-
     public sealed record UserState(ProfileState Profile) : IState;
 
     public static class Program
@@ -50,7 +45,7 @@ namespace StatePie.Examples.NestedSlices
             });
 
             store.Dispatch(new SetThemeAction("dark"));
-            store.Dispatch(new SetDisplayNameAction("FooBar"));
+            store.Dispatch(new SetDisplayNameAction("Jane Doe"));
         }
     }
 }
