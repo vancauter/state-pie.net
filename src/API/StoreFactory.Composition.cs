@@ -31,7 +31,11 @@ namespace StatePie
         /// Factory method for creating a store from one or more slices.
         /// </summary>
         public static IStore<TAction> CreateStore<TAction>(params ISlice<TAction>[] slices)
-            where TAction : class, IAction => CreateStoreCore(slices, Array.Empty<DispatchMiddleware<TAction>>());
+            where TAction : class, IAction => CreateStoreCore(
+                slices,
+                Array.Empty<DispatchMiddleware<TAction>>(),
+                Array.Empty<Effect<TAction>>(),
+                onEffectError: null);
 
         /// <summary>
         /// Creates a store whose typed dispatch is wrapped by synchronous middleware in registration order; middleware may short-circuit, exceptions propagate, and each middleware may invoke its next stage at most once.
@@ -39,6 +43,17 @@ namespace StatePie
         public static IStore<TAction> CreateStore<TAction>(
             IReadOnlyList<ISlice<TAction>> slices,
             params DispatchMiddleware<TAction>[] middleware)
+            where TAction : class, IAction =>
+            CreateStore(slices, middleware, Array.Empty<Effect<TAction>>());
+
+        /// <summary>
+        /// Creates a store that also starts asynchronous effects for committed actions; effects start in registration order after reducers run and subscribers are notified, are not awaited by dispatch, report results by dispatching typed actions, and stop through a token cancelled on disposal, while faulted effect tasks go to the optional error handler and cancellation is not treated as a fault.
+        /// </summary>
+        public static IStore<TAction> CreateStore<TAction>(
+            IReadOnlyList<ISlice<TAction>> slices,
+            IReadOnlyList<DispatchMiddleware<TAction>> middleware,
+            IReadOnlyList<Effect<TAction>> effects,
+            Action<Exception, TAction>? onEffectError = null)
             where TAction : class, IAction
         {
             if (middleware is null)
@@ -47,12 +62,20 @@ namespace StatePie
             if (middleware.Any(static item => item is null))
                 throw new ArgumentException("Middleware cannot contain null entries.", nameof(middleware));
 
-            return CreateStoreCore(slices, middleware);
+            if (effects is null)
+                throw new ArgumentNullException(nameof(effects));
+
+            if (effects.Any(static item => item is null))
+                throw new ArgumentException("Effects cannot contain null entries.", nameof(effects));
+
+            return CreateStoreCore(slices, middleware, effects, onEffectError);
         }
 
         private static IStore<TAction> CreateStoreCore<TAction>(
             IEnumerable<ISlice<TAction>> slices,
-            IReadOnlyList<DispatchMiddleware<TAction>> middleware)
+            IReadOnlyList<DispatchMiddleware<TAction>> middleware,
+            IReadOnlyList<Effect<TAction>> effects,
+            Action<Exception, TAction>? onEffectError)
             where TAction : class, IAction
         {
             // A store without slices has no meaningful behavior and usually indicates setup error.
@@ -117,8 +140,8 @@ namespace StatePie
                 return nextSliceStates is null ? state : new ReadOnlyDictionary<string, IState>(nextSliceStates);
             }
 
-            // Return a new store instance initialized with the composed root state and reducer.
-            return new Store<TAction>(initialRootState, rootReducerCore, middleware);
+            // Return a new store instance initialized with the composed root state, reducer, middleware, and effects.
+            return new Store<TAction>(initialRootState, rootReducerCore, middleware, effects, onEffectError);
         }
     }
 }
