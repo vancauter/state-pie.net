@@ -5,60 +5,20 @@ namespace StatePie
     public static partial class StoreFactory
     {
         /// <summary>
-        /// Factory method for creating a slice.
+        /// Creates a store instance from the provided slices, middleware, and effects.
         /// </summary>
-        public static ISlice<TAction> CreateSlice<TState, TAction>(string name, TState initialState, Reducer<TState, TAction> reducer)
-            where TState : IState
-            where TAction : class, IAction
-        {
-            // Name validation is strict so state lookups are stable and diagnostics stay clear.
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Slice name must be a non-empty string.", nameof(name));
-
-            // Null initial state would fail unpredictably later during reducer execution.
-            if (initialState is null)
-                throw new ArgumentNullException(nameof(initialState));
-
-            // Explicit delegate validation surfaces wiring errors at composition time.
-            if (reducer is null)
-                throw new ArgumentNullException(nameof(reducer));
-
-            // Creates a typed slice wrapper
-            return new StoreSlice<TState, TAction>(name, initialState, reducer);
-        }
-
-        /// <summary>
-        /// Factory method for creating a store from one or more slices.
-        /// </summary>
-        public static IStore<TAction> CreateStore<TAction>(params ISlice<TAction>[] slices)
-            where TAction : class, IAction => CreateStoreCore(slices, Array.Empty<DispatchMiddleware<TAction>>());
-
-        /// <summary>
-        /// Creates a store whose typed dispatch is wrapped by synchronous middleware in registration order; middleware may short-circuit, exceptions propagate, and each middleware may invoke its next stage at most once.
-        /// </summary>
-        public static IStore<TAction> CreateStore<TAction>(
-            IReadOnlyList<ISlice<TAction>> slices,
-            params DispatchMiddleware<TAction>[] middleware)
-            where TAction : class, IAction
-        {
-            if (middleware is null)
-                throw new ArgumentNullException(nameof(middleware));
-
-            if (middleware.Any(static item => item is null))
-                throw new ArgumentException("Middleware cannot contain null entries.", nameof(middleware));
-
-            return CreateStoreCore(slices, middleware);
-        }
-
-        private static IStore<TAction> CreateStoreCore<TAction>(
+        private static IStore<TAction> BuildStore<TAction>(
             IEnumerable<ISlice<TAction>> slices,
-            IReadOnlyList<DispatchMiddleware<TAction>> middleware)
+            IReadOnlyList<DispatchMiddleware<TAction>> middleware,
+            IReadOnlyList<Effect<TAction>> effects,
+            Action<Exception, TAction>? onEffectError)
             where TAction : class, IAction
         {
-            // A store without slices has no meaningful behavior and usually indicates setup error.
+            // A store without slices has no meaningful behavior, so enforce at least one slice.
             if (slices is null)
                 throw new ArgumentException("Must provide at least one slice to create a store.", nameof(slices));
 
+            // Convert slices to an array to allow multiple enumerations and enforce non-empty collection.
             var sliceArray = slices.ToArray();
             if (sliceArray.Length == 0)
                 throw new ArgumentException("Must provide at least one slice to create a store.", nameof(slices));
@@ -73,7 +33,7 @@ namespace StatePie
 
             foreach (var slice in sliceArray)
             {
-                // Duplicate names would make state and reducer routing ambiguous.
+                // Duplicate names make state and reducer routing ambiguous, so fail fast.
                 if (reducerDictionary.ContainsKey(slice.Name))
                     throw new ArgumentException($"Duplicate slice name detected: {slice.Name}", nameof(slices));
 
@@ -84,6 +44,7 @@ namespace StatePie
             // The initial root snapshot is immutable so startup state cannot be changed externally.
             var initialRootState = new ReadOnlyDictionary<string, IState>(initialSliceStates);
 
+            // The root reducer core handles state transitions by delegating to individual slice reducers.
             StateSnapshot rootReducerCore(StateSnapshot state, TAction action)
             {
                 // Deferred allocation keeps no-op dispatches allocation-free.
@@ -117,8 +78,8 @@ namespace StatePie
                 return nextSliceStates is null ? state : new ReadOnlyDictionary<string, IState>(nextSliceStates);
             }
 
-            // Return a new store instance initialized with the composed root state and reducer.
-            return new Store<TAction>(initialRootState, rootReducerCore, middleware);
+            // Return a new store instance initialized with the composed root state, reducer, middleware, and effects.
+            return new Store<TAction>(initialRootState, rootReducerCore, middleware, effects, onEffectError);
         }
     }
 }

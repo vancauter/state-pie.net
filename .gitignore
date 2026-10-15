@@ -74,5 +74,11 @@ artifacts/
 
 # Development environment specific files
 *.code-workspace
+
+# Copilot files
 .github/agents/
+.github/instructions/
+.github/prompts/
+.github/skills/
+
 

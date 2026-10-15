@@ -1,12 +1,8 @@
 namespace StatePie.Examples.OneSlice
 {
-    // One action family per store keeps dispatch strongly typed.
     public interface ICounterAction : IAction;
-
     public sealed record IncrementCounterAction : ICounterAction;
-
     public sealed record SetCounterAction(int Value) : ICounterAction;
-
     public sealed record CounterState(int Count) : IState;
 
     public static class Program

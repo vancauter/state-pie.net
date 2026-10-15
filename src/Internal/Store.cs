@@ -18,6 +18,18 @@ namespace StatePie
         // The fully composed pipeline is built once because its middleware order does not change after creation.
         private readonly Action<TAction> _dispatch;
 
+        // Effects are copied once so later changes to the caller's collection cannot alter dispatch behavior.
+        private readonly Effect<TAction>[] _effects;
+
+        // Optional sink for faulted effect tasks; without it faults stay unobserved.
+        private readonly Action<Exception, TAction>? _onEffectError;
+
+        // Shared by all effects because the context carries no per-action state.
+        private readonly IEffectContext<TAction> _effectContext;
+
+        // Cancelled on disposal but never disposed itself, because effects may still observe its token afterwards.
+        private readonly CancellationTokenSource _disposal = new();
+
         // Registrations are accessed only while holding _lock so baseline and candidate selections stay coherent.
         private readonly List<IStateSelectorSubscription> _subscriptions = new();
 
@@ -27,7 +39,9 @@ namespace StatePie
         public Store(
             StateSnapshot initialState,
             RootReducer<TAction> reducer,
-            IReadOnlyList<DispatchMiddleware<TAction>> middleware)
+            IReadOnlyList<DispatchMiddleware<TAction>> middleware,
+            IReadOnlyList<Effect<TAction>> effects,
+            Action<Exception, TAction>? onEffectError)
         {
             if (initialState is null)
                 throw new ArgumentNullException(nameof(initialState));
@@ -38,11 +52,18 @@ namespace StatePie
             if (middleware is null)
                 throw new ArgumentNullException(nameof(middleware));
 
+            if (effects is null)
+                throw new ArgumentNullException(nameof(effects));
+
             // Initial snapshot is trusted immutable input from StoreFactory.
             _state = initialState;
             _reducer = reducer;
+            _effects = effects.ToArray();
+            _onEffectError = onEffectError;
+            _effectContext = new EffectContext<TAction>(_disposal.Token, DispatchFromEffect);
 
-            Action<TAction> dispatch = DispatchCore;
+            // Effects sit innermost so they only start for actions that middleware forwarded and reducers committed.
+            Action<TAction> dispatch = _effects.Length == 0 ? DispatchCore : DispatchCoreThenStartEffects;
             for (var index = middleware.Count - 1; index >= 0; index--)
             {
                 var currentMiddleware = middleware[index]
@@ -168,6 +189,54 @@ namespace StatePie
                 notification();
         }
 
+        private void DispatchCoreThenStartEffects(TAction action)
+        {
+            DispatchCore(action);
+            StartEffects(action);
+        }
+
+        private void StartEffects(TAction action)
+        {
+            var onError = _onEffectError;
+
+            foreach (var effect in _effects)
+            {
+                // A null task would hide failures inside the effect, so reject it at the boundary.
+                var task = effect(action, _effectContext)
+                    ?? throw new InvalidOperationException("Effects must return a task.");
+
+                // Without a handler, faults stay unobserved so the host's standard unobserved-task policy applies.
+                if (onError is null)
+                    continue;
+
+                // Cancellation is the expected shutdown path, so only genuine faults reach the handler.
+                _ = task.ContinueWith(
+                    faulted => onError(faulted.Exception!.GetBaseException(), action),
+                    CancellationToken.None,
+                    TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                    TaskScheduler.Default);
+            }
+        }
+
+        private void DispatchFromEffect(TAction action)
+        {
+            if (action is null)
+                throw new ArgumentNullException(nameof(action));
+
+            // Late completions legitimately race disposal, so they are dropped instead of failing the effect.
+            if (_isDisposed)
+                return;
+
+            try
+            {
+                Dispatch(action);
+            }
+            catch (ObjectDisposedException) when (_isDisposed)
+            {
+                // The store was disposed between the check and the dispatch, which is the same race.
+            }
+        }
+
         private void Unsubscribe(IStateSelectorSubscription subscription)
         {
             lock (_lock)
@@ -191,6 +260,9 @@ namespace StatePie
 
                 _subscriptions.Clear();
             }
+
+            // Cancel outside the lock so token callbacks cannot re-enter store state.
+            _disposal.Cancel();
         }
     }
 }

@@ -4,7 +4,7 @@
 [![NuGet](https://img.shields.io/nuget/v/SC.StatePie)](https://www.nuget.org/packages/SC.StatePie)
 
 StatePie is a lightweight .NET state-management library for immutable application state, built around a compact
-reducer-based (sliced) store for predictable state transitions.
+reducer-based (sliced) store with first-class support for asynchronous effects.
 
 ## Quick start
 
@@ -51,6 +51,8 @@ store.Dispatch(new SetCounterAction(10));
   deterministic state transitions.
 - **Modular Feature Slices:** Slices encapsulate independent state and logic, promoting strong modularity and separation
   of concerns.
+- **Pure Reducers & Asynchronous Effects:** Reducers remain strictly synchronous and pure, while (optional) asynchronous
+  side effects run after actions commit—keeping I/O cleanly separated from state logic.
 
 ### State snapshots
 
@@ -148,6 +150,43 @@ Middleware behavior:
 - exceptions from reducers and listeners propagate without retrying the dispatch
 
 Middleware is useful for cross-cutting concerns such as logging, validation, and instrumentation.
+
+### Effects
+
+Effects start asynchronous work after an action is committed and report the result by dispatching a typed action, so
+reducers stay pure and synchronous.
+
+```csharp
+static async Task loadProfile(IProfileAction action, IEffectContext<IProfileAction> context)
+{
+    if (action is not LoadProfileAction load)
+        return;
+
+    var profile = await FetchProfileAsync(load.Id, context.CancellationToken);
+    context.Dispatch(new ProfileLoadedAction(profile));
+}
+
+using var store = StoreFactory.CreateStore([profileSlice], [], [loadProfile]);
+```
+
+The second argument is the middleware list; pass `[]` when there is none.
+
+Effect behavior:
+
+- effects start in registration order after reducers commit and subscribers are notified; dispatch does not await them
+- effects do not start for actions that middleware short-circuits or reducers reject, but they do start for no-op
+  dispatches
+- result actions are ordinary dispatches, so they pass through middleware and reducers and arrive in completion order
+- the context's cancellation token is cancelled when the store is disposed, and result actions dispatched afterwards are
+  dropped
+- an exception thrown synchronously by an effect propagates from `Dispatch` after the state is committed
+- a faulted effect task is passed to the optional `onEffectError` callback; without one the fault stays unobserved, and
+  cancellation is never treated as a fault
+- continuations resume wherever `await` resumes; StatePie does not capture or schedule synchronization contexts
+
+Prefer middleware for synchronous cross-cutting concerns and effects for asynchronous work that returns results.
+
+See [effects](./examples/effects/) example.
 
 ### Validation and guard rails
 
