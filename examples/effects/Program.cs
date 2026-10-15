@@ -39,7 +39,7 @@ namespace StatePie.Examples.Effects
 
             using var store = StoreFactory.CreateStore(
                 [profileSlice],
-                [],
+                [], // optional middleware
                 [loadProfile],
                 static (exception, action) => Console.WriteLine($"Unexpected effect failure for {action}: {exception.Message}"));
 

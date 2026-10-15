@@ -6,4 +6,4 @@ become a failure action; the store's error handler only receives unexpected faul
 
 - Reducers stay pure and synchronous.
 - Dispatch does not wait for effects; results arrive as ordinary dispatches.
-- The effect's cancellation token is cancelled when the store is disposed.
+- The effect's cancellation token is triggered when the store is disposed.
