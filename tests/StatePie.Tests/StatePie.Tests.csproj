@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\StatePie.csproj" />
+    <ProjectReference Include="..\..\src\StatePie\StatePie.csproj" />
   </ItemGroup>
 
 </Project>

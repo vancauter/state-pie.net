@@ -36,7 +36,7 @@
         {
             "label": "Run Tests",
             "type": "shell",
-            "command": "dotnet test tests/StatePie.Tests.csproj",
+            "command": "dotnet test tests/StatePie.Tests/StatePie.Tests.csproj",
             "group": "test",
             "problemMatcher": "$msCompile",
             "presentation": { "reveal": "always", "panel": "shared" }
