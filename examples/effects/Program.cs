@@ -1,14 +1,10 @@
 namespace StatePie.Examples.Effects
 {
     public interface IProfileAction : IAction;
-
     public sealed record LoadProfileAction(string Id) : IProfileAction;
-
-    public sealed record ProfileLoadedAction(string Name) : IProfileAction;
-
+    public sealed record ProfileLoadedAction(string Name, string Surname) : IProfileAction;
     public sealed record ProfileFailedAction(string Reason) : IProfileAction;
-
-    public sealed record ProfileState(string Status, string? Name) : IState;
+    public sealed record ProfileState(string Status, string? Name, string? Surname) : IState;
 
     public static class Program
     {
@@ -16,11 +12,11 @@ namespace StatePie.Examples.Effects
         {
             var profileSlice = StoreFactory.CreateSlice<ProfileState, IProfileAction>(
                 name: "profile",
-                initialState: new ProfileState("idle", null),
+                initialState: new ProfileState("idle", null, null),
                 reducer: static (state, action) => action switch
                 {
                     LoadProfileAction => state with { Status = "loading" },
-                    ProfileLoadedAction loaded => state with { Status = "loaded", Name = loaded.Name },
+                    ProfileLoadedAction loaded => state with { Status = "loaded", Name = loaded.Name, Surname = loaded.Surname },
                     ProfileFailedAction failed => state with { Status = $"failed ({failed.Reason})" },
                     _ => state
                 });
@@ -31,10 +27,10 @@ namespace StatePie.Examples.Effects
                 if (action is not LoadProfileAction load)
                     return;
 
-                var name = await FetchNameAsync(load.Id, context.CancellationToken);
-                context.Dispatch(name is null
+                var (name, surname) = await FetchNameAsync(load.Id, context.CancellationToken);
+                context.Dispatch(name is null || surname is null
                     ? new ProfileFailedAction("not found")
-                    : new ProfileLoadedAction(name));
+                    : new ProfileLoadedAction(name, surname));
             }
 
             using var store = StoreFactory.CreateStore(
@@ -43,7 +39,7 @@ namespace StatePie.Examples.Effects
                 [loadProfile],
                 static (exception, action) => Console.WriteLine($"Unexpected effect failure for {action}: {exception.Message}"));
 
-            foreach (var id in new[] { "ada", "missing" })
+            foreach (var id in new[] { "jane", "missing" })
             {
                 var settled = new TaskCompletionSource();
                 using var subscription = store.Subscribe(snapshot =>
@@ -63,10 +59,10 @@ namespace StatePie.Examples.Effects
         }
 
         // Stands in for real I/O; the token stops the delay when the store is disposed.
-        private static async Task<string?> FetchNameAsync(string id, CancellationToken cancellationToken)
+        private static async Task<(string? name, string? surname)> FetchNameAsync(string id, CancellationToken cancellationToken)
         {
             await Task.Delay(50, cancellationToken);
-            return id == "ada" ? "Ada" : null;
+            return id == "jane" ? ("Jane", "Doe") : (null, null);
         }
     }
 }
