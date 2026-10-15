@@ -17,8 +17,7 @@ namespace StatePie
         /// Creates a new state snapshot by copying current values first and then applying matching update values to
         /// produce deterministic immutable transitions.
         /// </summary>
-        public static TState Merge<TState>(TState state, object updates)
-            where TState : class, IState, new()
+        public static TState Merge<TState>(TState state, object updates) where TState : class, IState, new()
         {
             // Explicit guard clauses keep argument issues obvious at call site and avoid hidden
             // NullReferenceException paths deeper in reflection code.
