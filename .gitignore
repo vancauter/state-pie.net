@@ -81,4 +81,5 @@ artifacts/
 .github/prompts/
 .github/skills/
 
-
+# BenchmarkDotNet
+BenchmarkDotNet.Artifacts/

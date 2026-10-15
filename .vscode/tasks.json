@@ -40,6 +40,14 @@
             "group": "test",
             "problemMatcher": "$msCompile",
             "presentation": { "reveal": "always", "panel": "shared" }
+        },
+        {
+            "label": "Run Benchmarks",
+            "type": "shell",
+            "command": "dotnet run -c Release --project tests/StatePie.Benchmarks/StatePie.Benchmarks.csproj",
+            "group": "test",
+            "problemMatcher": "$msCompile",
+            "presentation": { "reveal": "always", "panel": "shared" }
         }
     ]
 }
