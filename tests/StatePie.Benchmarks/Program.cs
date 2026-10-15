@@ -4,6 +4,6 @@ namespace StatePie.Benchmarks
 {
     public static class Program
     {
-        public static void Main() => BenchmarkRunner.Run<StateMerger>();
+        public static void Main() => BenchmarkRunner.Run<StateMergerBenchmarks>();
     }
 }

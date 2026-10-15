@@ -3,7 +3,7 @@ using BenchmarkDotNet.Attributes;
 namespace StatePie.Benchmarks
 {
     [MemoryDiagnoser]
-    public class StateMerger
+    public class StateMergerBenchmarks
     {
         private readonly ProfileState _current = new()
         {
@@ -25,7 +25,7 @@ namespace StatePie.Benchmarks
 
         [Benchmark]
         public ProfileState StateMergerMerge() =>
-            StatePie.StateMerger.Merge(_current, _updates);
+            StateMerger.Merge(_current, _updates);
 
         public sealed class ProfileState : IState
         {
