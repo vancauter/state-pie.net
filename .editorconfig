@@ -269,5 +269,5 @@ dotnet_naming_style.s_prefix_style.required_prefix = s_  # required prefix: s_
 dotnet_naming_style.camel_case_style.capitalization = camel_case  # naming style: camelCase
 
 # Given_When_Then test method names intentionally use underscores.
-[tests/*.cs]
+[tests/**.cs]
 dotnet_diagnostic.CA1707.severity = none

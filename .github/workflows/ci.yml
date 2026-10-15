@@ -43,7 +43,7 @@ jobs:
         run: dotnet build StatePie.sln --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test tests/StatePie.Tests.csproj --configuration Release --no-build
+        run: dotnet test tests/StatePie/StatePie.Tests.csproj --configuration Release --no-build
 
       - name: Verify package can be packed
-        run: dotnet pack src/StatePie.csproj --configuration Release --no-build --no-restore --output ./artifacts
+        run: dotnet pack src/StatePie/StatePie.csproj --configuration Release --no-build --no-restore --output ./artifacts
