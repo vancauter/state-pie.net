@@ -3,14 +3,14 @@ namespace StatePie
     /// <summary>
     /// Adapts concrete typed slice reducers to the store's shared IState composition surface without losing action-type safety.
     /// </summary>
-    internal sealed class StoreSlice<TState, TAction> : ISlice<TAction>
+    internal sealed class Slice<TState, TAction> : ISlice<TAction>
         where TState : IState
         where TAction : class, IAction
     {
         /// <summary>
         /// Creates a named slice adapter with initial state and a typed reducer.
         /// </summary>
-        public StoreSlice(string sliceName, TState initialState, Reducer<TState, TAction> reducer)
+        public Slice(string sliceName, TState initialState, Reducer<TState, TAction> reducer)
         {
             Name = sliceName;
             InitialState = initialState;

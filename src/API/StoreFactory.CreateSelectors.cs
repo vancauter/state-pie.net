@@ -5,6 +5,9 @@ namespace StatePie
         /// <summary>
         /// Factory method for creating a typed selector for a single slice key.
         /// </summary>
+        /// <typeparam name="TState">The expected type of the slice state.</typeparam>
+        /// <param name="sliceName">The identifier key of the slice.</param>
+        /// <returns>A selector function extracting the typed slice state from a snapshot.</returns>
         public static Func<StateSnapshot, TState> CreateSliceSelector<TState>(string sliceName)
             where TState : IState
         {
@@ -29,6 +32,11 @@ namespace StatePie
         /// <summary>
         /// Factory method for creating a projected selector from an existing source selector.
         /// </summary>
+        /// <typeparam name="TSource">The type of the source state or value.</typeparam>
+        /// <typeparam name="TResult">The type of the projected result.</typeparam>
+        /// <param name="sourceSelector">The source selector function.</param>
+        /// <param name="projector">The projection function applied to the source value.</param>
+        /// <returns>A new selector function returning the projected result.</returns>
         public static Func<StateSnapshot, TResult> CreateSelector<TSource, TResult>(Func<StateSnapshot, TSource> sourceSelector, Func<TSource, TResult> projector)
         {
             if (sourceSelector is null)
