@@ -4,8 +4,8 @@ namespace StatePie.Tests
 {
     public class StoreEffectTests
     {
-        // Bounds awaits so a broken effect fails the test instead of hanging the run.
-        private static readonly TimeSpan WaitLimit = TimeSpan.FromSeconds(5);
+        // Timeout so a broken effect fails the test instead of hanging the run.
+        private static readonly TimeSpan s_waitLimit = TimeSpan.FromSeconds(3);
 
         [Fact]
         public void GivenEffect_WhenActionIsDispatched_ThenEffectStartsAfterCommitAndNotification()
@@ -55,11 +55,11 @@ namespace StatePie.Tests
                 if (action is not IncrementCounterAction)
                     return Task.CompletedTask;
 
-                var task = RunAsync();
+                var task = runAsync();
                 effectTasks.Add(task);
                 return task;
 
-                async Task RunAsync()
+                async Task runAsync()
                 {
                     await gate.Task;
                     context.Dispatch(new SetCounterAction(7));
@@ -76,7 +76,7 @@ namespace StatePie.Tests
             Assert.Equal([1], received);
 
             gate.SetResult();
-            await Assert.Single(effectTasks).WaitAsync(WaitLimit);
+            await Assert.Single(effectTasks).WaitAsync(s_waitLimit);
 
             Assert.Equal([1, 7], received);
         }
@@ -95,11 +95,11 @@ namespace StatePie.Tests
                 if (action is not StartLoadAction start)
                     return Task.CompletedTask;
 
-                var task = RunAsync(start.Id);
+                var task = runAsync(start.Id);
                 effectTasks.Add(task);
                 return task;
 
-                async Task RunAsync(int id)
+                async Task runAsync(int id)
                 {
                     await gates[id].Task;
                     context.Dispatch(new SetCounterAction(id));
@@ -114,9 +114,9 @@ namespace StatePie.Tests
             store.Dispatch(new StartLoadAction(2));
 
             gates[2].SetResult();
-            await effectTasks[1].WaitAsync(WaitLimit);
+            await effectTasks[1].WaitAsync(s_waitLimit);
             gates[1].SetResult();
-            await effectTasks[0].WaitAsync(WaitLimit);
+            await effectTasks[0].WaitAsync(s_waitLimit);
 
             Assert.Equal([2, 1], received);
         }
@@ -124,7 +124,7 @@ namespace StatePie.Tests
         [Fact]
         public void GivenEffectDispatchesBeforeItsFirstAwait_WhenDispatching_ThenResultIsCommittedImmediately()
         {
-            Task effect(ICounterAction action, IEffectContext<ICounterAction> context)
+            static Task effect(ICounterAction action, IEffectContext<ICounterAction> context)
             {
                 if (action is IncrementCounterAction)
                     context.Dispatch(new SetCounterAction(10));
@@ -233,11 +233,11 @@ namespace StatePie.Tests
                 if (action is not IncrementCounterAction)
                     return Task.CompletedTask;
 
-                var task = RunAsync();
+                var task = runAsync();
                 effectTasks.Add(task);
                 return task;
 
-                async Task RunAsync()
+                async Task runAsync()
                 {
                     await gate.Task;
                     context.Dispatch(new SetCounterAction(9));
@@ -250,7 +250,7 @@ namespace StatePie.Tests
             store.Dispose();
 
             gate.SetResult();
-            await Assert.Single(effectTasks).WaitAsync(WaitLimit);
+            await Assert.Single(effectTasks).WaitAsync(s_waitLimit);
 
             Assert.Equal(1, notifications);
             Assert.Equal(1, Assert.IsType<CounterState>(store.State["counter"]).Count);
@@ -285,7 +285,7 @@ namespace StatePie.Tests
 
             store.Dispatch(dispatchedAction);
 
-            var (reportedException, reportedAction) = await reported.Task.WaitAsync(WaitLimit);
+            var (reportedException, reportedAction) = await reported.Task.WaitAsync(s_waitLimit);
             Assert.Same(expectedException, reportedException);
             Assert.Same(dispatchedAction, reportedAction);
         }
@@ -359,13 +359,13 @@ namespace StatePie.Tests
         [Fact]
         public void GivenNullEffects_WhenCreatingStore_ThenArgumentNullExceptionIsThrown() =>
             _ = Assert.Throws<ArgumentNullException>(() =>
-                StoreFactory.CreateStore([CreateCounterSlice()], [], (IReadOnlyList<Effect<ICounterAction>>)null!));
+                StoreFactory.CreateStore([CreateCounterSlice()], [], null!));
 
         [Fact]
         public void GivenNullEffectEntry_WhenCreatingStore_ThenArgumentExceptionIsThrown()
         {
             var exception = Assert.Throws<ArgumentException>(() =>
-                StoreFactory.CreateStore([CreateCounterSlice()], [], [(Effect<ICounterAction>)null!]));
+                StoreFactory.CreateStore([CreateCounterSlice()], [], [(null!)]));
 
             Assert.Contains("null entries", exception.Message);
         }
