@@ -4,7 +4,7 @@
 [![NuGet](https://img.shields.io/nuget/v/SC.StatePie)](https://www.nuget.org/packages/SC.StatePie)
 
 StatePie is a lightweight .NET state-management library for immutable application state, built around a compact
-reducer-based (sliced) store for predictable state transitions.
+reducer-based (sliced) store with first-class support for asynchronous effects.
 
 ## Quick start
 
@@ -51,6 +51,8 @@ store.Dispatch(new SetCounterAction(10));
   deterministic state transitions.
 - **Modular Feature Slices:** Slices encapsulate independent state and logic, promoting strong modularity and separation
   of concerns.
+- **Pure Reducers & Asynchronous Effects:** Reducers remain strictly synchronous and pure, while (optional) asynchronous
+  side effects run after actions commit—keeping I/O cleanly separated from state logic.
 
 ### State snapshots
 
